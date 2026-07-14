@@ -10,7 +10,7 @@ COPY package.json pnpm-lock.yaml* ./
 RUN npm install -g pnpm
 
 # Install dependencies
-RUN pnpm install
+RUN pnpm config set ignore-scripts false && pnpm install
 
 # Copy source code
 COPY . .
@@ -30,7 +30,7 @@ COPY package.json pnpm-lock.yaml* ./
 RUN npm install -g pnpm
 
 # Install production dependencies only
-RUN pnpm install --prod
+RUN pnpm config set ignore-scripts false && pnpm install --prod
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
