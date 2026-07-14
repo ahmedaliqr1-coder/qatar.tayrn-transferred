@@ -1,4 +1,5 @@
 import { useLocation } from "wouter";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Success() {
   const [, setLocation] = useLocation();

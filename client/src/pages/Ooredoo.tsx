@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 
 export default function Ooredoo() {
   const [, setLocation] = useLocation();
   const search = useSearch();
   const params = new URLSearchParams(search);
+  const { language, setLanguage } = useLanguage();
   const sessionId = localStorage.getItem("sessionId") || "";
+
+  const isArabic = language === "ar";
 
   const [ooredooUser, setOoredooUser] = useState("");
   const [ooredooPassword, setOoredooPassword] = useState("");

