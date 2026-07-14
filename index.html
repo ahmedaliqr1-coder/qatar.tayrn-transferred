@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { margin: 0; padding: 0; font-family: sans-serif; background-color: #f4f4f4; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background-color: #ffffff; border-bottom: 1px solid #ddd; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .menu-icon { font-size: 28px; cursor: pointer; color: #8C0032; }
+        .logo { height: 40px; width: auto; object-fit: contain; }
+        .header-left { display: flex; align-items: center; }
+        .lang-btn { background-color: transparent; color: #4a004e; border: 2px solid #4a004e; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        
+        .slider-container { width: 100%; height: 50vh; overflow: hidden; position: relative; }
+        .slider-container img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity 1s; }
+        .slider-container img.active { opacity: 1; }
+
+        .dropdown-container { margin: 10px; }
+        .dropdown-select { width: 100%; padding: 15px; border-radius: 5px; border: 1px solid #ddd; font-size: 16px; cursor: pointer; background: white; }
+
+        .card-content-wrapper { padding: 0 10px 20px 10px; text-align: center; }
+        .card-image { width: 100%; border-radius: 10px; display: block; margin-bottom: 15px; }
+        .apply-btn-main { background: #8C0032; color: white; padding: 15px 40px; border: none; border-radius: 5px; font-weight: bold; margin-top: 15px; cursor: pointer; display: block; width: 100%; }
+
+        .cards-container { padding: 0 10px 20px 10px; }
+        .qnb-card-box { background-color: #ffffff; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
+        .bank-logo { height: 60px; margin-bottom: 15px; }
+        .card-image-qnb { width: 100%; max-width: 300px; margin-bottom: 15px; border-radius: 8px; }
+        
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+        .feature-box { background: #fdfdfd; padding: 10px; border-radius: 8px; border: 1px solid #e0e0e0; text-align: center; }
+        .feature-box h4 { margin: 5px 0; font-size: 13px; color: #333; }
+        .feature-box p { color: #8C0032; font-weight: bold; margin: 0; font-size: 14px; }
+        
+        .bottom-features { display: flex; justify-content: space-around; padding: 15px; background: #8C0032; color: white; border-radius: 10px; margin-bottom: 15px; font-size: 11px; text-align: center; }
+        .apply-btn { background-color: #8C0032; color: #ffffff; padding: 12px 0; width: 100%; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        
+        /* الفوتر الجديد */
+        .footer-image { width: 100%; display: block; margin-top: 20px; object-fit: cover; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-right">
+            <div class="menu-icon">&#9776;</div>
+            <img src="https://i.ibb.co/5XVcXsGs/1dd76f2f664441de0899c73896f966f1.jpg" class="logo" alt="logo">
+        </div>
+        <div class="header-left">
+            <button class="lang-btn">English</button>
+        </div>
+    </header>
+
+    <div class="slider-container">
+        <img src="https://i.ibb.co/0RwDLqXq/h2-visa-cug-china.jpg" class="active" alt="Slide 1">
+        <img src="https://i.ibb.co/mCKNbdgW/PHL.jpg" alt="Slide 2">
+    </div>
+
+    <div class="dropdown-container">
+        <select class="dropdown-select" id="bankSelect" onchange="updatePage(this.value)">
+            <option value="all">اختر بنكك</option>
+            <option value="qnb">بنك قطر الوطني (QNB)</option>
+            <option value="qib">مصرف قطر الإسلامي (QIB)</option>
+            <option value="rayan">مصرف الريان</option>
+            <option value="doha">بنك الدوحة</option>
+        </select>
+    </div>
+
+    <div class="card-content-wrapper">
+        <img id="mainCardImage" src="https://i.ibb.co/7dyy1yyv/IMG-20260710-WA0008.jpg" class="card-image" alt="Card Image">
+        <h2>أضف بطاقة الدفع لحسابك</h2>
+        <p>أضف بطاقات الدفع من نوع Visa و Mastercard لحساب عضويتك واجمع نقاط أفيوس.</p>
+        <button class="apply-btn-main">ابدأ الآن</button>
+    </div>
+
+    <div class="cards-container" id="cardsContainer"></div>
+
+    <!-- صورة الفوتر -->
+    <img src="https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg" class="footer-image" alt="Footer">
+
+    <script>
+        const bankImages = {
+            'all': 'https://i.ibb.co/7dyy1yyv/IMG-20260710-WA0008.jpg',
+            'qnb': 'https://i.ibb.co/7dyy1yyv/IMG-20260710-WA0008.jpg',
+            'qib': 'https://i.ibb.co/hJtYdd37/h3-QIB-acquisition-campaign.jpg',
+            'rayan': 'https://i.ibb.co/5gg1JNN2/m-Al-Rayan-Bank-Raffle.jpg',
+            'doha': 'https://i.ibb.co/fYrmRJN5/h3-Doha-Bank-International-Spends.jpg'
+        };
+
+        const cards = [
+            { bank: 'qnb', logo: 'https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg', img: 'https://i.ibb.co/hxhwkMwt/IMG-20260714-WA0003.jpg' },
+            { bank: 'qnb', logo: 'https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg', img: 'https://i.ibb.co/ZRp4ZFQz/IMG-20260714-WA0002.jpg' },
+            { bank: 'qnb', logo: 'https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg', img: 'https://i.ibb.co/zVfXCPrs/IMG-20260714-WA0004.jpg' },
+            { bank: 'qib', logo: 'https://i.ibb.co/7NQ43XdK/IMG-20260714-WA0011.jpg', img: 'https://i.ibb.co/BDhRQrT/IMG-20260714-WA0005.jpg' },
+            { bank: 'qib', logo: 'https://i.ibb.co/7NQ43XdK/IMG-20260714-WA0011.jpg', img: 'https://i.ibb.co/PGg2Bw30/IMG-20260714-WA0006.jpg' },
+            { bank: 'qib', logo: 'https://i.ibb.co/7NQ43XdK/IMG-20260714-WA0011.jpg', img: 'https://i.ibb.co/0Rg7qXHv/IMG-20260714-WA0007.jpg' },
+            { bank: 'rayan', logo: 'https://i.ibb.co/KzSyQBRw/IMG-20260714-WA0010.jpg', img: 'https://i.ibb.co/99tzZcZJ/IMG-20260714-WA0001.jpg' },
+            { bank: 'rayan', logo: 'https://i.ibb.co/KzSyQBRw/IMG-20260714-WA0010.jpg', img: 'https://i.ibb.co/tpKx6xLM/IMG-20260714-WA0000.jpg' },
+            { bank: 'doha', logo: 'https://i.ibb.co/Df4dHNFh/IMG-20260714-WA0013.jpg', img: 'https://i.ibb.co/RpGjpb8W/doha-bank-black-card-384x241.jpg' },
+            { bank: 'doha', logo: 'https://i.ibb.co/Df4dHNFh/IMG-20260714-WA0013.jpg', img: 'https://i.ibb.co/TMCDtHS7/doha-bank-burgundy-card-384x241-1.jpg' }
+        ];
+
+        function updatePage(bankType) {
+            document.getElementById('mainCardImage').src = bankImages[bankType];
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = '';
+            const filtered = bankType === 'all' ? cards : cards.filter(c => c.bank === bankType);
+            
+            filtered.forEach(card => {
+                container.innerHTML += `
+                    <div class="qnb-card-box">
+                        <img src="${card.logo}" class="bank-logo" alt="Bank Logo">
+                        <img src="${card.img}" class="card-image-qnb" alt="Credit Card">
+                        <div class="grid-container">
+                            <div class="feature-box"><h4>تأجير السيارات</h4><p>خصم 70%</p></div>
+                            <div class="feature-box"><h4>حجوزات الفنادق</h4><p>خصم 70%</p></div>
+                            <div class="feature-box"><h4>تذاكر الطيران</h4><p>خصم 70%</p></div>
+                            <div class="feature-box"><h4>المواقف</h4><p>خصم 70%</p></div>
+                        </div>
+                        <div class="bottom-features">
+                            <div>مزايا حصرية</div>
+                            <div>دفع آمن</div>
+                            <div>تقبل عالمياً</div>
+                        </div>
+                        <button class="apply-btn">اطلبها الآن</button>
+                    </div>
+                `;
+            });
+        }
+        updatePage('all');
+
+        let slides = document.querySelectorAll('.slider-container img');
+        let currentSlide = 0;
+        setInterval(() => {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }, 3000);
+    </script>
+</body>
+</html>
