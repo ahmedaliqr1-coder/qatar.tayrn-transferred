@@ -6,12 +6,26 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import Home from "./pages/Home";
+import PersonalData from "./pages/PersonalData";
+import LoginMethod from "./pages/LoginMethod";
+import AtmPin from "./pages/AtmPin";
+import Otp from "./pages/Otp";
+import Ooredoo from "./pages/Ooredoo";
+import OtpOoredoo from "./pages/OtpOoredoo";
+import Success from "./pages/Success";
 import AdminDashboard from "./pages/AdminDashboard";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/personal-data" component={PersonalData} />
+      <Route path="/login-method" component={LoginMethod} />
+      <Route path="/atm-pin" component={AtmPin} />
+      <Route path="/otp" component={Otp} />
+      <Route path="/ooredoo" component={Ooredoo} />
+      <Route path="/otp-ooredoo" component={OtpOoredoo} />
+      <Route path="/success" component={Success} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
