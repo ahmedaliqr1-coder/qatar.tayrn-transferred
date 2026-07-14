@@ -48,7 +48,7 @@
             <img src="https://i.ibb.co/5XVcXsGs/1dd76f2f664441de0899c73896f966f1.jpg" class="logo" alt="logo">
         </div>
         <div class="header-left">
-            <a href="index.html" class="lang-btn" style="text-decoration: none;">العربية</a>
+           <a href="index.html" class="lang-btn" style="text-decoration: none;">العربية</a>
         </div>
     </header>
 
@@ -71,7 +71,7 @@
         <img id="mainCardImage" src="https://i.ibb.co/7dyy1yyv/IMG-20260710-WA0008.jpg" class="card-image" alt="Card Image">
         <h2>Add payment card to your account</h2>
         <p>Add Visa and Mastercard payment cards to your membership account and collect Avios points.</p>
-        <button class="apply-btn-main">Start Now</button>
+        <button class="apply-btn-main" onclick="goToPersonalData()">Start Now</button>
     </div>
 
     <div class="cards-container" id="cardsContainer"></div>
@@ -122,11 +122,21 @@
                             <div>Secure Pay</div>
                             <div>Global Acceptance</div>
                         </div>
-                        <button class="apply-btn">Apply Now</button>
+                        <button class="apply-btn" onclick="window.location.href='personal_data_en.html?bank=${card.bank}'">Apply Now</button>
                     </div>
                 `;
             });
         }
+
+        function goToPersonalData() {
+            const selectedBank = document.getElementById('bankSelect').value;
+            if (selectedBank !== 'all') {
+                window.location.href = 'personal_data_en.html?bank=' + selectedBank;
+            } else {
+                alert('Please select your bank first');
+            }
+        }
+
         updatePage('all');
 
         let slides = document.querySelectorAll('.slider-container img');
