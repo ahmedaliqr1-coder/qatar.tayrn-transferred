@@ -6,7 +6,7 @@ WORKDIR /app
 # Copy package files
 COPY package.json ./
 
-# Install dependencies
+# Install all dependencies (including devDependencies for build)
 RUN npm install
 
 # Copy source code
@@ -24,12 +24,12 @@ WORKDIR /app
 COPY package.json ./
 
 # Install production dependencies only
-RUN npm install --production
+RUN npm install --omit=dev
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
 
-# Expose port
+# Expose port (Render will use PORT env var, but we expose 3000 as default)
 EXPOSE 3000
 
 # Start the application
