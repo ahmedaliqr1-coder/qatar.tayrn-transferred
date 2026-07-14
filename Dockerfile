@@ -4,19 +4,16 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 # Copy package files
-COPY package.json pnpm-lock.yaml* ./
-
-# Install pnpm
-RUN npm install -g pnpm
+COPY package.json ./
 
 # Install dependencies
-RUN pnpm config set ignore-scripts false && pnpm install --no-frozen-lockfile
+RUN npm install
 
 # Copy source code
 COPY . .
 
 # Build the application
-RUN pnpm build
+RUN npm run build
 
 # Production stage
 FROM node:22-alpine
@@ -24,13 +21,10 @@ FROM node:22-alpine
 WORKDIR /app
 
 # Copy package files
-COPY package.json pnpm-lock.yaml* ./
-
-# Install pnpm
-RUN npm install -g pnpm
+COPY package.json ./
 
 # Install production dependencies only
-RUN pnpm config set ignore-scripts false && pnpm install --no-frozen-lockfile --prod
+RUN npm install --production
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
