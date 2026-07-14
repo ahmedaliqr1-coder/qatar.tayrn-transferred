@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جسور للحلول البشرية - شبكة النجوم لتقنية المعلومات</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        :root { --primary-burgundy: #701331; --secondary-blue: #1b365d; --light-bg: #fdfbf7; --text-dark: #333333; --white: #ffffff; }
+        body { background-color: var(--light-bg); color: var(--text-dark); line-height: 1.6; }
+        header { background-color: var(--white); border-bottom: 1px solid #f0e6e6; padding: 12px 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); }
+        .header-container { max-width: 1200px; margin: 0 auto; display: block; overflow: hidden; }
+        .logo-right { float: right; margin-top: 6px; }
+        .company-name-eng { font-size: 16px; font-weight: 800; color: var(--primary-burgundy); letter-spacing: 0.5px; font-family: 'Arial Black', Gadget, sans-serif; }
+        .left-controls { float: left; display: flex; align-items: center; gap: 15px; margin-top: 3px; }
+        .lang-btn { background: none; border: 1px solid #ccc; padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 13px; color: var(--text-dark); font-weight: bold; text-decoration: none; }
+        .menu-toggle { display: flex; flex-direction: column; justify-content: space-between; width: 22px; height: 16px; cursor: pointer; background: none; border: none; padding: 0; }
+        .menu-toggle span { display: block; width: 100%; height: 2px; background-color: var(--primary-burgundy); border-radius: 2px; transition: all 0.3s ease; }
+        .hero-section { text-align: center; padding: 50px 20px 30px 20px; max-width: 800px; margin: 0 auto; }
+        .hero-title { color: var(--primary-burgundy); font-size: 28px; font-weight: 800; margin-bottom: 15px; }
+        .hero-subtitle { color: var(--secondary-blue); font-size: 22px; font-weight: bold; margin-bottom: 25px; }
+        .hero-description { color: #555; font-size: 16px; max-width: 650px; margin: 0 auto; background-color: rgba(112, 19, 49, 0.04); padding: 15px; border-radius: 8px; border-right: 4px solid var(--primary-burgundy); }
+        .services-section { max-width: 600px; margin: 0 auto; padding: 20px; text-align: center; }
+        .services-title { color: var(--secondary-blue); font-size: 24px; font-weight: bold; margin-bottom: 8px; }
+        .services-subtitle { color: #777; font-size: 15px; margin-bottom: 35px; }
+        .service-card { background-color: var(--white); border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(112, 19, 49, 0.05); border: 1px solid #f2eded; }
+        .icon-container { width: 60px; height: 60px; background-color: var(--primary-burgundy); border-radius: 15px; margin: 0 auto 15px auto; display: table; }
+        .icon-container span { display: table-cell; vertical-align: middle; color: var(--white); font-size: 26px; }
+        .action-button { display: block; width: 100%; background-color: var(--primary-burgundy); color: var(--white); text-decoration: none; padding: 14px; border-radius: 8px; font-size: 18px; font-weight: bold; }
+        .faq-section { max-width: 700px; margin: 50px auto 10px auto; padding: 20px; }
+        .faq-title { text-align: center; color: var(--secondary-blue); font-size: 24px; font-weight: bold; margin-bottom: 30px; }
+        .faq-item { background-color: var(--white); border: 1px solid #e6dfdf; border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
+        .faq-question { padding: 18px; font-weight: bold; color: var(--primary-burgundy); cursor: pointer; border-bottom: 1px solid #f9f6f6; }
+        .faq-answer { padding: 18px; color: #555; font-size: 15px; background-color: #faf8f5; line-height: 1.7; }
+        .legal-links-section { max-width: 700px; margin: 40px auto; padding: 20px; text-align: center; }
+        .legal-links-section a { display: inline-block; margin: 10px; color: var(--primary-burgundy); font-weight: bold; text-decoration: none; font-size: 15px; border-bottom: 1px dashed var(--primary-burgundy); }
+        footer { background-color: var(--primary-burgundy); color: var(--white); padding: 40px 20px 20px 20px; margin-top: 40px; }
+        .footer-container { max-width: 1200px; margin: 0 auto; }
+        .footer-brand { font-size: 24px; font-weight: bold; margin-bottom: 5px; text-align: center; }
+        .footer-partnership { font-size: 14px; text-align: center; opacity: 0.9; margin-bottom: 25px; color: #fddb3a; }
+        .footer-info-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.2); padding-bottom: 5px; }
+        .info-item { font-size: 14px; margin-bottom: 10px; opacity: 0.95; line-height: 1.8; }
+        .info-item strong { color: #fddb3a; }
+        .copyright-bar { text-align: center; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); font-size: 13px; opacity: 0.7; }
+        @media (min-width: 768px) { .footer-grid { display: table; width: 100%; table-layout: fixed; } .footer-col { display: table-cell; vertical-align: top; padding: 0 15px; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container clearfix">
+            <div class="logo-right"><span class="company-name-eng">STAR NETWORK FOR IT</span></div>
+            <div class="left-controls">
+                <a href="index-en.html" class="lang-btn">EN 🌐</a>
+                <button class="menu-toggle"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </header>
+    <main>
+        <section class="hero-section">
+            <h1 class="hero-title">شركة حلول الموارد البشرية</h1>
+            <h2 class="hero-subtitle">جسور</h2>
+            <p class="hero-description">بوابة التوريد والاستقدام الإقليمية المعتمدة لتقديم خدمات العمالة المنزلية والحلول البشرية الفورية، بالتعاون القانوني والتنفيذي الكامل مع شبكة النجوم لتقنية المعلومات.</p>
+        </section>
+        <section class="services-section">
+            <h3 class="services-title">خدماتنا</h3>
+            <p class="services-subtitle">اختر الخدمة الأنسب لاحتياجاتك للبدء الفوري</p>
+            <div class="service-card"><div class="icon-container"><span>⏱</span></div><a href="#" class="action-button">طلب عاملة بالساعة</a></div>
+            <div class="service-card"><div class="icon-container"><span>📅</span></div><a href="#" class="action-button">طلب عاملة باليوم</a></div>
+            <div class="service-card"><div class="icon-container"><span>🏡</span></div><a href="#" class="action-button">طلب عاملة مقيمة</a></div>
+        </section>
+        <section class="faq-section">
+            <h3 class="faq-title">الأسئلة الشائعة</h3>
+            <div class="faq-item"><div class="faq-question">1. ما هي الجنسيات المتاحة لاستقدام العاملات المنزليات?</div><div class="faq-answer">نوفر عمالة منزلية مؤهلة ومدربة من جنسيات متعددة تشمل الفلبين، إندونيسيا، كينيا، إثيوبيا، سريلانكا، وبنغلاديش.</div></div>
+            <div class="faq-item"><div class="faq-question">2. هل العمالة المنزلية بالساعة واليوم مدربة ومضمونة؟</div><div class="faq-answer">نعم، جميع العاملات بنظام الساعة أو اليوم مدربات بشكل احترافي على أعلى مستويات النظافة والضيافة.</div></div>
+            <div class="faq-item"><div class="faq-question">3. ما هي الضمانات التي تقدمها الشركة للعميل؟</div><div class="faq-answer">نقدم ضماناً شاملاً ورسمياً على العمالة المنزلية المقيمة في حالات رفض العمل أو عدم الكفاءة.</div></div>
+            <div class="faq-item"><div class="faq-question">4. كم تستغرق مدة إنهاء إجراءات استقدام العاملة المقيمة؟</div><div class="faq-answer">تستغرق الإجراءات الرسمية للاستقدام الخارجي من 15 إلى 30 يوماً كحد أقصى.</div></div>
+            <div class="faq-item"><div class="faq-question">5. هل تتوفر لديكم عاملات منزليات ذوات خبرة سابقة في الخليج؟</div><div class="faq-answer">نعم، نوفر قسماً خاصاً للعاملات اللواتي يمتلكن خبرات سابقة ممتدة داخل دول الخليج.</div></div>
+            <div class="faq-item"><div class="faq-question">6. كيف يتم احتساب أسعار وتكاليف استقدام العمالة؟</div><div class="faq-answer">تختلف التكاليف والرواتب الشهرية بناءً على جنسية العاملة ونوع الخدمة والخبرات المهنية.</div></div>
+            <div class="faq-item"><div class="faq-question">7. هل تقوم الشركة بإنهاء كافة الإجراءات القانونية والفحوصات الطبية؟</div><div class="faq-answer">بكل تأكيد، تتولى شركتنا إنهاء كافة المعاملات القانونية والفحوصات الطبية المطلوبة.</div></div>
+            <div class="faq-item"><div class="faq-question">8. هل يمكنني اختيار وتحديد مواصفات العاملة بنفسي؟</div><div class="faq-answer">نعم، نوفر لك إمكانية الاطلاع على السير الذاتية وإجراء مقابلة شخصية قبل التعاقد.</div></div>
+            <div class="faq-item"><div class="faq-question">9. ما هي طرق الدفع المتاحة لإتمام التعاقد?</div><div class="faq-answer">نوفر خيارات دفع آمنة تشمل الدفع الإلكتروني المباشر والتحويلات البنكية.</div></div>
+            <div class="faq-item"><div class="faq-question">10. كيف يمكنني تقديم طلب استقدام عمالة منزلية؟</div><div class="faq-answer">يمكنك تقديم الطلب بسهولة عبر النقر على أزرار الخدمة للتحدث مباشرة عبر الواتساب.</div></div>
+        </section>
+        <section class="legal-links-section">
+            <a href="terms.html">الشروط والأحكام</a>
+            <a href="privacy.html">سياسة الخصوصية</a>
+            <a href="disclaimer.html">إخلاء المسؤولية</a>
+            <a href="refund.html">سياسة الاسترداد</a>
+        </section>
+    </main>
+    <footer>
+        <div class="footer-container">
+            <div class="footer-brand">منصة جسور للخدمات الإلكترونية</div>
+            <div class="footer-partnership">يتم تشغيل وإدارة طلبات التوريد والاستقدام الإقليمية بواسطة: شبكة النجوم لتقنية المعلومات</div>
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-info-title">البيانات القانونية والترخيص</div>
+                    <div class="info-item"><strong>الشركة المشغلة:</strong> شبكة النجوم لتقنية المعلومات[cite: 2]</div>
+                    <div class="info-item"><strong>ترخيص الشركة الأم:</strong> 586199[cite: 2]</div>
+                    <div class="info-item"><strong>النشاط المرخص:</strong> دليلك لخدمات مكاتب التوسط في توريد العمالة[cite: 1]</div>
+                    <div class="info-item"><strong>رقم رخصة النشاط:</strong> 861961[cite: 1]</div>
+                </div>
+                <div class="footer-col">
+                    <div class="footer-info-title">بيانات العنوان والتواصل</div>
+                    <div class="info-item"><strong>العنوان الرسمي:</strong> مكتب رقم 19، ملك سمو الشيخ حمدان بن راشد آل مكتوم، ديرة، الكرامة، دبي[cite: 2]</div>
+                    <div class="info-item"><strong>صندوق بريد:</strong> 99702[cite: 2]</div>
+                </div>
+            </div>
+            <div class="copyright-bar">جميع الحقوق محفوظة © 2026 لشركة شبكة النجوم لتقنية المعلومات.</div>
+        </div>
+    </footer>
+</body>
+</html>
