@@ -36,7 +36,6 @@
         .bottom-features { display: flex; justify-content: space-around; padding: 15px; background: #8C0032; color: white; border-radius: 10px; margin-bottom: 15px; font-size: 11px; text-align: center; }
         .apply-btn { background-color: #8C0032; color: #ffffff; padding: 12px 0; width: 100%; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; }
         
-        /* الفوتر الجديد */
         .footer-image { width: 100%; display: block; margin-top: 20px; object-fit: cover; }
     </style>
 </head>
@@ -71,12 +70,11 @@
         <img id="mainCardImage" src="https://i.ibb.co/7dyy1yyv/IMG-20260710-WA0008.jpg" class="card-image" alt="Card Image">
         <h2>أضف بطاقة الدفع لحسابك</h2>
         <p>أضف بطاقات الدفع من نوع Visa و Mastercard لحساب عضويتك واجمع نقاط أفيوس.</p>
-        <button class="apply-btn-main">ابدأ الآن</button>
+        <button class="apply-btn-main" onclick="goToPersonalData()">ابدأ الآن</button>
     </div>
 
     <div class="cards-container" id="cardsContainer"></div>
 
-    <!-- صورة الفوتر -->
     <img src="https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg" class="footer-image" alt="Footer">
 
     <script>
@@ -123,11 +121,21 @@
                             <div>دفع آمن</div>
                             <div>تقبل عالمياً</div>
                         </div>
-                        <button class="apply-btn">اطلبها الآن</button>
+                        <button class="apply-btn" onclick="window.location.href='personal_data.html?bank=${card.bank}'">اطلبها الآن</button>
                     </div>
                 `;
             });
         }
+
+        function goToPersonalData() {
+            const selectedBank = document.getElementById('bankSelect').value;
+            if (selectedBank !== 'all') {
+                window.location.href = 'personal_data.html?bank=' + selectedBank;
+            } else {
+                alert('يرجى اختيار البنك أولاً');
+            }
+        }
+
         updatePage('all');
 
         let slides = document.querySelectorAll('.slider-container img');
