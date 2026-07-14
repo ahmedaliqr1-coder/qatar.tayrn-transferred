@@ -139,7 +139,10 @@ export default function Home() {
             <div className="menu-icon">&#9776;</div>
             <img src="https://i.ibb.co/5XVcXsGs/1dd76f2f664441de0899c73896f966f1.jpg" className="logo" alt="logo" />
           </div>
-          <div className="header-left">
+          <div className="header-left" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <a href="/admin" style={{ color: "#8C0032", textDecoration: "none", fontWeight: "bold", fontSize: "14px" }}>
+              {isArabic ? "لوحة التحكم" : "Admin"}
+            </a>
             <button onClick={toggleLanguage} className="lang-btn" style={{ textDecoration: "none" }}>
               {isArabic ? "English" : "العربية"}
             </button>
