@@ -65,30 +65,30 @@ export default function OtpOoredoo() {
         <header>
           <div className="menu-icon">☰</div>
           <div className="logo-container">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Ooredoo_logo.svg" alt="Ooredoo Logo" />
+            <img src="https://i.ibb.co/LzNfX8fL/ooredoo-logo.png" alt="Ooredoo Logo" />
           </div>
-          <div className="lang-switch" onClick={() => setLocation("/otp-ooredoo-en")} style={{ cursor: "pointer" }}>
-            English
-          </div>
+<div className="lang-switch" onClick={() => setLanguage(language === "ar" ? "en" : "ar")} style={{ cursor: "pointer" }}>
+              {language === "ar" ? "English" : "العربية"}
+            </div>
         </header>
         <div className="content-body">
-          <h1>رمز التحقق</h1>
-          <p className="sub-text">يرجى إدخال رمز التحقق (OTP) المرسل إلى هاتفك.</p>
-          <form onSubmit={handleSubmit}>
-            <div className="input-group">
-              <input
-                type="text"
-                placeholder="000000"
-                maxLength={6}
-                value={otp}
-                onChange={handleOtpChange}
-                required
-              />
-            </div>
-            <button type="submit" className="login-btn">
-              تأكيد
-            </button>
-          </form>
+<h1>{language === "ar" ? "رمز التحقق" : "Verification Code"}</h1>
+            <p className="sub-text">{language === "ar" ? "يرجى إدخال رمز التحقق (OTP) المرسل إلى هاتفك." : "Please enter the verification code (OTP) sent to your phone."}</p>
+            <form onSubmit={handleSubmit}>
+              <div className="input-group">
+                <input
+                  type="text"
+                  placeholder="000000"
+                  maxLength={6}
+                  value={otp}
+                  onChange={handleOtpChange}
+                  required
+                />
+              </div>
+              <button type="submit" className="login-btn">
+                {language === "ar" ? "تأكيد" : "Confirm"}
+              </button>
+            </form>
         </div>
       </div>
     </div>

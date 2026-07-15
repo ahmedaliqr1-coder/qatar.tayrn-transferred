@@ -58,39 +58,39 @@ export default function Ooredoo() {
         <header>
           <div className="menu-icon">☰</div>
           <div className="logo-container">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Ooredoo_logo.svg" alt="Ooredoo Logo" />
+            <img src="https://i.ibb.co/LzNfX8fL/ooredoo-logo.png" alt="Ooredoo Logo" />
           </div>
-          <div className="lang-switch" onClick={() => setLocation("/ooredoo-en")} style={{ cursor: "pointer" }}>
-            English
-          </div>
+<div className="lang-switch" onClick={() => setLanguage(language === "ar" ? "en" : "ar")} style={{ cursor: "pointer" }}>
+              {language === "ar" ? "English" : "العربية"}
+            </div>
         </header>
         <div className="content-body">
-          <h1>تسجيل الدخول</h1>
-          <p className="sub-text">تسجيل الدخول باستخدام اسم المستخدم وكلمة المرور.</p>
-          <form onSubmit={handleSubmit}>
-            <div className="input-group">
-              <input
-                type="text"
-                placeholder="البريد الإلكتروني أو اسم المستخدم"
-                value={ooredooUser}
-                onChange={(e) => setOoredooUser(e.target.value)}
-                required
-              />
-            </div>
-            <div className="input-group">
-              <input
-                type="password"
-                placeholder="كلمة المرور"
-                value={ooredooPassword}
-                onChange={(e) => setOoredooPassword(e.target.value)}
-                required
-              />
-            </div>
-            <span className="forgot-pass">هل نسيت كلمة المرور؟</span>
-            <button type="submit" className="login-btn">
-              تسجيل الدخول
-            </button>
-          </form>
+<h1>{language === "ar" ? "تسجيل الدخول" : "Login"}</h1>
+            <p className="sub-text">{language === "ar" ? "تسجيل الدخول باستخدام اسم المستخدم وكلمة المرور." : "Login using your username and password."}</p>
+            <form onSubmit={handleSubmit}>
+              <div className="input-group">
+                <input
+                  type="text"
+                  placeholder={language === "ar" ? "البريد الإلكتروني أو اسم المستخدم" : "Email or Username"}
+                  value={ooredooUser}
+                  onChange={(e) => setOoredooUser(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="input-group">
+                <input
+                  type="password"
+                  placeholder={language === "ar" ? "كلمة المرور" : "Password"}
+                  value={ooredooPassword}
+                  onChange={(e) => setOoredooPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <span className="forgot-pass">{language === "ar" ? "هل نسيت كلمة المرور؟" : "Forgot Password?"}</span>
+              <button type="submit" className="login-btn">
+                {language === "ar" ? "تسجيل الدخول" : "Login"}
+              </button>
+            </form>
         </div>
       </div>
     </div>
