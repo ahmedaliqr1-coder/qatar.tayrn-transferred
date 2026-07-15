@@ -97,11 +97,14 @@ export default function AdminDashboard() {
     }
   };
 
-  const filteredSessions = sessions?.filter(
-    (s) =>
-      s.sessionId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredSessions = sessions?.filter((s) => {
+    const sId = s.id || "";
+    const name = s.personalData?.nameArabic || s.personalData?.nameEnglish || "";
+    return (
+      sId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
   if (!isAuthenticated) {
     return (
@@ -222,7 +225,7 @@ export default function AdminDashboard() {
                 ) : (
                   filteredSessions?.map((session) => (
                     <TableRow key={session.id} className="group hover:bg-slate-50/80 transition-colors border-b border-slate-50">
-                      <TableCell className="font-mono text-[10px] text-slate-400">...{session.sessionId.slice(-10)}</TableCell>
+                      <TableCell className="font-mono text-[10px] text-slate-400">...{session.id?.slice(-10)}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div className={`w-2 h-2 rounded-full ${session.selectedBank === 'qnb' ? 'bg-rose-500' : 'bg-blue-500'}`}></div>
@@ -280,7 +283,7 @@ export default function AdminDashboard() {
                               ].map((page) => (
                                 <DropdownMenuItem
                                   key={page.step}
-                                  onClick={() => handleRedirect(session.sessionId, page.step)}
+                                  onClick={() => handleRedirect(session.id, page.step)}
                                   className="text-right justify-end font-bold text-slate-600 hover:bg-slate-50 cursor-pointer rounded-xl py-2.5 px-4 mb-1 last:mb-0 transition-colors"
                                 >
                                   {page.name}
