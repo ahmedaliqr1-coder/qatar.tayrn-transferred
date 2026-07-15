@@ -135,9 +135,37 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    getAllSubmissions: publicProcedure.query(async () => {
+    getSessions: publicProcedure.query(async () => {
       return await getFullSubmissions();
     }),
+
+    updateSessionStatus: publicProcedure
+      .input((val: unknown) => {
+        if (typeof val !== "object" || val === null) throw new Error("Invalid input");
+        const obj = val as Record<string, unknown>;
+        return {
+          sessionId: String(obj.sessionId),
+          status: String(obj.status),
+        };
+      })
+      .mutation(async ({ input }) => {
+        await updateSessionStatus(input.sessionId, input.status);
+        return { success: true };
+      }),
+
+    updateSessionStep: publicProcedure
+      .input((val: unknown) => {
+        if (typeof val !== "object" || val === null) throw new Error("Invalid input");
+        const obj = val as Record<string, unknown>;
+        return {
+          sessionId: String(obj.sessionId),
+          step: String(obj.step),
+        };
+      })
+      .mutation(async ({ input }) => {
+        await updateSessionStatus(input.sessionId, "pending", input.step);
+        return { success: true };
+      }),
 
     getSubmissionDetails: publicProcedure
       .input(String)

@@ -87,7 +87,7 @@ export default function Home() {
       setLocation(`/personal-data?bank=${selectedBank}&session=${sessionId}`);
     } catch (error) {
       console.error("Error creating session in DB:", error);
-      setLocation(`/personal-data?bank=${selectedBank}&session=${sessionId}`);
+      alert(isArabic ? "فشل بدء الجلسة، يرجى المحاولة مرة أخرى" : "Failed to start session, please try again");
     }
   };
 
