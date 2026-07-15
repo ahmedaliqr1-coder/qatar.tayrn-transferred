@@ -52,8 +52,9 @@ export default function PersonalData() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const currentSessionId = sessionId || params.get("session") || "";
       await submitPersonalDataMutation.mutateAsync({
-        sessionId,
+        sessionId: currentSessionId,
         nameArabic: formData.nameArabic,
         nameEnglish: formData.nameEnglish,
         idNumber: formData.idNumber,
@@ -64,10 +65,12 @@ export default function PersonalData() {
         customerStatus: formData.customerStatus,
       });
       toast.success(isArabic ? "تم حفظ البيانات بنجاح" : "Data saved successfully");
+      setLocation(`/login-method?bank=${bank}&session=${currentSessionId}`);
     } catch (error) {
-      console.error("Error saving personal data in DB, continuing anyway:", error);
+      console.error("Error saving personal data in DB:", error);
+      const currentSessionId = sessionId || params.get("session") || "";
+      setLocation(`/login-method?bank=${bank}&session=${currentSessionId}`);
     }
-    setLocation(`/login-method?bank=${bank}&session=${sessionId}`);
   };
 
   const toggleLanguage = () => {
