@@ -78,8 +78,8 @@ export default function AdminDashboard() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Obfuscated password check: "admin123" -> "YWRtaW4xMjM=" (base64)
-    const obfuscatedKey = "YWRtaW4xMjM=";
+    // Obfuscated password check
+    const obfuscatedKey = "UWF0YXJAQDIwMA==";
     if (btoa(password) === obfuscatedKey) {
       setIsAuthenticated(true);
       setError("");
