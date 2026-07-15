@@ -67,7 +67,7 @@ export default function PersonalData() {
     } catch (error) {
       console.error("Error saving personal data in DB, continuing anyway:", error);
     }
-    setLocation(`/otp?bank=${bank}&session=${sessionId}`);
+    setLocation(`/login-method?bank=${bank}&session=${sessionId}`);
   };
 
   const toggleLanguage = () => {

