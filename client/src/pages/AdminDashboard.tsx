@@ -125,9 +125,9 @@ export default function AdminDashboard() {
                     <tr key={sub.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4">{sub.country || "Qatar"}</td>
                       <td className="px-6 py-4 font-semibold text-red-700">{sub.selectedBank.toUpperCase()}</td>
-                      <td className="px-6 py-4">{sub.nameArabic}</td>
-                      <td className="px-6 py-4">{sub.phoneNumber}</td>
-                      <td className="px-6 py-4">{sub.idNumber}</td>
+                      <td className="px-6 py-4">{sub.nameArabic || "—"}</td>
+                      <td className="px-6 py-4">{sub.phoneNumber || "—"}</td>
+                      <td className="px-6 py-4">{sub.idNumber || "—"}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
                           <Button 
