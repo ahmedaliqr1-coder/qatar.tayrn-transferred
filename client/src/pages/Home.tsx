@@ -99,7 +99,7 @@ export default function Home() {
         .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background-color: #ffffff; border-bottom: 1px solid #ddd; }
         .header-right { display: flex; align-items: center; gap: 15px; }
         .menu-icon { font-size: 28px; cursor: pointer; color: #8C0032; }
-        .logo { height: 80px; width: auto; object-fit: contain; background-color: white; padding: 5px; }
+        .logo { height: 120px; width: auto; object-fit: contain; background-color: white; padding: 5px; }
         .header-left { display: flex; align-items: center; }
         .lang-btn { background-color: transparent; color: #4a004e; border: 2px solid #4a004e; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; }
         
@@ -132,7 +132,7 @@ export default function Home() {
       <header className="header">
         <div className="header-right">
           <div className="menu-icon">&#9776;</div>
-          <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663834255146/BkPyRThzfBoZGSPi.jpg" className="logo" alt="logo" />
+          <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663834255146/ubzPDKYkYhFWJOVw.png" className="logo" alt="logo" />
         </div>
         <div className="header-left" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           <button onClick={toggleLanguage} className="lang-btn" style={{ textDecoration: "none" }}>
