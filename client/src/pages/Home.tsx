@@ -104,7 +104,7 @@ export default function Home() {
           .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background-color: #ffffff; border-bottom: 1px solid #ddd; }
           .header-right { display: flex; align-items: center; gap: 15px; }
           .menu-icon { font-size: 28px; cursor: pointer; color: #8C0032; }
-          .logo { height: 40px; width: auto; object-fit: contain; }
+          .logo { height: 70px; width: auto; object-fit: contain; background-color: white; padding: 8px 12px; border-radius: 8px; }
           .header-left { display: flex; align-items: center; }
           .lang-btn { background-color: transparent; color: #4a004e; border: 2px solid #4a004e; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; }
           
