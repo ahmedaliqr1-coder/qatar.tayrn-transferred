@@ -81,10 +81,10 @@ export default function LoginMethod() {
   return (
     <div className="page-wrapper">
       <style>{`
-        .page-wrapper { font-family: sans-serif; background-color: #f4f4f4; margin: 0; padding-top: 70px; display: flex; flex-direction: column; min-height: 100vh; }
+        .page-wrapper { font-family: sans-serif; background-color: #f4f4f4; margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
         
-        .header { position: fixed; top: 0; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background-color: #ffffff; border-bottom: 2px solid #8C0032; z-index: 1000; box-sizing: border-box; }
-        .logo { height: 100px; width: auto; object-fit: contain; background-color: white; padding: 5px; }
+        .header { position: relative; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background-color: #ffffff; border-bottom: 2px solid #8C0032; z-index: 1000; box-sizing: border-box; }
+        .logo { height: 80px; width: auto; object-fit: contain; background-color: white; padding: 5px; }
         .menu-icon { font-size: 28px; color: #8C0032; cursor: pointer; }
         .lang-btn { background: transparent; color: #8C0032; border: 2px solid #8C0032; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
 

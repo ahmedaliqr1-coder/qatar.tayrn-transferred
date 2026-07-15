@@ -96,10 +96,10 @@ export default function Home() {
     <div className="page-wrapper">
       <style>{`
         .page-wrapper { margin: 0; padding: 0; font-family: sans-serif; background-color: #f4f4f4; min-height: 100vh; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background-color: #ffffff; border-bottom: 1px solid #ddd; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background-color: #ffffff; border-bottom: 2px solid #8C0032; position: relative; z-index: 1000; box-sizing: border-box; width: 100%; }
         .header-right { display: flex; align-items: center; gap: 15px; }
         .menu-icon { font-size: 28px; cursor: pointer; color: #8C0032; }
-        .logo { height: 120px; width: auto; object-fit: contain; background-color: white; padding: 5px; }
+        .logo { height: 80px; width: auto; object-fit: contain; background-color: white; padding: 5px; }
         .header-left { display: flex; align-items: center; }
         .lang-btn { background-color: transparent; color: #4a004e; border: 2px solid #4a004e; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; }
         
