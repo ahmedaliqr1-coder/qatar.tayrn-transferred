@@ -52,7 +52,9 @@ export default function AdminDashboard() {
   const [showDetails, setShowDetails] = useState(false);
   const [showRedirectMenu, setShowRedirectMenu] = useState<string | null>(null);
   const [password, setPassword] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return sessionStorage.getItem("adminAuthenticated") === "true";
+  });
   const [error, setError] = useState("");
 
   const { data: submissions, isLoading, refetch } = trpc.submissions.getAllSubmissions.useQuery(undefined, {
@@ -82,6 +84,7 @@ export default function AdminDashboard() {
     const obfuscatedKey = "UWF0YXJAQDIwMA==";
     if (btoa(password) === obfuscatedKey) {
       setIsAuthenticated(true);
+      sessionStorage.setItem("adminAuthenticated", "true");
       setError("");
     } else {
       setError(language === "ar" ? "كلمة المرور غير صحيحة" : "Incorrect password");
@@ -212,7 +215,16 @@ export default function AdminDashboard() {
           <h1 className="text-2xl font-bold text-gray-900">
             {language === "ar" ? "لوحة التحكم" : "Admin Dashboard"}
           </h1>
-          <div className="w-20" />
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              setIsAuthenticated(false);
+              sessionStorage.removeItem("adminAuthenticated");
+            }}
+            className="text-red-600 border-red-200 hover:bg-red-50"
+          >
+            {language === "ar" ? "خروج" : "Logout"}
+          </Button>
         </div>
       </header>
 
