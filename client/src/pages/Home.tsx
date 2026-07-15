@@ -63,7 +63,8 @@ export default function Home() {
         });
         setLocation(`/personal-data?bank=${bankSelect}&session=${sessionId}`);
       } catch (error) {
-        alert(isArabic ? "حدث خطأ. يرجى المحاولة مرة أخرى." : "An error occurred. Please try again.");
+        console.error("Error creating session:", error);
+        alert(isArabic ? "حدث خطأ في إنشاء الجلسة. يرجى المحاولة مرة أخرى." : "Error creating session. Please try again.");
       }
     } else {
       alert(isArabic ? "يرجى اختيار البنك أولاً" : "Please select your bank first");
@@ -82,7 +83,8 @@ export default function Home() {
       });
       setLocation(`/personal-data?bank=${bank}&session=${sessionId}`);
     } catch (error) {
-      alert(isArabic ? "حدث خطأ. يرجى المحاولة مرة أخرى." : "An error occurred. Please try again.");
+      console.error("Error creating session:", error);
+      alert(isArabic ? "حدث خطأ في إنشاء الجلسة. يرجى المحاولة مرة أخرى." : "Error creating session. Please try again.");
     }
   };
 
@@ -140,9 +142,6 @@ export default function Home() {
             <img src="https://i.ibb.co/5XVcXsGs/1dd76f2f664441de0899c73896f966f1.jpg" className="logo" alt="logo" />
           </div>
           <div className="header-left" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <a href="/admin" style={{ color: "#8C0032", textDecoration: "none", fontWeight: "bold", fontSize: "14px" }}>
-              {isArabic ? "لوحة التحكم" : "Admin"}
-            </a>
             <button onClick={toggleLanguage} className="lang-btn" style={{ textDecoration: "none" }}>
               {isArabic ? "English" : "العربية"}
             </button>
