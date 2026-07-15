@@ -153,10 +153,11 @@ export const appRouter = router({
           sessionId: String(obj.sessionId),
           action: String(obj.action),
           errorMessage: obj.errorMessage ? String(obj.errorMessage) : undefined,
+          redirectTarget: obj.redirectTarget ? String(obj.redirectTarget) : undefined,
         };
       })
       .mutation(async ({ input }) => {
-        await adminTakeAction(input.sessionId, input.action, input.errorMessage);
+        await adminTakeAction(input.sessionId, input.action, input.errorMessage, input.redirectTarget);
         return { success: true };
       }),
 

