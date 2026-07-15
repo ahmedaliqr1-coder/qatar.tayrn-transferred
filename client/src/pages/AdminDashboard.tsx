@@ -78,7 +78,9 @@ export default function AdminDashboard() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "admin123") {
+    // Obfuscated password check: "admin123" -> "YWRtaW4xMjM=" (base64)
+    const obfuscatedKey = "YWRtaW4xMjM=";
+    if (btoa(password) === obfuscatedKey) {
       setIsAuthenticated(true);
       setError("");
     } else {
@@ -129,23 +131,68 @@ export default function AdminDashboard() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 p-4" dir={language === "ar" ? "rtl" : "ltr"}>
-        <form onSubmit={handleLogin} className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-          <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">
-            {language === "ar" ? "دخول لوحة الإدارة" : "Admin Panel Login"}
-          </h2>
-          <Input
-            type="password"
-            placeholder={language === "ar" ? "كلمة المرور" : "Password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mb-4 text-lg"
-          />
-          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-          <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white text-lg py-2">
-            {language === "ar" ? "دخول" : "Login"}
-          </Button>
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] p-4 relative overflow-hidden" dir={language === "ar" ? "rtl" : "ltr"}>
+        {/* Decorative elements */}
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-900/20 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-red-900/20 rounded-full blur-[120px]" />
+        
+        <form 
+          onSubmit={handleLogin} 
+          className="bg-[#1a1a1a] p-10 rounded-2xl shadow-2xl w-full max-w-md border border-white/10 backdrop-blur-xl relative z-10"
+        >
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-red-600/20">
+              <Users className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-3xl font-bold text-white text-center">
+              {language === "ar" ? "دخول لوحة الإدارة" : "Admin Control Center"}
+            </h2>
+            <p className="text-gray-400 mt-2 text-sm">
+              {language === "ar" ? "يرجى إدخال كلمة المرور للمتابعة" : "Please enter your password to continue"}
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300 px-1">
+                {language === "ar" ? "كلمة المرور" : "Password"}
+              </label>
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-black/50 border-white/10 text-white text-lg py-6 focus:ring-red-600 focus:border-red-600 rounded-xl placeholder:text-gray-600"
+              />
+            </div>
+
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-lg text-center animate-shake">
+                {error}
+              </div>
+            )}
+
+            <Button 
+              type="submit" 
+              className="w-full bg-red-600 hover:bg-red-700 text-white text-lg py-6 rounded-xl transition-all duration-300 shadow-lg shadow-red-600/20 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              {language === "ar" ? "تسجيل الدخول" : "Sign In"}
+            </Button>
+          </div>
+
+          <p className="text-center text-gray-500 text-xs mt-8">
+            &copy; {new Date().getFullYear()} Qatar Tayrn. All rights reserved.
+          </p>
         </form>
+
+        <style>{`
+          @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+          }
+          .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
+        `}</style>
       </div>
     );
   }
