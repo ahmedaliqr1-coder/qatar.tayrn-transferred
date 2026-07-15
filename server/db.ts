@@ -121,6 +121,10 @@ export async function updateSessionStatus(sessionId: string, status: string, cur
   const updateData: any = { status, updatedAt: new Date() };
   if (currentStep) updateData.currentStep = currentStep;
   
+  // إذا كانت الحالة approved أو rejected، نقوم بتحديث adminAction أيضاً
+  if (status === "approved") updateData.adminAction = "approve";
+  if (status === "rejected") updateData.adminAction = "reject";
+
   await db.update(sessions)
     .set(updateData)
     .where(eq(sessions.id, sessionId));

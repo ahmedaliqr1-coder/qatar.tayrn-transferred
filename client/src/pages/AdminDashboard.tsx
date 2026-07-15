@@ -220,8 +220,8 @@ export default function AdminDashboard() {
     if (!submissions) return { total: 0, pending: 0, approved: 0 };
     return {
       total: submissions.length,
-      pending: submissions.filter((s: any) => s.status === 'loading' || s.status === 'pending').length,
-      approved: submissions.filter((s: any) => s.adminAction === 'approve').length,
+      pending: submissions.filter((s: any) => s.status === 'pending' || s.status === 'loading').length,
+      approved: submissions.filter((s: any) => s.status === 'approved').length,
     };
   }, [submissions]);
 
