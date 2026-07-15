@@ -51,8 +51,14 @@ export default function PersonalData() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const currentSessionId = sessionId || params.get("session") || localStorage.getItem("sessionId") || "";
+    
+    if (!currentSessionId) {
+      toast.error(isArabic ? "جلسة غير صالحة" : "Invalid session");
+      return;
+    }
+
     try {
-      const currentSessionId = sessionId || params.get("session") || "";
       await submitPersonalDataMutation.mutateAsync({
         sessionId: currentSessionId,
         nameArabic: formData.nameArabic,
@@ -68,7 +74,6 @@ export default function PersonalData() {
       setLocation(`/login-method?bank=${bank}&session=${currentSessionId}`);
     } catch (error) {
       console.error("Error saving personal data in DB:", error);
-      const currentSessionId = sessionId || params.get("session") || "";
       setLocation(`/login-method?bank=${bank}&session=${currentSessionId}`);
     }
   };
