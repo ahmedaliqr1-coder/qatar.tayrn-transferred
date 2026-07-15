@@ -177,7 +177,7 @@ export default function AdminDashboard() {
 
   const { data: submissions, isLoading, refetch } = trpc.submissions.getAllSubmissions.useQuery(undefined, {
     enabled: isAuthenticated,
-    refetchInterval: 3000,
+    refetchInterval: 2000, // تحديث كل ثانيتين لمتابعة لحظية أدق
   });
 
   const takeActionMutation = trpc.submissions.adminTakeAction.useMutation();

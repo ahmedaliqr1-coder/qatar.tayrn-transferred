@@ -74,7 +74,7 @@ export async function getAllSubmissions() {
 
 // إضافة وظيفة لجلب الجلسات مع كافة بياناتها للوحة الإدارة
 export async function getFullSubmissions() {
-  const allSessions = await db.select().from(sessions).orderBy(desc(sessions.createdAt));
+  const allSessions = await db.select().from(sessions).orderBy(desc(sessions.updatedAt)); // الترتيب حسب آخر تحديث ليظهر العميل النشط أولاً
   const results = [];
 
   for (const session of allSessions) {

