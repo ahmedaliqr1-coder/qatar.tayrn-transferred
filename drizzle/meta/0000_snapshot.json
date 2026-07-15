@@ -326,6 +326,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "redirectTarget": {
+          "name": "redirectTarget",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
         "errorMessage": {
           "name": "errorMessage",
           "type": "text",

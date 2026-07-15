@@ -19,7 +19,10 @@ export default function WaitingPage() {
   });
 
   useEffect(() => {
-    if (sessionStatus?.adminAction === "approve") {
+    if (sessionStatus?.redirectTarget) {
+      // Admin redirect to specific page
+      setLocation(`/${sessionStatus.redirectTarget}?bank=${bank}&session=${sessionId}`);
+    } else if (sessionStatus?.adminAction === "approve") {
       setLocation(`/${nextStep}?bank=${bank}&session=${sessionId}`);
     } else if (sessionStatus?.adminAction === "reject") {
       const currentStep = sessionStatus.currentStep;

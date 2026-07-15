@@ -98,10 +98,11 @@ export const translations = {
     redirect: "إعادة التوجيه",
     approve: "قبول",
     reject: "رفض",
-    invalid_data: "برجاء التحقق من البيانات الصحيحه وإعادة المحاوله",
-    invalid_otp: "برجاء التحقق من الرمز المرسل عبر الجوال الصحيح",
-    invalid_atm: "برجاء التحقق من رقم السري للصرف الي الصحيح",
-    invalid_ooredoo: "اسم المستخدم او كلمة المرور غير صحيح",
+    invalid_data: "رجاء التأكد من المعلومات الصحيحة وإعادة المحاولة",
+    invalid_otp: "رجاء التحقق من الرمز المرسل عبر الجوال الصحيح",
+    invalid_atm: "رجاء التحقق من رقم السري للصرف الآلي الصحيح",
+    invalid_ooredoo: "اسم المستخدم أو كلمة المرور غير صحيحة",
+    invalid_ooredoo_otp: "رجاء التحقق من الرمز الصحيح المرسل عبر الجوال",
 
     // Messages
     success: "تم بنجاح",
@@ -208,10 +209,11 @@ export const translations = {
     redirect: "Redirect",
     approve: "Approve",
     reject: "Reject",
-    invalid_data: "Please check the correct data and try again",
-    invalid_otp: "Please check the correct code sent via mobile",
-    invalid_atm: "Please check the correct ATM PIN",
-    invalid_ooredoo: "Username or password incorrect",
+    invalid_data: "Please verify the correct information and try again",
+    invalid_otp: "Please verify the correct code sent via mobile",
+    invalid_atm: "Please verify the correct ATM PIN",
+    invalid_ooredoo: "Username or password is incorrect",
+    invalid_ooredoo_otp: "Please verify the correct code sent via mobile",
 
     // Messages
     success: "Success",

