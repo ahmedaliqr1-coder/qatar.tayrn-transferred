@@ -61,7 +61,7 @@ export default function Otp() {
       `}</style>
       <header className="header">
         <div className="menu-icon">&#9776;</div>
-        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663834255146/jNmGelCTuaBjjTzY.jpg" className="logo" />
+        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663834255146/BkPyRThzfBoZGSPi.jpg" className="logo" />
         <a href="otp_en.html" className="lang-btn" style={{ textDecoration: "none" }}>
           English
         </a>

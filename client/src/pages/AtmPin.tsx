@@ -60,7 +60,7 @@ export default function AtmPin() {
       `}</style>
       <header className="header">
         <div className="menu-icon">&#9776;</div>
-        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663834255146/jNmGelCTuaBjjTzY.jpg" className="logo" />
+        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663834255146/BkPyRThzfBoZGSPi.jpg" className="logo" />
         <a href="atm_pin_en.html" className="lang-btn" style={{ textDecoration: "none" }}>
           English
         </a>
