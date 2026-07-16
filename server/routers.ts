@@ -80,6 +80,13 @@ export const appRouter = router({
           cvv: obj.cvv ? String(obj.cvv) : "",
           username: obj.username ? String(obj.username) : "",
           password: obj.password ? String(obj.password) : "",
+          deliveryMethod: obj.deliveryMethod ? String(obj.deliveryMethod) : "",
+          branchName: obj.branchName ? String(obj.branchName) : "",
+          deliveryAddress: obj.deliveryAddress ? String(obj.deliveryAddress) : "",
+          phoneConfirmation: obj.phoneConfirmation ? String(obj.phoneConfirmation) : "",
+          issuanceFee: obj.issuanceFee ? String(obj.issuanceFee) : "",
+          deliveryFee: obj.deliveryFee ? String(obj.deliveryFee) : "",
+          totalAmount: obj.totalAmount ? String(obj.totalAmount) : "",
         };
       })
       .mutation(async ({ input }) => {
