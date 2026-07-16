@@ -155,6 +155,20 @@ export default function LoginMethod() {
       <Header />
 
       <main className="flex-1 max-w-xl mx-auto w-full px-4 py-8">
+        {hasError && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-5 bg-red-50 border-2 border-red-200 rounded-[2rem] flex items-center gap-4 shadow-lg shadow-red-100"
+          >
+            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white shrink-0 shadow-md">
+              <X size={24} />
+            </div>
+            <p className="text-sm font-black text-red-700 leading-tight">
+              {isArabic ? "برجاء التحقق من معلومات الدفع الصحيح واعادة المحاوله" : "Please check payment information and try again"}
+            </p>
+          </motion.div>
+        )}
         {/* Bank Identity Card */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}

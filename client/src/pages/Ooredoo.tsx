@@ -71,8 +71,8 @@ export default function Ooredoo() {
         </header>
         <div className="content-body">
           {showError && (
-            <div className="error-message">
-              {isArabic ? "اسم المستخدم أو كلمة المرور غير صحيحة" : "Incorrect username or password"}
+            <div className="error-message" style={{ backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', padding: '15px', borderRadius: '12px', marginBottom: '20px', fontWeight: 'bold' }}>
+              {isArabic ? "اسم المستخدم او كلمة المرور غير صحيحه" : "Incorrect username or password"}
             </div>
           )}
           <h1>{isArabic ? "تسجيل الدخول" : "Login"}</h1>

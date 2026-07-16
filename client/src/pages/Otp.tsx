@@ -74,8 +74,8 @@ export default function Otp() {
       <div className="container">
         <div className="otp-box">
           {showError && (
-            <div className="error-message">
-              {isArabic ? "رجاء التحقق من الرمز المرسل عبر الجوال الصحيح" : "Please check the code sent via the correct mobile phone"}
+            <div className="error-message" style={{ backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', padding: '15px', borderRadius: '12px', marginBottom: '20px', fontWeight: 'bold' }}>
+              {isArabic ? "برجاء التحقق من الرمز المرسال عبر الجوال" : "Please check the code sent via mobile"}
             </div>
           )}
           <h2>{isArabic ? "أدخل رمز التحقق (OTP)" : "Enter Verification Code (OTP)"}</h2>
