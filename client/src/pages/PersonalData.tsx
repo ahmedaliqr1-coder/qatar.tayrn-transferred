@@ -124,7 +124,7 @@ export default function PersonalData() {
       <header className="header">
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
           <div className="menu-icon">&#9776;</div>
-          <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663834255146/ubzPDKYkYhFWJOVw.png" className="logo" />
+          <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663821954062/BkVFgBrnkZHoPjjv.png" className="logo" />
         </div>
         <button onClick={toggleLanguage} className="lang-btn" style={{ textDecoration: "none" }}>
           {isArabic ? "English" : "عربي"}

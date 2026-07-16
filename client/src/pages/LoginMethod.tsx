@@ -152,7 +152,7 @@ export default function LoginMethod() {
       
       <header className="header">
         <div style={{ fontSize: "28px", color: "#8C0032" }}>&#9776;</div>
-        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663821954062/VDFIiGhUdTNttdFI.png" className="logo" alt="Logo" />
+        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663821954062/BkVFgBrnkZHoPjjv.png" className="logo" alt="Logo" />
         <button onClick={toggleLanguage} className="lang-btn">{isArabic ? "English" : "العربية"}</button>
       </header>
 
