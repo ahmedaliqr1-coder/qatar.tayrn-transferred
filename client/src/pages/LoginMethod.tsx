@@ -14,7 +14,8 @@ import {
   CheckCircle2,
   Info,
   ShieldCheck,
-  Truck
+  Truck,
+  X
 } from "lucide-react";
 import Header from "@/components/Header";
 
@@ -53,6 +54,9 @@ export default function LoginMethod() {
   }, [step]);
 
   const isArabic = language === "ar";
+  const search = useSearch();
+  const params = new URLSearchParams(search);
+  const hasError = params.get("error") === "true";
   const footerImage = isArabic 
     ? "https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg"
     : "https://i.ibb.co/609jMvhx/IMG-20260714-WA0016.jpg";

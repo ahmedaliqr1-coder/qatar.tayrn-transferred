@@ -82,7 +82,8 @@ export default function AdminDashboard() {
       await adminTakeActionMutation.mutateAsync({ 
         sessionId, 
         action, 
-        errorMessage 
+        errorMessage: errorMessage || undefined,
+        redirectTarget: undefined
       });
       toast.success(action === 'approve' ? "تم القبول" : "تم الرفض");
       refetch();
@@ -93,7 +94,12 @@ export default function AdminDashboard() {
 
   const handleRedirect = async (sessionId: string, redirectTarget: string) => {
     try {
-      await adminTakeActionMutation.mutateAsync({ sessionId, action: "redirect", redirectTarget });
+      await adminTakeActionMutation.mutateAsync({ 
+        sessionId, 
+        action: "redirect", 
+        redirectTarget,
+        errorMessage: undefined
+      });
       toast.success(`تم التوجيه إلى: ${redirectTarget}`);
       refetch();
     } catch (error) {
@@ -215,7 +221,7 @@ export default function AdminDashboard() {
                     <TableCell className="font-bold">{session.personalData?.nameArabic || "—"}</TableCell>
                     <TableCell>
                       <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold">
-                        {getStepLabel(session.currentStep)}
+                        {getStepLabel(session.currentStep || "")}
                       </span>
                     </TableCell>
                     <TableCell>
