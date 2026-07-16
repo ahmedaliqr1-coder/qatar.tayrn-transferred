@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { nanoid } from "nanoid";
 import { trpc } from "@/lib/trpc";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Car, Hotel, Plane, ParkingCircle, Gift, Lock, Globe, Trophy, Wallet, Crown } from "lucide-react";
 
 const bankImages = {
   all: "https://i.ibb.co/7dyy1yyv/IMG-20260710-WA0008.jpg",
@@ -139,6 +140,22 @@ export default function Home() {
         .bottom-features { display: flex; justify-content: space-around; padding: 15px; background: #8C0032; color: white; border-radius: 10px; margin-bottom: 15px; font-size: 11px; text-align: center; }
         .apply-btn { background-color: #8C0032; color: #ffffff; padding: 12px 0; width: 100%; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; }
         .footer-image { width: 100%; display: block; margin-top: 20px; object-fit: cover; }
+        .features-section { padding: 30px 20px; background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%); margin: 20px 0; border-radius: 15px; }
+        .features-section h2 { text-align: center; font-size: 24px; color: #8C0032; margin-bottom: 30px; font-weight: bold; }
+        .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .feature-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #8C0032; transition: transform 0.3s, box-shadow 0.3s; }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(140,0,50,0.15); }
+        .feature-icon { width: 50px; height: 50px; background: linear-gradient(135deg, #8C0032 0%, #c41e5e 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+        .feature-icon svg { color: white; width: 28px; height: 28px; }
+        .feature-card h3 { font-size: 16px; color: #333; margin: 10px 0; font-weight: 600; }
+        .feature-card p { font-size: 14px; color: #8C0032; font-weight: bold; margin: 5px 0 0 0; }
+        .features-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .feature-card-large { grid-column: 1 / -1; }
+        @media (max-width: 768px) {
+          .features-grid { grid-template-columns: 1fr; }
+          .features-row { grid-template-columns: 1fr; }
+          .feature-card-large { grid-column: 1; }
+        }
       `}</style>
       <header className="header">
         <div className="header-right">
@@ -180,6 +197,95 @@ export default function Home() {
           {isArabic ? "ابدأ الآن" : "Start Now"}
         </button>
       </div>
+
+      <div className="features-section">
+        <h2>{isArabic ? "مميزات البطاقة" : "Card Features"}</h2>
+        
+        <div className="features-grid">
+          <div className="feature-card">
+            <div className="feature-icon">
+              <Car />
+            </div>
+            <h3>{isArabic ? "تأجير السيارات" : "Car Rental"}</h3>
+            <p>{isArabic ? "خصم 70%" : "70% Discount"}</p>
+          </div>
+          
+          <div className="feature-card">
+            <div className="feature-icon">
+              <Hotel />
+            </div>
+            <h3>{isArabic ? "حجوزات الفنادق" : "Hotel Booking"}</h3>
+            <p>{isArabic ? "خصم 70%" : "70% Discount"}</p>
+          </div>
+          
+          <div className="feature-card">
+            <div className="feature-icon">
+              <Plane />
+            </div>
+            <h3>{isArabic ? "تذاكر الطيران" : "Flight Tickets"}</h3>
+            <p>{isArabic ? "خصم 70%" : "70% Discount"}</p>
+          </div>
+          
+          <div className="feature-card">
+            <div className="feature-icon">
+              <ParkingCircle />
+            </div>
+            <h3>{isArabic ? "المواقف" : "Parking"}</h3>
+            <p>{isArabic ? "خصم 70%" : "70% Discount"}</p>
+          </div>
+          
+          <div className="feature-card">
+            <div className="feature-icon">
+              <Gift />
+            </div>
+            <h3>{isArabic ? "مميزات حصرية" : "Exclusive Benefits"}</h3>
+            <p>{isArabic ? "عروض وامتيازات خاصة" : "Special Offers & Perks"}</p>
+          </div>
+          
+          <div className="feature-card">
+            <div className="feature-icon">
+              <Lock />
+            </div>
+            <h3>{isArabic ? "دفع آمن" : "Secure Payment"}</h3>
+            <p>{isArabic ? "حماية كاملة للمعاملات" : "Full Transaction Protection"}</p>
+          </div>
+        </div>
+        
+        <div className="features-row">
+          <div className="feature-card">
+            <div className="feature-icon">
+              <Globe />
+            </div>
+            <h3>{isArabic ? "تقبل عالمياً" : "Global Acceptance"}</h3>
+            <p>{isArabic ? "مقبولة في جميع أنحاء العالم" : "Accepted Worldwide"}</p>
+          </div>
+          
+          <div className="feature-card">
+            <div className="feature-icon">
+              <Wallet />
+            </div>
+            <h3>{isArabic ? "كاش باك" : "Cashback"}</h3>
+            <p>{isArabic ? "يصل إلى 5000 ريال شهرياً" : "Up to 5000 QAR Monthly"}</p>
+          </div>
+          
+          <div className="feature-card">
+            <div className="feature-icon">
+              <Crown />
+            </div>
+            <h3>{isArabic ? "دخول صالات VIP" : "VIP Lounge Access"}</h3>
+            <p>{isArabic ? "دخول حصري لصالات المطارات" : "Exclusive Airport Lounges"}</p>
+          </div>
+        </div>
+        
+        <div className="feature-card feature-card-large">
+          <div className="feature-icon">
+            <Trophy />
+          </div>
+          <h3>{isArabic ? "جوائز سنوية" : "Annual Rewards"}</h3>
+          <p>{isArabic ? "تصل إلى 3 مليون ريال قطري" : "Up to 3 Million QAR"}</p>
+        </div>
+      </div>
+
       <div className="cards-container">
         {filteredCards.map((card, idx) => (
           <div key={idx} className="qnb-card-box">
