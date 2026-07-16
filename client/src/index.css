@@ -175,3 +175,31 @@
     }
   }
 }
+
+/* Unified Header & Footer Styles */
+.header-logo {
+  height: 60px !important;
+  width: auto !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+.footer-image-container {
+  width: 100% !important;
+  overflow: hidden !important;
+  line-height: 0 !important;
+}
+
+.footer-image-standard {
+  width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  object-fit: cover !important;
+  object-position: top !important;
+}
+
+@media (max-width: 640px) {
+  .header-logo {
+    height: 50px !important;
+  }
+}

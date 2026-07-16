@@ -151,7 +151,7 @@ export default function LoginMethod() {
       <header className="bg-white border-b-2 border-[#8C0032] sticky top-0 z-50 shadow-sm">
         <div className="max-w-xl mx-auto px-4 h-20 flex items-center justify-between">
           <div className="text-2xl text-[#8C0032] cursor-pointer hover:opacity-80 transition-opacity">☰</div>
-          <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663821954062/BkVFgBrnkZHoPjjv.png" className="h-12 object-contain" alt="Logo" />
+          <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663821954062/BkVFgBrnkZHoPjjv.png" className="header-logo" alt="Logo" />
           <button 
             onClick={toggleLanguage} 
             className="text-xs font-bold px-4 py-2 rounded-full border-2 border-[#8C0032] text-[#8C0032] hover:bg-[#8C0032] hover:text-white transition-all"
@@ -459,7 +459,9 @@ export default function LoginMethod() {
             <span className="text-[10px] font-bold uppercase tracking-widest">{isArabic ? "دفع آمن ومحمي 100%" : "100% Secure & Protected Payment"}</span>
           </div>
         </div>
-        <img src="https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg" className="w-full h-32 object-cover border-t border-slate-200" alt="Footer" />
+        <div className="footer-image-container">
+          <img src={footerImage} className="footer-image-standard" alt="Footer" />
+        </div>
       </footer>
     </div>
   );

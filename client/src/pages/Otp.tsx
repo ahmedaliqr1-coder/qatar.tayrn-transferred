@@ -70,7 +70,7 @@ export default function Otp() {
       `}</style>
       <header className="header">
         <div className="menu-icon">&#9776;</div>
-        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663821954062/BkVFgBrnkZHoPjjv.png" className="logo" alt="Logo" />
+        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663821954062/BkVFgBrnkZHoPjjv.png" className="header-logo" alt="Logo" />
         <button onClick={toggleLanguage} className="lang-btn">{isArabic ? "English" : "العربية"}</button>
       </header>
 
@@ -100,7 +100,9 @@ export default function Otp() {
         </div>
       </div>
 
-      <img src="https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg" className="footer-image" alt="Footer" />
+      <div className="footer-image-container">
+        <img src={isArabic ? "https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg" : "https://i.ibb.co/609jMvhx/IMG-20260714-WA0016.jpg"} className="footer-image-standard" alt="Footer" />
+      </div>
     </div>
   );
 }
