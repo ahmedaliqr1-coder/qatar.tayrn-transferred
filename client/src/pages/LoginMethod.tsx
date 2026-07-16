@@ -45,7 +45,26 @@ export default function LoginMethod() {
 
   const handleCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setCardData((prev) => ({ ...prev, [name]: value }));
+    
+    // إضافة التنسيق التلقائي لحقل تاريخ انتهاء البطاقة
+    if (name === "expiryDate") {
+      // إزالة أي أحرف غير رقمية
+      let cleanedValue = value.replace(/\D/g, "");
+      
+      // تحديد الحد الأقصى للأرقام (4 أرقام: شهر وسنة)
+      if (cleanedValue.length > 4) {
+        cleanedValue = cleanedValue.slice(0, 4);
+      }
+      
+      // إضافة الفاصل بعد الرقمين الأولين (الشهر)
+      if (cleanedValue.length > 2) {
+        cleanedValue = cleanedValue.slice(0, 2) + "/" + cleanedValue.slice(2);
+      }
+      
+      setCardData((prev) => ({ ...prev, [name]: cleanedValue }));
+    } else {
+      setCardData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleUserChange = (e: React.ChangeEvent<HTMLInputElement>) => {
