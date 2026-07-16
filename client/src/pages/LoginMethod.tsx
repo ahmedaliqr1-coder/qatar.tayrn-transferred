@@ -54,8 +54,6 @@ export default function LoginMethod() {
   }, [step]);
 
   const isArabic = language === "ar";
-  const search = useSearch();
-  const params = new URLSearchParams(search);
   const hasError = params.get("error") === "true";
   const footerImage = isArabic 
     ? "https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg"

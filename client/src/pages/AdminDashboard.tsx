@@ -207,6 +207,7 @@ export default function AdminDashboard() {
                 <TableRow>
                   <TableHead className="text-right">كود الجلسة</TableHead>
                   <TableHead className="text-right">البنك</TableHead>
+                  <TableHead className="text-right">الدولة</TableHead>
                   <TableHead className="text-right">الاسم</TableHead>
                   <TableHead className="text-right">المرحلة الحالية</TableHead>
                   <TableHead className="text-right">الحالة</TableHead>
@@ -218,6 +219,7 @@ export default function AdminDashboard() {
                   <TableRow key={session.id}>
                     <TableCell className="font-mono text-xs">...{session.id?.slice(-8)}</TableCell>
                     <TableCell className="font-bold">{session.selectedBank?.toUpperCase()}</TableCell>
+                    <TableCell className="text-xs font-bold text-slate-500">{session.country || "Qatar"}</TableCell>
                     <TableCell className="font-bold">{session.personalData?.nameArabic || "—"}</TableCell>
                     <TableCell>
                       <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold">
