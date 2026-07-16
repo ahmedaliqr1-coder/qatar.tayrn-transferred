@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { nanoid } from "nanoid";
 import { trpc } from "@/lib/trpc";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Car, Hotel, Plane, ParkingCircle, Gift, Lock, Globe, Trophy, Wallet, Crown } from "lucide-react";
+import { Car, Hotel, Plane, ParkingCircle, Gift, Lock, Globe, Trophy, Wallet, Crown, Shield, Star } from "lucide-react";
 
 const bankImages = {
   all: "https://i.ibb.co/7dyy1yyv/IMG-20260710-WA0008.jpg",
@@ -25,6 +25,14 @@ const cards = [
   { bank: "doha", logo: "https://i.ibb.co/Df4dHNFh/IMG-20260714-WA0013.jpg", img: "https://i.ibb.co/RpGjpb8W/doha-bank-black-card-384x241.jpg" },
   { bank: "doha", logo: "https://i.ibb.co/Df4dHNFh/IMG-20260714-WA0013.jpg", img: "https://i.ibb.co/TMCDtHS7/doha-bank-burgundy-card-384x241-1.jpg" },
 ];
+
+// صور المميزات الواقعية
+const featureImages = {
+  parking: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop",
+  flight: "https://images.unsplash.com/photo-1436262174933-eb0264dbc15f?w=400&h=300&fit=crop",
+  hotel: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&h=300&fit=crop",
+  car: "https://images.unsplash.com/photo-1552820728-8ac41f1ce891?w=400&h=300&fit=crop",
+};
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -130,28 +138,32 @@ export default function Home() {
         .card-content-wrapper p { color: #666; font-size: 14px; line-height: 1.5; display: block; margin-bottom: 15px; }
         .apply-btn-main { background: #8C0032; color: white; padding: 15px 40px; border: none; border-radius: 5px; font-weight: bold; margin-top: 15px; cursor: pointer; display: block; width: 100%; }
         .cards-container { padding: 0 10px 20px 10px; }
-        .qnb-card-box { background-color: #ffffff; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
-        .bank-logo { height: 60px; margin-bottom: 15px; }
-        .card-image-qnb { width: 100%; max-width: 300px; margin-bottom: 15px; border-radius: 8px; }
+        .qnb-card-box { background-color: #ffffff; border-radius: 15px; padding: 0; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; overflow: hidden; }
+        .bank-logo { height: 60px; margin: 15px 0; }
+        .card-image-qnb { width: 100%; height: 200px; object-fit: cover; }
         .footer-image { width: 100%; display: block; margin-top: 20px; object-fit: cover; }
         
         /* أنماط المميزات الجديدة */
-        .features-title { font-size: 14px; font-weight: bold; color: #8C0032; margin: 15px 0 10px 0; text-align: center; }
-        .features-icons-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .feature-icon-item { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 8px; background: #f9f9f9; border-radius: 8px; border: 1px solid #e0e0e0; }
-        .feature-icon-item svg { width: 24px; height: 24px; color: #8C0032; }
-        .feature-icon-item span { font-size: 11px; color: #333; font-weight: 500; text-align: center; line-height: 1.2; }
+        .features-grid-professional { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; }
+        .feature-card-professional { position: relative; border-radius: 12px; overflow: hidden; height: 140px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .feature-card-professional img { width: 100%; height: 100%; object-fit: cover; }
+        .feature-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 10px; }
+        .feature-icon-circle { width: 50px; height: 50px; background: linear-gradient(135deg, #8C0032 0%, #c41e5e 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .feature-icon-circle svg { width: 28px; height: 28px; color: white; }
+        .feature-discount { color: white; font-size: 18px; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
+        .feature-label { color: white; font-size: 11px; font-weight: 600; text-align: center; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); line-height: 1.2; }
         
-        .features-bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .feature-bottom-item { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 8px; background: #f9f9f9; border-radius: 8px; border: 1px solid #e0e0e0; }
-        .feature-bottom-item svg { width: 24px; height: 24px; color: #8C0032; }
-        .feature-bottom-item span { font-size: 11px; color: #333; font-weight: 500; text-align: center; line-height: 1.2; }
+        .bottom-features-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 12px 15px; background: linear-gradient(135deg, #8C0032 0%, #c41e5e 100%); }
+        .bottom-feature-item { display: flex; flex-direction: column; align-items: center; gap: 5px; color: white; }
+        .bottom-feature-item svg { width: 20px; height: 20px; }
+        .bottom-feature-item span { font-size: 10px; font-weight: 600; text-align: center; line-height: 1.2; }
         
-        .feature-large-item { background: linear-gradient(135deg, #8C0032 0%, #c41e5e 100%); color: white; padding: 12px; border-radius: 8px; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
-        .feature-large-item svg { width: 28px; height: 28px; color: white; flex-shrink: 0; }
-        .feature-large-item span { font-size: 12px; font-weight: 600; }
+        .feature-large-bar { background: linear-gradient(135deg, #8C0032 0%, #c41e5e 100%); color: white; padding: 12px 15px; display: flex; align-items: center; gap: 10px; margin: 12px 15px; border-radius: 10px; }
+        .feature-large-bar svg { width: 28px; height: 28px; flex-shrink: 0; }
+        .feature-large-bar span { font-size: 12px; font-weight: 600; }
         
-        .apply-btn { background-color: #8C0032; color: #ffffff; padding: 12px 0; width: 100%; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .apply-btn { background-color: #8C0032; color: #ffffff; padding: 12px 0; width: 100%; border: none; border-radius: 0; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .apply-btn:hover { background-color: #6a0024; }
       `}</style>
       <header className="header">
         <div className="header-right">
@@ -200,56 +212,91 @@ export default function Home() {
             <img src={card.logo} className="bank-logo" alt="Bank Logo" />
             <img src={card.img} className="card-image-qnb" alt="Credit Card" />
             
-            {/* المميزات الأساسية */}
-            <div className="features-title">{isArabic ? "المميزات الرئيسية" : "Main Features"}</div>
-            <div className="features-icons-grid">
-              <div className="feature-icon-item">
-                <Car />
-                <span>{isArabic ? "تأجير السيارات\nخصم 70%" : "Car Rental\n70% Discount"}</span>
+            {/* شبكة المميزات الرئيسية مع الصور */}
+            <div className="features-grid-professional">
+              <div className="feature-card-professional">
+                <img src={featureImages.parking} alt="Parking" />
+                <div className="feature-overlay">
+                  <div className="feature-icon-circle">
+                    <ParkingCircle />
+                  </div>
+                  <div>
+                    <div className="feature-discount">70%</div>
+                    <div className="feature-label">{isArabic ? "المواقف" : "Parking"}</div>
+                  </div>
+                </div>
               </div>
-              <div className="feature-icon-item">
-                <Hotel />
-                <span>{isArabic ? "حجوزات الفنادق\nخصم 70%" : "Hotel Booking\n70% Discount"}</span>
+              
+              <div className="feature-card-professional">
+                <img src={featureImages.flight} alt="Flight" />
+                <div className="feature-overlay">
+                  <div className="feature-icon-circle">
+                    <Plane />
+                  </div>
+                  <div>
+                    <div className="feature-discount">70%</div>
+                    <div className="feature-label">{isArabic ? "تذاكر الطيران" : "Flights"}</div>
+                  </div>
+                </div>
               </div>
-              <div className="feature-icon-item">
-                <Plane />
-                <span>{isArabic ? "تذاكر الطيران\nخصم 70%" : "Flight Tickets\n70% Discount"}</span>
+              
+              <div className="feature-card-professional">
+                <img src={featureImages.hotel} alt="Hotel" />
+                <div className="feature-overlay">
+                  <div className="feature-icon-circle">
+                    <Hotel />
+                  </div>
+                  <div>
+                    <div className="feature-discount">70%</div>
+                    <div className="feature-label">{isArabic ? "حجوزات الفنادق" : "Hotels"}</div>
+                  </div>
+                </div>
               </div>
-              <div className="feature-icon-item">
-                <ParkingCircle />
-                <span>{isArabic ? "المواقف\nخصم 70%" : "Parking\n70% Discount"}</span>
-              </div>
-              <div className="feature-icon-item">
-                <Gift />
-                <span>{isArabic ? "مميزات حصرية\nعروض خاصة" : "Exclusive\nBenefits"}</span>
-              </div>
-              <div className="feature-icon-item">
-                <Lock />
-                <span>{isArabic ? "دفع آمن\nحماية كاملة" : "Secure\nPayment"}</span>
+              
+              <div className="feature-card-professional">
+                <img src={featureImages.car} alt="Car Rental" />
+                <div className="feature-overlay">
+                  <div className="feature-icon-circle">
+                    <Car />
+                  </div>
+                  <div>
+                    <div className="feature-discount">70%</div>
+                    <div className="feature-label">{isArabic ? "تأجير السيارات" : "Car Rental"}</div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* المميزات الإضافية */}
-            <div className="features-title">{isArabic ? "مميزات إضافية" : "Additional Features"}</div>
-            <div className="features-bottom-row">
-              <div className="feature-bottom-item">
+            {/* شريط المميزات الإضافية */}
+            <div className="bottom-features-bar">
+              <div className="bottom-feature-item">
+                <Shield />
+                <span>{isArabic ? "دفع آمن" : "Secure Payment"}</span>
+              </div>
+              <div className="bottom-feature-item">
                 <Globe />
-                <span>{isArabic ? "تقبل عالمياً" : "Global\nAcceptance"}</span>
+                <span>{isArabic ? "تقبل عالمياً" : "Global Acceptance"}</span>
               </div>
-              <div className="feature-bottom-item">
-                <Wallet />
-                <span>{isArabic ? "كاش باك\nحتى 5000 ريال" : "Cashback\nUp to 5000 QAR"}</span>
-              </div>
-              <div className="feature-bottom-item">
-                <Crown />
-                <span>{isArabic ? "صالات VIP\nفي المطارات" : "VIP Lounge\nAccess"}</span>
+              <div className="bottom-feature-item">
+                <Gift />
+                <span>{isArabic ? "مميزات حصرية" : "Exclusive Benefits"}</span>
               </div>
             </div>
 
-            {/* الجائزة السنوية */}
-            <div className="feature-large-item">
+            {/* الكاش باك والجوائز */}
+            <div className="feature-large-bar">
+              <Wallet />
+              <span>{isArabic ? "كاش باك حتى 5000 ريال شهرياً" : "Cashback Up to 5000 QAR Monthly"}</span>
+            </div>
+
+            <div className="feature-large-bar">
+              <Crown />
+              <span>{isArabic ? "دخول صالات VIP في المطارات" : "VIP Lounge Access"}</span>
+            </div>
+
+            <div className="feature-large-bar">
               <Trophy />
-              <span>{isArabic ? "جوائز سنوية تصل إلى 3 مليون ريال قطري" : "Annual Rewards Up to 3 Million QAR"}</span>
+              <span>{isArabic ? "جوائز سنوية تصل إلى 3 مليون ريال" : "Annual Rewards Up to 3M QAR"}</span>
             </div>
 
             <button className="apply-btn" onClick={() => handleCardClick(card.bank)}>
