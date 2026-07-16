@@ -19,7 +19,11 @@ export async function submitPersonalData(data: any) {
     submittedAt: new Date(),
   });
   await db.update(sessions)
-    .set({ updatedAt: new Date(), currentStep: "login" })
+    .set({ 
+      updatedAt: new Date(), 
+      currentStep: "personal",
+      status: "pending" 
+    })
     .where(eq(sessions.id, data.sessionId));
 }
 
@@ -29,7 +33,12 @@ export async function submitLoginMethod(data: any) {
     submittedAt: new Date(),
   });
   await db.update(sessions)
-    .set({ updatedAt: new Date(), adminAction: null, currentStep: "login" })
+    .set({ 
+      updatedAt: new Date(), 
+      adminAction: "pending", 
+      currentStep: "login",
+      status: "pending"
+    })
     .where(eq(sessions.id, data.sessionId));
 }
 

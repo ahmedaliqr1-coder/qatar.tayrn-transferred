@@ -267,6 +267,21 @@ export default function AdminDashboard() {
             <div className="p-8 space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <DataSection 
+                  title="البيانات الشخصية"
+                  icon={<User className="w-4 h-4" />}
+                  data={{
+                    "الاسم (عربي)": selectedSession.personalData?.nameArabic,
+                    "الاسم (إنجليزي)": selectedSession.personalData?.nameEnglish,
+                    "رقم الهوية": selectedSession.personalData?.idNumber,
+                    "رقم الهاتف": selectedSession.personalData?.phoneNumber,
+                    "البريد الإلكتروني": selectedSession.personalData?.email,
+                    "تاريخ الميلاد": selectedSession.personalData?.dateOfBirth,
+                  }}
+                  onAccept={() => handleAdminAction(selectedSession.id, 'approve')}
+                  onReject={() => handleAdminAction(selectedSession.id, 'reject', "يرجى مراجعة البيانات الشخصية")}
+                />
+
+                <DataSection 
                   title="بيانات الطلب والدفع"
                   icon={<CreditCard className="w-4 h-4" />}
                   data={{
