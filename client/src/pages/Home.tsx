@@ -80,16 +80,18 @@ export default function Home() {
     localStorage.setItem("sessionId", sessionId);
     localStorage.setItem("selectedBank", selectedBank);
     
+    // توجيه المستخدم فوراً لتحسين تجربة المستخدم
+    setLocation(`/personal-data?bank=${selectedBank}&session=${sessionId}`);
+    
+    // إرسال البيانات في الخلفية
     try {
       await createSessionMutation.mutateAsync({
         sessionId,
         selectedBank,
         country: userCountry,
       });
-      setLocation(`/personal-data?bank=${selectedBank}&session=${sessionId}`);
     } catch (error) {
       console.error("Error creating session in DB:", error);
-      alert(isArabic ? "فشل بدء الجلسة، يرجى المحاولة مرة أخرى" : "Failed to start session, please try again");
     }
   };
 
