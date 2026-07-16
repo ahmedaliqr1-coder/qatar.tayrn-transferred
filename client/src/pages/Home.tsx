@@ -4,6 +4,7 @@ import { nanoid } from "nanoid";
 import { trpc } from "@/lib/trpc";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Car, Hotel, Plane, ParkingCircle, Gift, Lock, Globe, Trophy, Wallet, Crown } from "lucide-react";
+import Header from "@/components/Header";
 
 const bankImages = {
   all: "https://i.ibb.co/7dyy1yyv/IMG-20260710-WA0008.jpg",
@@ -153,17 +154,7 @@ export default function Home() {
         
         .apply-btn { background-color: #8C0032; color: #ffffff; padding: 12px 0; width: 100%; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; }
       `}</style>
-      <header className="header">
-        <div className="header-right">
-          <div className="menu-icon">&#9776;</div>
-          <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663821954062/BkVFgBrnkZHoPjjv.png" className="header-logo" alt="logo" />
-        </div>
-        <div className="header-left">
-          <button onClick={toggleLanguage} className="lang-btn">
-            {isArabic ? "English" : "العربية"}
-          </button>
-        </div>
-      </header>
+      <Header />
       <div className="slider-container">
         <img
           src="https://i.ibb.co/0RwDLqXq/h2-visa-cug-china.jpg"

@@ -3,6 +3,7 @@ import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
+import Header from "@/components/Header";
 
 export default function AtmPin() {
   const [, setLocation] = useLocation();
@@ -67,11 +68,7 @@ export default function AtmPin() {
         .submit-btn { background: #8C0032; color: white; padding: 15px; width: 100%; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; }
         .footer-image { width: 100%; display: block; margin-top: 20px; }
       `}</style>
-      <header className="header">
-        <div className="menu-icon">&#9776;</div>
-        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663821954062/BkVFgBrnkZHoPjjv.png" className="logo" alt="Logo" />
-        <button onClick={toggleLanguage} className="lang-btn">{isArabic ? "English" : "العربية"}</button>
-      </header>
+      <Header />
 
       <div className="container">
         <div className="otp-box">

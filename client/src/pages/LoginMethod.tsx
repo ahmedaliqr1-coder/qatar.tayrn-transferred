@@ -5,7 +5,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Home, 
   Building2, 
   ChevronRight, 
   ChevronLeft, 
@@ -17,6 +16,7 @@ import {
   ShieldCheck,
   Truck
 } from "lucide-react";
+import Header from "@/components/Header";
 
 const BANK_INFO: Record<string, { nameAr: string, nameEn: string, logo: string, color: string }> = {
   qnb: { nameAr: "بنك قطر الوطني (QNB)", nameEn: "Qatar National Bank (QNB)", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", color: "#003565" },
@@ -152,19 +152,7 @@ export default function LoginMethod() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans" dir={isArabic ? "rtl" : "ltr"}>
-      {/* Premium Header */}
-      <header className="bg-white border-b-2 border-[#8C0032] sticky top-0 z-50 shadow-sm">
-        <div className="max-w-xl mx-auto px-4 h-20 flex items-center justify-between">
-          <div className="text-2xl text-[#8C0032] cursor-pointer hover:opacity-80 transition-opacity">☰</div>
-          <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663821954062/BkVFgBrnkZHoPjjv.png" className="header-logo" alt="Logo" />
-          <button 
-            onClick={toggleLanguage} 
-            className="text-xs font-bold px-4 py-2 rounded-full border-2 border-[#8C0032] text-[#8C0032] hover:bg-[#8C0032] hover:text-white transition-all"
-          >
-            {isArabic ? "English" : "العربية"}
-          </button>
-        </div>
-      </header>
+      <Header />
 
       <main className="flex-1 max-w-xl mx-auto w-full px-4 py-8">
         {/* Bank Identity Card */}

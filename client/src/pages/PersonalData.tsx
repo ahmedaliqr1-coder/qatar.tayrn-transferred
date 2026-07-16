@@ -4,6 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import { Car, Hotel, Plane, ParkingCircle, Gift, Lock, Globe, Trophy, Wallet, Crown, Calendar } from "lucide-react";
+import Header from "@/components/Header";
 
 const bankLogos = {
   doha: "https://i.ibb.co/fYrmRJN5/h3-Doha-Bank-International-Spends.jpg",
@@ -121,15 +122,7 @@ export default function PersonalData() {
 
         .footer-image { width: 100%; display: block; margin-top: 20px; }
       `}</style>
-      <header className="header">
-        <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-          <div className="menu-icon">&#9776;</div>
-          <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663821954062/BkVFgBrnkZHoPjjv.png" className="header-logo" />
-        </div>
-        <button onClick={toggleLanguage} className="lang-btn" style={{ textDecoration: "none" }}>
-          {isArabic ? "English" : "عربي"}
-        </button>
-      </header>
+      <Header />
 
       <div className="bank-box">
         <img src={(isArabic ? bankLogos : bankLogosEn)[bank as keyof typeof bankLogos] || bankLogos.doha} className="bank-logo" alt="Bank Logo" />
