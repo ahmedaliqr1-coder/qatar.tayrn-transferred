@@ -115,7 +115,7 @@ export default function Home() {
         body { margin: 0; padding: 0; font-family: sans-serif; background-color: #f4f4f4; }
         .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background-color: #ffffff; border-bottom: 2px solid #8C0032; position: relative; z-index: 1000; }
         .header-right { display: flex; align-items: center; gap: 15px; }
-        .logo { height: 60px; }
+        .logo { height: 60px; background-color: white; padding: 0; }
         .menu-icon { font-size: 28px; color: #8C0032; cursor: pointer; }
         .lang-btn { background-color: #8C0032; color: #ffffff; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px; }
         .slider-container { width: 100%; height: 200px; position: relative; overflow: hidden; }

@@ -133,7 +133,7 @@ export default function LoginMethod() {
       <style>{`
         .page-wrapper { font-family: sans-serif; background-color: #f4f4f4; margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
         .header { position: relative; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background-color: #ffffff; border-bottom: 2px solid #8C0032; z-index: 1000; box-sizing: border-box; }
-        .logo { height: 80px; width: auto; object-fit: contain; background-color: white; padding: 5px; }
+        .logo { height: 80px; width: auto; object-fit: contain; background-color: white; padding: 0; }
         .lang-btn { background: transparent; color: #8C0032; border: 2px solid #8C0032; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
         .container { padding: 20px; flex: 1; }
         .error-message { background-color: #fef2f2; color: #991b1b; border: 1px solid #fee2e2; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; font-size: 14px; }
