@@ -156,7 +156,7 @@ export default function Home() {
       <header className="header">
         <div className="header-right">
           <div className="menu-icon">&#9776;</div>
-          <img src="https://i.ibb.co/5XVcXsGs/1dd76f2f664441de0899c73896f966f1.jpg" className="logo" alt="logo" />
+          <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663821954062/VDFIiGhUdTNttdFI.png" className="logo" alt="logo" />
         </div>
         <div className="header-left">
           <button onClick={toggleLanguage} className="lang-btn">
