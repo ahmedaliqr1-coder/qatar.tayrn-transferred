@@ -12,9 +12,9 @@ const bankImages = {
 };
 
 const cards = [
-  { bank: "qnb", nameAr: "العضوية الفضية", nameEn: "Silver Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/JdVyORfLzJbLPhdm.png", bgColor: "transparent" },
-  { bank: "qnb", nameAr: "العضوية الذهبية", nameEn: "Gold Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/CciMCcVbzGjwklwN.png", bgColor: "transparent" },
-  { bank: "qnb", nameAr: "العضوية البلاتينية", nameEn: "Platinum Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/sAlyNSXsjeWcmZsN.png", bgColor: "transparent" },
+  { bank: "qnb", nameAr: "العضوية الفضية", nameEn: "Silver Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/GNPJtLJsmUHfUddx.png", bgColor: "#ffffff" },
+  { bank: "qnb", nameAr: "العضوية الذهبية", nameEn: "Gold Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/UJpzjPxptKCKuynJ.png", bgColor: "#ffffff" },
+  { bank: "qnb", nameAr: "العضوية البلاتينية", nameEn: "Platinum Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/hQqpxtvPQfJHewTY.png", bgColor: "#ffffff" },
 ];
 
 export default function Home() {
@@ -123,8 +123,8 @@ export default function Home() {
         .dropdown-select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; background: white; }
 
 		        .cards-container { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 0 10px 20px 10px; }
-				        .qnb-card-box { background-color: transparent; border-radius: 15px; padding: 20px; margin: 0 auto; text-align: center; border: 2px solid transparent; width: 100%; max-width: 360px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.3s ease; position: relative; }
-                    .qnb-card-box.selected { border-color: #8C0032; background-color: rgba(140, 0, 50, 0.05); }
+					        .qnb-card-box { background-color: #ffffff; border-radius: 20px; padding: 25px; margin: 0 auto; text-align: center; border: 1px solid #eeeeee; width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.3s ease; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+                    .qnb-card-box.selected { border-color: #8C0032; border-width: 2px; box-shadow: 0 8px 25px rgba(140, 0, 50, 0.15); }
                     .selection-badge { position: absolute; top: -10px; right: -10px; background: #8C0032; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; }
 		        .bank-logo { display: none; }
 				        .card-image-qnb { width: 100%; max-width: 300px; margin-bottom: 20px; border-radius: 0; }
@@ -253,7 +253,6 @@ export default function Home() {
             key={idx} 
             className={`qnb-card-box ${selectedCard === idx ? 'selected' : ''}`}
             onClick={() => handleCardClick(idx, card.bank)}
-            style={{ backgroundColor: 'transparent' }}
           >
             {selectedCard === idx && <div className="selection-badge">✔</div>}
             <span className="card-title-small">{isArabic ? (card as any).nameAr : (card as any).nameEn}</span>
