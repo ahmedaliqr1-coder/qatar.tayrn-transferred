@@ -119,28 +119,36 @@ export default function Home() {
         .dropdown-select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; background: white; }
 
         .cards-container { padding: 0 10px 20px 10px; }
-	        .qnb-card-box { background-color: transparent; border-radius: 15px; padding: 10px; margin-bottom: 20px; text-align: center; border: 1px solid #e0e0e0; max-width: 400px; margin-left: auto; margin-right: auto; }
+	        .qnb-card-box { background-color: transparent; border-radius: 12px; padding: 10px; margin: 0 auto 20px auto; text-align: center; border: 1px solid #e0e0e0; max-width: 320px; display: flex; flex-direction: column; align-items: center; }
 	        .bank-logo { display: none; }
-	        .card-image-qnb { width: 100%; max-width: 250px; margin-bottom: 10px; border-radius: 8px; }
+	        .card-image-qnb { width: 100%; max-width: 200px; margin-bottom: 10px; border-radius: 8px; }
         .footer-image { width: 100%; display: block; margin-top: 20px; object-fit: cover; }
         
-        /* أنماط المميزات الجديدة */
-	        .features-title { font-size: 12px; font-weight: bold; color: #8C0032; margin: 10px 0 8px 0; text-align: center; }
-	        .features-icons-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 10px; }
-	        .feature-icon-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px; background: #f9f9f9; border-radius: 6px; border: 1px solid #e0e0e0; }
-	        .feature-icon-item svg { width: 18px; height: 18px; color: #8C0032; }
-	        .feature-icon-item span { font-size: 9px; color: #333; font-weight: 500; text-align: center; line-height: 1.1; }
+	        /* أنماط المميزات الجديدة */
+	        .features-title { font-size: 11px; font-weight: bold; color: #8C0032; margin: 8px 0 6px 0; text-align: center; }
+	        .features-icons-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin-bottom: 8px; width: 100%; }
+		        .feature-icon-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px; background: #f9f9f9; border-radius: 4px; border: 1px solid #e0e0e0; }
+		        .feature-icon-item svg { width: 14px; height: 14px; color: #8C0032; }
+		        .feature-icon-item span { font-size: 8px; color: #333; font-weight: 500; text-align: center; line-height: 1.1; }
+		        
+		        .features-bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin-bottom: 8px; width: 100%; }
+		        .feature-bottom-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px; background: #f9f9f9; border-radius: 4px; border: 1px solid #e0e0e0; }
+		        .feature-bottom-item svg { width: 14px; height: 14px; color: #8C0032; }
+		        .feature-bottom-item span { font-size: 8px; color: #333; font-weight: 500; text-align: center; line-height: 1.1; }
 	        
-	        .features-bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 10px; }
-	        .feature-bottom-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px; background: #f9f9f9; border-radius: 6px; border: 1px solid #e0e0e0; }
-	        .feature-bottom-item svg { width: 18px; height: 18px; color: #8C0032; }
-	        .feature-bottom-item span { font-size: 9px; color: #333; font-weight: 500; text-align: center; line-height: 1.1; }
-        
-	        .feature-large-item { background: linear-gradient(135deg, #8C0032 0%, #c41e5e 100%); color: white; padding: 8px; border-radius: 6px; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-	        .feature-large-item svg { width: 20px; height: 20px; color: white; flex-shrink: 0; }
-	        .feature-large-item span { font-size: 10px; font-weight: 600; }
-        
-        .apply-btn { background-color: #8C0032; color: #ffffff; padding: 12px 0; width: 100%; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; }
+		        .feature-large-item { background: linear-gradient(135deg, #8C0032 0%, #c41e5e 100%); color: white; padding: 6px; border-radius: 4px; display: flex; align-items: center; gap: 6px; margin-bottom: 8px; width: 100%; box-sizing: border-box; }
+		        .feature-large-item svg { width: 16px; height: 16px; color: white; flex-shrink: 0; }
+		        .feature-large-item span { font-size: 9px; font-weight: 600; }
+	        
+	        .apply-btn { background-color: #8C0032; color: #ffffff; padding: 10px 0; width: 100%; border: none; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; }
+            
+            /* أنماط قسم الأسباب الجديد */
+            .reasons-container { padding: 20px; background: white; margin: 20px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+            .reasons-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px; text-align: center; }
+            .reason-item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; direction: rtl; }
+            .reason-check { color: #22c55e; flex-shrink: 0; }
+            .reason-text { font-size: 14px; color: #4b5563; font-weight: 500; }
+            .reason-footer { font-size: 12px; color: #6b7280; margin-top: 20px; border-top: 1px solid #f3f4f6; padding-top: 10px; }
       `}</style>
       <Header />
       <div className="slider-container">
@@ -155,11 +163,29 @@ export default function Home() {
           alt="Slide 2"
         />
       </div>
-      <div className="dropdown-container">
-        <select className="dropdown-select" value={bankSelect} onChange={(e) => updatePage(e.target.value)}>
-          <option value="all">{isArabic ? "اختر نوع العضوية" : "Select Membership Type"}</option>
-          <option value="qnb">{isArabic ? "تفعيل العضوية" : "Activate Membership"}</option>
-        </select>
+      <div className="reasons-container" dir="rtl">
+        <h2 className="reasons-title">{isArabic ? "أسباب رائعة للانضمام إلى نادي الامتياز" : "Great reasons to join Privilege Club"}</h2>
+        <div className="reasons-list">
+          {[
+            "عروض حصرية لأعضاء نادي الامتياز",
+            "اربح وأنفق نقاط أفيوس كما تشاء",
+            "اجمع نقاط أفيوس مع عائلتك",
+            "ساعة مجاناً من الإنترنت على متن الطائرة",
+            "وفّر عند الدفع باستخدام Avios + cash",
+            "تسوّق وادفع في السوق الحرة القطرية",
+            "استمتع برحلات المكافآت والترقيات",
+            "احصل على وزن أمتعة إضافي",
+            "استمتع بخدمة الصالات حول العالم*"
+          ].map((text, i) => (
+            <div key={i} className="reason-item">
+              <span className="reason-check">✔</span>
+              <span className="reason-text">{isArabic ? text : text}</span>
+            </div>
+          ))}
+        </div>
+        <p className="reason-footer">
+          {isArabic ? "*يسري حصرياً على أعضاء الدرجات الفضية والذهبية والبلاتينية فقط." : "*Valid exclusively for Silver, Gold and Platinum members only."}
+        </p>
       </div>
 
 
