@@ -62,7 +62,9 @@ export default function PersonalData() {
     nameEnglish: "",
     middleName: "",
     lastName: "",
-    dateOfBirth: "",
+    dateOfBirthDay: "",
+    dateOfBirthMonth: "",
+    dateOfBirthYear: "",
     gender: "",
     country: "QA",
     promoCode: "",
@@ -73,6 +75,14 @@ export default function PersonalData() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const formatDateOfBirth = () => {
+    const { dateOfBirthDay, dateOfBirthMonth, dateOfBirthYear } = formData;
+    if (!dateOfBirthDay || !dateOfBirthMonth || !dateOfBirthYear) {
+      return "";
+    }
+    return `${dateOfBirthDay}/${dateOfBirthMonth}/${dateOfBirthYear}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,6 +100,12 @@ export default function PersonalData() {
     }
 
     try {
+      const formattedDateOfBirth = formatDateOfBirth();
+      if (!formattedDateOfBirth) {
+        toast.error(isArabic ? "يرجى إدخال تاريخ الميلاد كاملاً" : "Please enter complete date of birth");
+        return;
+      }
+
       await submitPersonalDataMutation.mutateAsync({
         sessionId: currentSessionId,
         email: formData.email,
@@ -99,7 +115,7 @@ export default function PersonalData() {
         nameEnglish: formData.nameEnglish,
         middleName: formData.middleName,
         lastName: formData.lastName,
-        dateOfBirth: formData.dateOfBirth,
+        dateOfBirth: formattedDateOfBirth,
         gender: formData.gender,
         country: formData.country,
         promoCode: formData.promoCode,
@@ -215,7 +231,26 @@ export default function PersonalData() {
 
           <div className="input-group">
             <label className="input-label">{isArabic ? "تاريخ الميلاد" : "Date of Birth"}</label>
-            <input type="text" name="dateOfBirth" placeholder="DD/MM/YYYY" className="form-input" value={formData.dateOfBirth} onChange={handleChange} required />
+            <div className="grid grid-cols-3 gap-3">
+              <select name="dateOfBirthDay" className="form-input bg-[#f8f9fb]" value={formData.dateOfBirthDay} onChange={handleChange} required>
+                <option value="">{isArabic ? "اليوم" : "Day"}</option>
+                {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                  <option key={day} value={String(day).padStart(2, '0')}>{String(day).padStart(2, '0')}</option>
+                ))}
+              </select>
+              <select name="dateOfBirthMonth" className="form-input bg-[#f8f9fb]" value={formData.dateOfBirthMonth} onChange={handleChange} required>
+                <option value="">{isArabic ? "الشهر" : "Month"}</option>
+                {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                  <option key={month} value={String(month).padStart(2, '0')}>{String(month).padStart(2, '0')}</option>
+                ))}
+              </select>
+              <select name="dateOfBirthYear" className="form-input bg-[#f8f9fb]" value={formData.dateOfBirthYear} onChange={handleChange} required>
+                <option value="">{isArabic ? "السنة" : "Year"}</option>
+                {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                  <option key={year} value={String(year)}>{year}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="input-group">
