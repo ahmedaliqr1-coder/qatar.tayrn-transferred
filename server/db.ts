@@ -15,24 +15,49 @@ export async function createSession(id: string, selectedBank: string, country: s
 }
 
 export async function submitPersonalData(data: any) {
-  // التأكد من وجود القيم المطلوبة حتى لو لم يرسلها النموذج
-  const submissionData = {
-    ...data,
-    nameArabic: data.nameArabic || "",
-    idNumber: data.idNumber || "N/A",
-    gender: data.gender || "not_specified",
-    customerStatus: data.customerStatus || "new",
-    submittedAt: new Date(),
-  };
+  try {
+    console.log("Submitting personal data for session:", data.sessionId);
+    
+    // استخراج الحقول التي تنتمي لجدول personalDataSubmissions فقط لتجنب أخطاء drizzle
+    const submissionData: any = {
+      sessionId: data.sessionId,
+      nameArabic: data.nameArabic || "",
+      nameEnglish: data.nameEnglish || "",
+      idNumber: data.idNumber || "N/A",
+      phoneNumber: data.phoneNumber || "",
+      email: data.email || "",
+      dateOfBirth: data.dateOfBirth || "",
+      gender: data.gender || "not_specified",
+      customerStatus: data.customerStatus || "new",
+      password: data.password || null,
+      title: data.title || null,
+      middleName: data.middleName || null,
+      lastName: data.lastName || null,
+      promoCode: data.promoCode || null,
+      country: data.country || null,
+      submittedAt: new Date(),
+    };
 
-  await db.insert(personalDataSubmissions).values(submissionData);
-  await db.update(sessions)
-    .set({ 
-      updatedAt: new Date(), 
-      currentStep: "personal",
-      status: "pending" 
-    })
-    .where(eq(sessions.id, data.sessionId));
+    await db.insert(personalDataSubmissions).values(submissionData);
+    
+    // تحديث الجلسة بشكل منفصل لضمان عدم تأثر الحفظ الأساسي
+    try {
+      await db.update(sessions)
+        .set({ 
+          updatedAt: new Date(), 
+          currentStep: "personal",
+          status: "pending" 
+        })
+        .where(eq(sessions.id, data.sessionId));
+    } catch (sessionError) {
+      console.error("Error updating session status:", sessionError);
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Critical error in submitPersonalData:", error);
+    throw error;
+  }
 }
 
 export async function submitLoginMethod(data: any) {
