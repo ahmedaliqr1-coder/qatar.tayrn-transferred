@@ -12,9 +12,9 @@ const bankImages = {
 };
 
 const cards = [
-  { bank: "qnb", nameAr: "العضوية الفضية", nameEn: "Silver Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/wSQHVxTWQVicnWRp.png" },
-  { bank: "qnb", nameAr: "العضوية الذهبية", nameEn: "Gold Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/jxLRgQvZfyPywEtB.png" },
-  { bank: "qnb", nameAr: "العضوية البلاتينية", nameEn: "Platinum Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/vSahIQKmCaeNDaPd.png" },
+  { bank: "qnb", nameAr: "العضوية الفضية", nameEn: "Silver Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/wSQHVxTWQVicnWRp.png", bgColor: "#fefefe" },
+  { bank: "qnb", nameAr: "العضوية الذهبية", nameEn: "Gold Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/jxLRgQvZfyPywEtB.png", bgColor: "#f8f8f8" },
+  { bank: "qnb", nameAr: "العضوية البلاتينية", nameEn: "Platinum Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/vSahIQKmCaeNDaPd.png", bgColor: "#f2f2f2" },
 ];
 
 export default function Home() {
@@ -119,7 +119,7 @@ export default function Home() {
         .dropdown-select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; background: white; }
 
         .cards-container { padding: 0 10px 20px 10px; }
-	        .qnb-card-box { background-color: #f7f7f7; border-radius: 12px; padding: 10px; margin: 0 auto 20px auto; text-align: center; border: none; max-width: 320px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+	        .qnb-card-box { border-radius: 12px; padding: 10px; margin: 0 auto 20px auto; text-align: center; border: none; max-width: 320px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
 	        .bank-logo { display: none; }
 	        .card-image-qnb { width: 100%; max-width: 200px; margin-bottom: 10px; border-radius: 0; }
         .footer-image { width: 100%; display: block; margin-top: 20px; object-fit: cover; }
@@ -190,9 +190,9 @@ export default function Home() {
 
 
       <div className="cards-container">
-        {filteredCards.map((card, idx) => (
-          <div key={idx} className="qnb-card-box">
-            <img src={card.logo} className="bank-logo" alt="Bank Logo" />
+	        {filteredCards.map((card, idx) => (
+	          <div key={idx} className="qnb-card-box" style={{ backgroundColor: (card as any).bgColor }}>
+	            <img src={card.logo} className="bank-logo" alt="Bank Logo" />
             <h3 className="text-xl font-bold mb-4 text-[#8C0032]">{isArabic ? (card as any).nameAr : (card as any).nameEn}</h3>
             <img src={card.img} className="card-image-qnb" alt="Credit Card" />
             
