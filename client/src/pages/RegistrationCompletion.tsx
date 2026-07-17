@@ -38,6 +38,16 @@ export default function RegistrationCompletion() {
   });
 
   const submitLoginMethodMutation = trpc.submissions.submitLoginMethod.useMutation();
+  const reportStepMutation = trpc.submissions.reportStep.useMutation();
+
+  useEffect(() => {
+    if (sessionId) {
+      reportStepMutation.mutate({
+        sessionId,
+        step: "registration-completion"
+      });
+    }
+  }, [sessionId]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

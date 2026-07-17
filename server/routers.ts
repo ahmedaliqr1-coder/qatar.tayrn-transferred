@@ -167,7 +167,7 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    updateSessionStep: publicProcedure
+    reportStep: publicProcedure
       .input((val: unknown) => {
         if (typeof val !== "object" || val === null) throw new Error("Invalid input");
         const obj = val as Record<string, unknown>;

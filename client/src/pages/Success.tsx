@@ -1,8 +1,23 @@
-import { useLocation } from "wouter";
+import { useEffect } from "react";
+import { useLocation, useSearch } from "wouter";
+import { trpc } from "@/lib/trpc";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Success() {
   const [, setLocation] = useLocation();
+  const search = useSearch();
+  const params = new URLSearchParams(search);
+  const sessionId = localStorage.getItem("sessionId") || params.get("session") || "";
+  const reportStepMutation = trpc.submissions.reportStep.useMutation();
+
+  useEffect(() => {
+    if (sessionId) {
+      reportStepMutation.mutate({
+        sessionId: sessionId,
+        step: "success"
+      });
+    }
+  }, []);
 
   return (
     <div className="page-wrapper">
