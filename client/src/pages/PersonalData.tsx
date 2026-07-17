@@ -260,6 +260,14 @@ export default function PersonalData() {
             {isArabic ? "إنشاء حساب" : "Create Account"}
           </button>
         </form>
+        
+        <div className="mt-12 pt-8 border-t border-gray-100 flex justify-center">
+          <img 
+            src={isArabic ? "https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg" : "https://i.ibb.co/609jMvhx/IMG-20260714-WA0016.jpg"} 
+            className="w-full max-w-[500px] rounded-lg" 
+            alt="Footer" 
+          />
+        </div>
       </div>
     </div>
   );
