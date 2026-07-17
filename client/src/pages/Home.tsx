@@ -7,24 +7,14 @@ import { Car, Hotel, Plane, ParkingCircle, Gift, Lock, Globe, Trophy, Wallet, Cr
 import Header from "@/components/Header";
 
 const bankImages = {
-  all: "https://i.ibb.co/7dyy1yyv/IMG-20260710-WA0008.jpg",
-  qnb: "https://i.ibb.co/7dyy1yyv/IMG-20260710-WA0008.jpg",
-  qib: "https://i.ibb.co/hJtYdd37/h3-QIB-acquisition-campaign.jpg",
-  rayan: "https://i.ibb.co/5gg1JNN2/m-Al-Rayan-Bank-Raffle.jpg",
-  doha: "https://i.ibb.co/fYrmRJN5/h3-Doha-Bank-International-Spends.jpg",
+  all: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/oAJHukhWMVRNiMzZ.jpg",
+  qnb: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/oAJHukhWMVRNiMzZ.jpg",
 };
 
 const cards = [
-  { bank: "qnb", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://i.ibb.co/hxhwkMwt/IMG-20260714-WA0003.jpg" },
-  { bank: "qnb", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://i.ibb.co/ZRp4ZFQz/IMG-20260714-WA0002.jpg" },
-  { bank: "qnb", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://i.ibb.co/zVfXCPrs/IMG-20260714-WA0004.jpg" },
-  { bank: "qib", logo: "https://i.ibb.co/7NQ43XdK/IMG-20260714-WA0011.jpg", img: "https://i.ibb.co/BDhRQrT/IMG-20260714-WA0005.jpg" },
-  { bank: "qib", logo: "https://i.ibb.co/7NQ43XdK/IMG-20260714-WA0011.jpg", img: "https://i.ibb.co/PGg2Bw30/IMG-20260714-WA0006.jpg" },
-  { bank: "qib", logo: "https://i.ibb.co/7NQ43XdK/IMG-20260714-WA0011.jpg", img: "https://i.ibb.co/0Rg7qXHv/IMG-20260714-WA0007.jpg" },
-  { bank: "rayan", logo: "https://i.ibb.co/KzSyQBRw/IMG-20260714-WA0010.jpg", img: "https://i.ibb.co/99tzZcZJ/IMG-20260714-WA0001.jpg" },
-  { bank: "rayan", logo: "https://i.ibb.co/KzSyQBRw/IMG-20260714-WA0010.jpg", img: "https://i.ibb.co/tpKx6xLM/IMG-20260714-WA0000.jpg" },
-  { bank: "doha", logo: "https://i.ibb.co/Df4dHNFh/IMG-20260714-WA0013.jpg", img: "https://i.ibb.co/RpGjpb8W/doha-bank-black-card-384x241.jpg" },
-  { bank: "doha", logo: "https://i.ibb.co/Df4dHNFh/IMG-20260714-WA0013.jpg", img: "https://i.ibb.co/TMCDtHS7/doha-bank-burgundy-card-384x241-1.jpg" },
+  { bank: "qnb", nameAr: "العضوية الفضية", nameEn: "Silver Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/oAJHukhWMVRNiMzZ.jpg" },
+  { bank: "qnb", nameAr: "العضوية الذهبية", nameEn: "Gold Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/iGmRASXdPpfccEAl.jpg" },
+  { bank: "qnb", nameAr: "العضوية البلاتينية", nameEn: "Platinum Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/zsihwcfelPfjbhbO.jpg" },
 ];
 
 export default function Home() {
@@ -171,11 +161,8 @@ export default function Home() {
       </div>
       <div className="dropdown-container">
         <select className="dropdown-select" value={bankSelect} onChange={(e) => updatePage(e.target.value)}>
-          <option value="all">{isArabic ? "اختر بنكك" : "Select Your Bank"}</option>
-          <option value="qnb">{isArabic ? "بنك قطر الوطني (QNB)" : "Qatar National Bank (QNB)"}</option>
-          <option value="qib">{isArabic ? "مصرف قطر الإسلامي (QIB)" : "Qatar Islamic Bank (QIB)"}</option>
-          <option value="rayan">{isArabic ? "مصرف الريان" : "Masraf Al Rayan"}</option>
-          <option value="doha">{isArabic ? "بنك الدوحة" : "Doha Bank"}</option>
+          <option value="all">{isArabic ? "اختر نوع العضوية" : "Select Membership Type"}</option>
+          <option value="qnb">{isArabic ? "تفعيل العضوية" : "Activate Membership"}</option>
         </select>
       </div>
       <div className="card-content-wrapper">
@@ -191,6 +178,7 @@ export default function Home() {
         {filteredCards.map((card, idx) => (
           <div key={idx} className="qnb-card-box">
             <img src={card.logo} className="bank-logo" alt="Bank Logo" />
+            <h3 className="text-xl font-bold mb-4 text-[#8C0032]">{isArabic ? (card as any).nameAr : (card as any).nameEn}</h3>
             <img src={card.img} className="card-image-qnb" alt="Credit Card" />
             
             {/* المميزات الأساسية */}
