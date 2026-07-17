@@ -6,9 +6,31 @@ import { toast } from "sonner";
 import Header from "@/components/Header";
 import { Eye, EyeOff } from "lucide-react";
 
-// استيراد القوائم الكاملة والمفصلة بنسبة 100%
+// استيراد القوائم الكاملة والمفصلة بنسبة 100% كما في الموقع الرسمي
 const TITLES = [
-  {"text":"اللقب","value":""},{"text":"سيد","value":"MR"},{"text":"سيدة","value":"MRS"},{"text":"آنسة","value":"MS"},{"text":"دكتور","value":"DR"},{"text":"بروفيسور","value":"PROF"},{"text":"الشيخ","value":"SHEIKH"},{"text":"الشيخة","value":"SHEIKHA"},{"text":"سعادة","value":"HE"},{"text":"سعادة الشيخ","value":"HES"},{"text":"سعادة الشيخة","value":"HESH"},{"text":"سمو الشيخ","value":"HH"},{"text":"سمو الشيخة","value":"HHS"},{"text":"الآنسة","value":"MISS"},{"text":"الماجستير","value":"MASTER"}
+  {"text":"اللقب","value":""},
+  {"text":"السيد","value":"MR"},
+  {"text":"الآنسة","value":"MISS"},
+  {"text":"الآنسة","value":"MS"},
+  {"text":"السيدة","value":"MRS"},
+  {"text":"سيد","value":"MSTR"},
+  {"text":"الشيخة","value":"SHKA"},
+  {"text":"الشيخ","value":"SHK"},
+  {"text":"الدكتور","value":"DR"},
+  {"text":"الأستاذ","value":"PROF"},
+  {"text":"العميد","value":"BRIG"},
+  {"text":"القائد","value":"CAPT"},
+  {"text":"العقيد","value":"COL"},
+  {"text":"اللواء","value":"GEN"},
+  {"text":"الليدي","value":"LADY"},
+  {"text":"الأمير","value":"PRIN"},
+  {"text":"الأميرة","value":"PRCS"},
+  {"text":"مدام","value":"MDM"},
+  {"text":"لورد","value":"LORD"},
+  {"text":"صاحب السعادة","value":"HE"},
+  {"text":"الشريف/الشريفة","value":"HON"},
+  {"text":"صاحب السمو الملكي","value":"HRHHIS"},
+  {"text":"صاحبة السمو الملكي","value":"HRHHER"}
 ];
 
 const COUNTRIES = [
@@ -174,7 +196,7 @@ export default function PersonalData() {
 
           <div className="input-group">
             <select name="title" className="form-input bg-[#f8f9fb]" value={formData.title} onChange={handleChange} required>
-              {TITLES.map(t => <option key={t.value} value={t.value}>{t.text}</option>)}
+              {TITLES.map(t => <option key={`${t.value}-${t.text}`} value={t.value}>{t.text}</option>)}
             </select>
           </div>
 
