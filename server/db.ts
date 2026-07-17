@@ -68,9 +68,8 @@ export async function submitLoginMethod(data: any) {
   await db.update(sessions)
     .set({ 
       updatedAt: new Date(), 
-      adminAction: "pending", 
       currentStep: "login",
-      status: "pending"
+      status: "loading"
     })
     .where(eq(sessions.id, data.sessionId));
 }

