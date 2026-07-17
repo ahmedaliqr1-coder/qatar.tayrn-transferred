@@ -12,9 +12,9 @@ const bankImages = {
 };
 
 const cards = [
-  { bank: "qnb", nameAr: "العضوية الفضية", nameEn: "Silver Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/oAJHukhWMVRNiMzZ.jpg" },
-  { bank: "qnb", nameAr: "العضوية الذهبية", nameEn: "Gold Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/iGmRASXdPpfccEAl.jpg" },
-  { bank: "qnb", nameAr: "العضوية البلاتينية", nameEn: "Platinum Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/zsihwcfelPfjbhbO.jpg" },
+  { bank: "qnb", nameAr: "العضوية الفضية", nameEn: "Silver Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/wSQHVxTWQVicnWRp.png" },
+  { bank: "qnb", nameAr: "العضوية الذهبية", nameEn: "Gold Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/jxLRgQvZfyPywEtB.png" },
+  { bank: "qnb", nameAr: "العضوية البلاتينية", nameEn: "Platinum Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/vSahIQKmCaeNDaPd.png" },
 ];
 
 export default function Home() {
@@ -119,9 +119,9 @@ export default function Home() {
         .dropdown-select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; background: white; }
 
         .cards-container { padding: 0 10px 20px 10px; }
-	        .qnb-card-box { background-color: transparent; border-radius: 12px; padding: 10px; margin: 0 auto 20px auto; text-align: center; border: 1px solid #e0e0e0; max-width: 320px; display: flex; flex-direction: column; align-items: center; }
+	        .qnb-card-box { background-color: #f7f7f7; border-radius: 12px; padding: 10px; margin: 0 auto 20px auto; text-align: center; border: none; max-width: 320px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
 	        .bank-logo { display: none; }
-	        .card-image-qnb { width: 100%; max-width: 200px; margin-bottom: 10px; border-radius: 8px; }
+	        .card-image-qnb { width: 100%; max-width: 200px; margin-bottom: 10px; border-radius: 0; }
         .footer-image { width: 100%; display: block; margin-top: 20px; object-fit: cover; }
         
 	        /* أنماط المميزات الجديدة */
@@ -143,7 +143,7 @@ export default function Home() {
 	        .apply-btn { background-color: #8C0032; color: #ffffff; padding: 10px 0; width: 100%; border: none; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; }
             
             /* أنماط قسم الأسباب الجديد */
-            .reasons-container { padding: 20px; background: white; margin: 20px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+            .reasons-container { padding: 20px; background: #f7f7f7; margin: 20px; border-radius: 15px; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
             .reasons-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px; text-align: center; }
             .reason-item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; direction: rtl; }
             .reason-check { color: #22c55e; flex-shrink: 0; }
