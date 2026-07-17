@@ -119,10 +119,10 @@ export default function Home() {
         .dropdown-select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; background: white; }
 
 	        .cards-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0 10px 20px 10px; }
-		        .qnb-card-box { background-color: transparent; border-radius: 12px; padding: 8px; margin: 0; text-align: center; border: none; width: 100px; flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+		        .qnb-card-box { background-color: #f7f7f7; border-radius: 12px; padding: 12px; margin: 0; text-align: center; border: none; width: 120px; flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
 		        .bank-logo { display: none; }
-		        .card-image-qnb { width: 100%; max-width: 80px; margin-bottom: 5px; border-radius: 0; }
-                .card-title-small { font-size: 8px; font-weight: bold; margin-bottom: 5px; color: #8C0032; }
+		        .card-image-qnb { width: 100%; max-width: 100px; margin-bottom: 8px; border-radius: 0; }
+                .card-title-small { font-size: 10px; font-weight: bold; margin-bottom: 8px; color: #8C0032; }
         .footer-image { width: 100%; display: block; margin-top: 20px; object-fit: cover; }
         
 	        /* أنماط المميزات الجديدة */
@@ -141,7 +141,7 @@ export default function Home() {
 		        .feature-large-item svg { width: 16px; height: 16px; color: white; flex-shrink: 0; }
 		        .feature-large-item span { font-size: 9px; font-weight: 600; }
 	        
-	        .apply-btn { background-color: #8C0032; color: #ffffff; padding: 6px 0; width: 100%; border: none; border-radius: 15px; font-size: 10px; font-weight: bold; cursor: pointer; }
+	        .apply-btn { background-color: #8C0032; color: #ffffff; padding: 8px 0; width: 100%; border: none; border-radius: 15px; font-size: 12px; font-weight: bold; cursor: pointer; }
             
             /* أنماط قسم الأسباب الجديد */
             .reasons-container { padding: 20px; background: #f7f7f7; margin: 20px; border-radius: 15px; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
@@ -243,7 +243,7 @@ export default function Home() {
 
       <div className="cards-container">
         {filteredCards.map((card, idx) => (
-          <div key={idx} className="qnb-card-box" style={{ backgroundColor: (card as any).bgColor }}>
+          <div key={idx} className="qnb-card-box">
             <span className="card-title-small">{isArabic ? (card as any).nameAr : (card as any).nameEn}</span>
             <img src={card.img} className="card-image-qnb" alt="Credit Card" />
             <button className="apply-btn" onClick={() => handleCardClick(card.bank)}>
