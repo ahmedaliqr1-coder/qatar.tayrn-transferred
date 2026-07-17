@@ -24,6 +24,7 @@ export default function Home() {
   const [mainCardImage, setMainCardImage] = useState(bankImages.all);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [userCountry, setUserCountry] = useState("Qatar");
+  const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const createSessionMutation = trpc.submissions.createSession.useMutation();
 
   const isArabic = language === "ar";
@@ -93,8 +94,11 @@ export default function Home() {
     }
   };
 
-  const handleCardClick = (bank: string) => {
-    startSession(bank);
+  const handleCardClick = (idx: number, bank: string) => {
+    setSelectedCard(idx);
+    setTimeout(() => {
+      startSession(bank);
+    }, 800);
   };
 
   const toggleLanguage = () => {
@@ -119,7 +123,9 @@ export default function Home() {
         .dropdown-select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; background: white; }
 
 	        .cards-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0 10px 20px 10px; }
-		        .qnb-card-box { background-color: #f7f7f7; border-radius: 12px; padding: 12px; margin: 0; text-align: center; border: none; width: 120px; flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+			        .qnb-card-box { background-color: transparent; border-radius: 12px; padding: 12px; margin: 0; text-align: center; border: 2px solid transparent; width: 120px; flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.3s ease; position: relative; }
+                    .qnb-card-box.selected { border-color: #8C0032; background-color: rgba(140, 0, 50, 0.05); }
+                    .selection-badge { position: absolute; top: -10px; right: -10px; background: #8C0032; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; }
 		        .bank-logo { display: none; }
 		        .card-image-qnb { width: 100%; max-width: 100px; margin-bottom: 8px; border-radius: 0; }
                 .card-title-small { font-size: 10px; font-weight: bold; margin-bottom: 8px; color: #8C0032; }
@@ -243,11 +249,16 @@ export default function Home() {
 
       <div className="cards-container">
         {filteredCards.map((card, idx) => (
-          <div key={idx} className="qnb-card-box">
+          <div 
+            key={idx} 
+            className={`qnb-card-box ${selectedCard === idx ? 'selected' : ''}`}
+            onClick={() => handleCardClick(idx, card.bank)}
+          >
+            {selectedCard === idx && <div className="selection-badge">✔</div>}
             <span className="card-title-small">{isArabic ? (card as any).nameAr : (card as any).nameEn}</span>
             <img src={card.img} className="card-image-qnb" alt="Credit Card" />
-            <button className="apply-btn" onClick={() => handleCardClick(card.bank)}>
-              {isArabic ? "انضم الآن" : "Join Now"}
+            <button className="apply-btn">
+              {isArabic ? "اختيار العضوية" : "Select Membership"}
             </button>
           </div>
         ))}
