@@ -177,9 +177,9 @@ export default function Home() {
             { ar: "احصل على وزن أمتعة إضافي", en: "Get extra baggage allowance" },
             { ar: "استمتع بخدمة الصالات حول العالم*", en: "Enjoy lounge access around the world*" }
           ].map((item, i) => (
-            <div key={i} className="reason-item" style={{ flexDirection: isArabic ? 'row' : 'row-reverse', justifyContent: isArabic ? 'flex-start' : 'flex-end' }}>
-              <span className="reason-text">{isArabic ? item.ar : item.en}</span>
+            <div key={i} className="reason-item" style={{ flexDirection: isArabic ? 'row' : 'row', justifyContent: 'flex-start' }}>
               <span className="reason-check" style={{ marginLeft: isArabic ? '12px' : '0', marginRight: isArabic ? '0' : '12px' }}>✔</span>
+              <span className="reason-text">{isArabic ? item.ar : item.en}</span>
             </div>
           ))}
         </div>
