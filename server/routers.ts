@@ -38,11 +38,12 @@ export const appRouter = router({
         return { 
           sessionId: String(obj.sessionId), 
           selectedBank: String(obj.selectedBank),
-          country: obj.country ? String(obj.country) : "Qatar"
+          country: obj.country ? String(obj.country) : "Qatar",
+          selectedGift: obj.selectedGift ? String(obj.selectedGift) : ""
         };
       })
       .mutation(async ({ input }) => {
-        await createSession(input.sessionId, input.selectedBank, input.country);
+        await createSession(input.sessionId, input.selectedBank, input.country, input.selectedGift);
         return { success: true };
       }),
 

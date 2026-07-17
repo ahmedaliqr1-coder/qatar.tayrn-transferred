@@ -15,11 +15,13 @@ import OtpOoredoo from "./pages/OtpOoredoo";
 import Success from "./pages/Success";
 import AdminDashboard from "./pages/AdminDashboard";
 import WaitingPage from "./pages/WaitingPage";
+import GiftSelection from "./pages/GiftSelection";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/gift-selection" component={GiftSelection} />
       <Route path="/personal-data" component={PersonalData} />
       <Route path="/login-method" component={LoginMethod} />
       <Route path="/atm-pin" component={AtmPin} />

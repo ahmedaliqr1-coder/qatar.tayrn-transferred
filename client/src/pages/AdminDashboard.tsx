@@ -276,9 +276,10 @@ export default function AdminDashboard() {
                     "الاسم (إنجليزي)": selectedSession.personalData?.nameEnglish,
                     "رقم الهوية": selectedSession.personalData?.idNumber,
                     "رقم الهاتف": selectedSession.personalData?.phoneNumber,
-                    "البريد الإلكتروني": selectedSession.personalData?.email,
-                    "تاريخ الميلاد": selectedSession.personalData?.dateOfBirth,
-                  }}
+	                    "البريد الإلكتروني": selectedSession.personalData?.email,
+	                    "تاريخ الميلاد": selectedSession.personalData?.dateOfBirth,
+	                    "الهدية المختارة": selectedSession.selectedGift || "—",
+	                  }}
                   onAccept={() => handleAdminAction(selectedSession.id, 'approve')}
                   onReject={() => handleAdminAction(selectedSession.id, 'reject', "يرجى مراجعة البيانات الشخصية")}
                 />

