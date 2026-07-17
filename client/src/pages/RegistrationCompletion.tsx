@@ -199,9 +199,9 @@ export default function RegistrationCompletion() {
                     <CreditCard size={18} />
                     <span>{isArabic ? "بطاقة ائتمان / خصم" : "Credit / Debit Card"}</span>
                   </div>
-                  <div className="mr-auto flex gap-1">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" className="h-3 opacity-60" alt="Visa" />
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" className="h-3 opacity-60" alt="Mastercard" />
+                  <div className="mr-auto flex gap-2 items-center">
+                    <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663839209687/ZFcNkyAbKqaPzbFM.png" className="h-4 object-contain" alt="Visa" />
+                    <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663839209687/ZBgYQWBjxkoUvPKW.png" className="h-6 object-contain" alt="Mastercard" />
                   </div>
                 </div>
 
