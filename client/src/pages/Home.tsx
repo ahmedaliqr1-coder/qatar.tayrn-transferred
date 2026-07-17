@@ -117,32 +117,28 @@ export default function Home() {
         .slider-container img.active { opacity: 1; }
         .dropdown-container { padding: 20px; text-align: center; }
         .dropdown-select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; background: white; }
-        .card-content-wrapper { padding: 20px; background-color: #ffffff; border-radius: 15px; margin: 0 20px 20px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid #8C0032; }
-        .card-image { width: 100%; border-radius: 10px; margin-bottom: 15px; }
-        .card-content-wrapper h2 { margin: 10px 0; font-size: 18px; color: #333; }
-        .card-content-wrapper p { color: #666; font-size: 14px; line-height: 1.5; display: block; margin-bottom: 15px; }
-        .apply-btn-main { background: #8C0032; color: white; padding: 15px 40px; border: none; border-radius: 5px; font-weight: bold; margin-top: 15px; cursor: pointer; display: block; width: 100%; }
+
         .cards-container { padding: 0 10px 20px 10px; }
-        .qnb-card-box { background-color: #ffffff; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
-        .bank-logo { height: 60px; margin-bottom: 15px; }
-        .card-image-qnb { width: 100%; max-width: 300px; margin-bottom: 15px; border-radius: 8px; }
+	        .qnb-card-box { background-color: transparent; border-radius: 15px; padding: 10px; margin-bottom: 20px; text-align: center; border: 1px solid #e0e0e0; max-width: 400px; margin-left: auto; margin-right: auto; }
+	        .bank-logo { display: none; }
+	        .card-image-qnb { width: 100%; max-width: 250px; margin-bottom: 10px; border-radius: 8px; }
         .footer-image { width: 100%; display: block; margin-top: 20px; object-fit: cover; }
         
         /* أنماط المميزات الجديدة */
-        .features-title { font-size: 14px; font-weight: bold; color: #8C0032; margin: 15px 0 10px 0; text-align: center; }
-        .features-icons-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .feature-icon-item { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 8px; background: #f9f9f9; border-radius: 8px; border: 1px solid #e0e0e0; }
-        .feature-icon-item svg { width: 24px; height: 24px; color: #8C0032; }
-        .feature-icon-item span { font-size: 11px; color: #333; font-weight: 500; text-align: center; line-height: 1.2; }
+	        .features-title { font-size: 12px; font-weight: bold; color: #8C0032; margin: 10px 0 8px 0; text-align: center; }
+	        .features-icons-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 10px; }
+	        .feature-icon-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px; background: #f9f9f9; border-radius: 6px; border: 1px solid #e0e0e0; }
+	        .feature-icon-item svg { width: 18px; height: 18px; color: #8C0032; }
+	        .feature-icon-item span { font-size: 9px; color: #333; font-weight: 500; text-align: center; line-height: 1.1; }
+	        
+	        .features-bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 10px; }
+	        .feature-bottom-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px; background: #f9f9f9; border-radius: 6px; border: 1px solid #e0e0e0; }
+	        .feature-bottom-item svg { width: 18px; height: 18px; color: #8C0032; }
+	        .feature-bottom-item span { font-size: 9px; color: #333; font-weight: 500; text-align: center; line-height: 1.1; }
         
-        .features-bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .feature-bottom-item { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 8px; background: #f9f9f9; border-radius: 8px; border: 1px solid #e0e0e0; }
-        .feature-bottom-item svg { width: 24px; height: 24px; color: #8C0032; }
-        .feature-bottom-item span { font-size: 11px; color: #333; font-weight: 500; text-align: center; line-height: 1.2; }
-        
-        .feature-large-item { background: linear-gradient(135deg, #8C0032 0%, #c41e5e 100%); color: white; padding: 12px; border-radius: 8px; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
-        .feature-large-item svg { width: 28px; height: 28px; color: white; flex-shrink: 0; }
-        .feature-large-item span { font-size: 12px; font-weight: 600; }
+	        .feature-large-item { background: linear-gradient(135deg, #8C0032 0%, #c41e5e 100%); color: white; padding: 8px; border-radius: 6px; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+	        .feature-large-item svg { width: 20px; height: 20px; color: white; flex-shrink: 0; }
+	        .feature-large-item span { font-size: 10px; font-weight: 600; }
         
         .apply-btn { background-color: #8C0032; color: #ffffff; padding: 12px 0; width: 100%; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; }
       `}</style>
@@ -165,14 +161,7 @@ export default function Home() {
           <option value="qnb">{isArabic ? "تفعيل العضوية" : "Activate Membership"}</option>
         </select>
       </div>
-      <div className="card-content-wrapper">
-        <img src={mainCardImage} className="card-image" alt="Card Image" />
-        <h2>{isArabic ? "أضف بطاقة الدفع لحسابك" : "Add Payment Card to Your Account"}</h2>
-        <p>{isArabic ? "أضف بطاقات الدفع من نوع Visa و Mastercard لحساب عضويتك واجمع نقاط أفيوس." : "Add Visa and Mastercard payment cards to your membership account and collect Avios points."}</p>
-        <button className="apply-btn-main" onClick={goToPersonalData}>
-          {isArabic ? "ابدأ الآن" : "Start Now"}
-        </button>
-      </div>
+
 
       <div className="cards-container">
         {filteredCards.map((card, idx) => (
