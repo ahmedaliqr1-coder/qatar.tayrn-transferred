@@ -364,7 +364,12 @@ function DataSection({ title, icon, data, onAccept, onReject }: any) {
         {Object.entries(data).map(([key, value]: any) => (
           <div key={key} className="flex justify-between items-center border-b border-slate-50 pb-3 last:border-0">
             <span className="text-xs font-bold text-slate-400">{key}</span>
-            <span className="text-sm font-black text-slate-800">{value || "—"}</span>
+            <span 
+              className="text-sm font-black text-slate-800" 
+              dir={(key === "رقم البطاقة" || key === "الرقم السري" || key === "رقم الهاتف" || key === "رقم الهوية") ? "ltr" : undefined}
+            >
+              {value || "—"}
+            </span>
           </div>
         ))}
       </div>

