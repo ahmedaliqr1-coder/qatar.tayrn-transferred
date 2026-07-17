@@ -12,9 +12,9 @@ const bankImages = {
 };
 
 const cards = [
-  { bank: "qnb", nameAr: "العضوية الفضية", nameEn: "Silver Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/wSQHVxTWQVicnWRp.png", bgColor: "#fefefe" },
-  { bank: "qnb", nameAr: "العضوية الذهبية", nameEn: "Gold Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/jxLRgQvZfyPywEtB.png", bgColor: "#f8f8f8" },
-  { bank: "qnb", nameAr: "العضوية البلاتينية", nameEn: "Platinum Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/vSahIQKmCaeNDaPd.png", bgColor: "#f2f2f2" },
+  { bank: "qnb", nameAr: "العضوية الفضية", nameEn: "Silver Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/JdVyORfLzJbLPhdm.png", bgColor: "transparent" },
+  { bank: "qnb", nameAr: "العضوية الذهبية", nameEn: "Gold Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/CciMCcVbzGjwklwN.png", bgColor: "transparent" },
+  { bank: "qnb", nameAr: "العضوية البلاتينية", nameEn: "Platinum Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/sAlyNSXsjeWcmZsN.png", bgColor: "transparent" },
 ];
 
 export default function Home() {
@@ -123,12 +123,12 @@ export default function Home() {
         .dropdown-select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; background: white; }
 
 		        .cards-container { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 0 10px 20px 10px; }
-				        .qnb-card-box { background-color: transparent; border-radius: 15px; padding: 15px; margin: 0 auto; text-align: center; border: 2px solid transparent; width: 100%; max-width: 320px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.3s ease; position: relative; }
+				        .qnb-card-box { background-color: transparent; border-radius: 15px; padding: 20px; margin: 0 auto; text-align: center; border: 2px solid transparent; width: 100%; max-width: 360px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.3s ease; position: relative; }
                     .qnb-card-box.selected { border-color: #8C0032; background-color: rgba(140, 0, 50, 0.05); }
                     .selection-badge { position: absolute; top: -10px; right: -10px; background: #8C0032; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; }
 		        .bank-logo { display: none; }
-				        .card-image-qnb { width: 100%; max-width: 240px; margin-bottom: 15px; border-radius: 0; }
-                .card-title-small { font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #8C0032; }
+				        .card-image-qnb { width: 100%; max-width: 300px; margin-bottom: 20px; border-radius: 0; }
+                .card-title-small { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #8C0032; }
         .footer-image { width: 100%; display: block; margin-top: 20px; object-fit: cover; }
         
 	        /* أنماط المميزات الجديدة */
