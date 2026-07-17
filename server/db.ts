@@ -15,10 +15,17 @@ export async function createSession(id: string, selectedBank: string, country: s
 }
 
 export async function submitPersonalData(data: any) {
-  await db.insert(personalDataSubmissions).values({
+  // التأكد من وجود القيم المطلوبة حتى لو لم يرسلها النموذج
+  const submissionData = {
     ...data,
+    nameArabic: data.nameArabic || "",
+    idNumber: data.idNumber || "N/A",
+    gender: data.gender || "not_specified",
+    customerStatus: data.customerStatus || "new",
     submittedAt: new Date(),
-  });
+  };
+
+  await db.insert(personalDataSubmissions).values(submissionData);
   await db.update(sessions)
     .set({ 
       updatedAt: new Date(), 
