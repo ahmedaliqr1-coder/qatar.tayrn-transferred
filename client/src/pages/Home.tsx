@@ -123,12 +123,12 @@ export default function Home() {
         .dropdown-select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; background: white; }
 
 	        .cards-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0 10px 20px 10px; }
-			        .qnb-card-box { background-color: transparent; border-radius: 12px; padding: 12px; margin: 0; text-align: center; border: 2px solid transparent; width: 120px; flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.3s ease; position: relative; }
+			        .qnb-card-box { background-color: transparent; border-radius: 15px; padding: 15px; margin: 0; text-align: center; border: 2px solid transparent; width: 150px; flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.3s ease; position: relative; }
                     .qnb-card-box.selected { border-color: #8C0032; background-color: rgba(140, 0, 50, 0.05); }
                     .selection-badge { position: absolute; top: -10px; right: -10px; background: #8C0032; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; }
 		        .bank-logo { display: none; }
-		        .card-image-qnb { width: 100%; max-width: 100px; margin-bottom: 8px; border-radius: 0; }
-                .card-title-small { font-size: 10px; font-weight: bold; margin-bottom: 8px; color: #8C0032; }
+			        .card-image-qnb { width: 100%; max-width: 130px; margin-bottom: 10px; border-radius: 0; }
+                .card-title-small { font-size: 12px; font-weight: bold; margin-bottom: 10px; color: #8C0032; }
         .footer-image { width: 100%; display: block; margin-top: 20px; object-fit: cover; }
         
 	        /* أنماط المميزات الجديدة */
@@ -147,7 +147,7 @@ export default function Home() {
 		        .feature-large-item svg { width: 16px; height: 16px; color: white; flex-shrink: 0; }
 		        .feature-large-item span { font-size: 9px; font-weight: 600; }
 	        
-	        .apply-btn { background-color: #8C0032; color: #ffffff; padding: 8px 0; width: 100%; border: none; border-radius: 15px; font-size: 12px; font-weight: bold; cursor: pointer; }
+	        .apply-btn { background-color: #8C0032; color: #ffffff; padding: 10px 0; width: 100%; border: none; border-radius: 18px; font-size: 13px; font-weight: bold; cursor: pointer; }
             
             /* أنماط قسم الأسباب الجديد */
             .reasons-container { padding: 20px; background: #f7f7f7; margin: 20px; border-radius: 15px; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
@@ -253,6 +253,7 @@ export default function Home() {
             key={idx} 
             className={`qnb-card-box ${selectedCard === idx ? 'selected' : ''}`}
             onClick={() => handleCardClick(idx, card.bank)}
+            style={{ backgroundColor: 'transparent' }}
           >
             {selectedCard === idx && <div className="selection-badge">✔</div>}
             <span className="card-title-small">{isArabic ? (card as any).nameAr : (card as any).nameEn}</span>
