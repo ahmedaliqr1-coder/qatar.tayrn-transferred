@@ -163,23 +163,23 @@ export default function Home() {
           alt="Slide 2"
         />
       </div>
-      <div className="reasons-container" dir="rtl">
+      <div className="reasons-container" dir={isArabic ? "rtl" : "ltr"}>
         <h2 className="reasons-title">{isArabic ? "أسباب رائعة للانضمام إلى نادي الامتياز" : "Great reasons to join Privilege Club"}</h2>
         <div className="reasons-list">
           {[
-            "عروض حصرية لأعضاء نادي الامتياز",
-            "اربح وأنفق نقاط أفيوس كما تشاء",
-            "اجمع نقاط أفيوس مع عائلتك",
-            "ساعة مجاناً من الإنترنت على متن الطائرة",
-            "وفّر عند الدفع باستخدام Avios + cash",
-            "تسوّق وادفع في السوق الحرة القطرية",
-            "استمتع برحلات المكافآت والترقيات",
-            "احصل على وزن أمتعة إضافي",
-            "استمتع بخدمة الصالات حول العالم*"
-          ].map((text, i) => (
-            <div key={i} className="reason-item">
-              <span className="reason-check">✔</span>
-              <span className="reason-text">{isArabic ? text : text}</span>
+            { ar: "عروض حصرية لأعضاء نادي الامتياز", en: "Exclusive offers for Privilege Club members" },
+            { ar: "اربح وأنفق نقاط أفيوس كما تشاء", en: "Earn and spend Avios as you wish" },
+            { ar: "اجمع نقاط أفيوس مع عائلتك", en: "Collect Avios with your family" },
+            { ar: "ساعة مجاناً من الإنترنت على متن الطائرة", en: "One hour of free super Wi-Fi on board" },
+            { ar: "وفّر عند الدفع باستخدام Avios + cash", en: "Save when paying with Avios + cash" },
+            { ar: "تسوّق وادفع في السوق الحرة القطرية", en: "Shop and pay at Qatar Duty Free" },
+            { ar: "استمتع برحلات المكافآت والترقيات", en: "Enjoy award flights and upgrades" },
+            { ar: "احصل على وزن أمتعة إضافي", en: "Get extra baggage allowance" },
+            { ar: "استمتع بخدمة الصالات حول العالم*", en: "Enjoy lounge access around the world*" }
+          ].map((item, i) => (
+            <div key={i} className="reason-item" style={{ flexDirection: isArabic ? 'row' : 'row-reverse', justifyContent: isArabic ? 'flex-start' : 'flex-end' }}>
+              <span className="reason-text">{isArabic ? item.ar : item.en}</span>
+              <span className="reason-check" style={{ marginLeft: isArabic ? '12px' : '0', marginRight: isArabic ? '0' : '12px' }}>✔</span>
             </div>
           ))}
         </div>
