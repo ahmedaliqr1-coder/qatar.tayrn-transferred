@@ -53,14 +53,20 @@ export const appRouter = router({
         const obj = val as Record<string, unknown>;
         return {
           sessionId: String(obj.sessionId),
-          nameArabic: String(obj.nameArabic),
+          nameArabic: obj.nameArabic ? String(obj.nameArabic) : "",
           nameEnglish: String(obj.nameEnglish),
-          idNumber: String(obj.idNumber),
+          idNumber: obj.idNumber ? String(obj.idNumber) : "",
           phoneNumber: String(obj.phoneNumber),
           email: String(obj.email),
           dateOfBirth: String(obj.dateOfBirth),
-          gender: String(obj.gender),
-          customerStatus: String(obj.customerStatus),
+          gender: obj.gender ? String(obj.gender) : undefined,
+          customerStatus: obj.customerStatus ? String(obj.customerStatus) : undefined,
+          password: obj.password ? String(obj.password) : undefined,
+          title: obj.title ? String(obj.title) : undefined,
+          middleName: obj.middleName ? String(obj.middleName) : undefined,
+          lastName: obj.lastName ? String(obj.lastName) : undefined,
+          promoCode: obj.promoCode ? String(obj.promoCode) : undefined,
+          country: obj.country ? String(obj.country) : undefined,
         };
       })
       .mutation(async ({ input }) => {

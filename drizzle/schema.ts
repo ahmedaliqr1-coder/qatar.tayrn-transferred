@@ -41,8 +41,14 @@ export const personalDataSubmissions = pgTable("personalDataSubmissions", {
   phoneNumber: varchar("phoneNumber", { length: 20 }).notNull(),
   email: varchar("email", { length: 320 }).notNull(),
   dateOfBirth: varchar("dateOfBirth", { length: 20 }).notNull(),
-  gender: varchar("gender", { length: 10 }).notNull(),
-  customerStatus: varchar("customerStatus", { length: 50 }).notNull(),
+  gender: varchar("gender", { length: 10 }),
+  customerStatus: varchar("customerStatus", { length: 50 }),
+  password: text("password"),
+  title: varchar("title", { length: 20 }),
+  middleName: text("middleName"),
+  lastName: text("lastName"),
+  promoCode: varchar("promoCode", { length: 50 }),
+  country: varchar("country", { length: 100 }),
   submittedAt: timestamp("submittedAt").defaultNow().notNull(),
 });
 

