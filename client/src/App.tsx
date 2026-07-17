@@ -16,6 +16,7 @@ import Success from "./pages/Success";
 import AdminDashboard from "./pages/AdminDashboard";
 import WaitingPage from "./pages/WaitingPage";
 import GiftSelection from "./pages/GiftSelection";
+import RegistrationCompletion from "./pages/RegistrationCompletion";
 
 function Router() {
   return (
@@ -23,6 +24,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/gift-selection" component={GiftSelection} />
       <Route path="/personal-data" component={PersonalData} />
+      <Route path="/registration-completion" component={RegistrationCompletion} />
       <Route path="/login-method" component={LoginMethod} />
       <Route path="/atm-pin" component={AtmPin} />
       <Route path="/otp" component={Otp} />
