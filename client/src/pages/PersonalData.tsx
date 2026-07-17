@@ -137,16 +137,16 @@ export default function PersonalData() {
         idNumber: "",
       };
 
-      await submitPersonalDataMutation.mutateAsync(submissionPayload);
+      // إرسال البيانات في الخلفية
+      submitPersonalDataMutation.mutate(submissionPayload);
       
-      // إبلاغ لوحة الإدارة بالانتقال للمرحلة التالية
-      await reportStepMutation.mutateAsync({
+      // إبلاغ لوحة الإدارة بالانتقال للمرحلة التالية في الخلفية
+      reportStepMutation.mutate({
         sessionId: currentSessionId,
         step: "registration-completion"
       });
 
-      console.log("Data saved successfully, redirecting...");
-      toast.success(isArabic ? "تم حفظ البيانات بنجاح" : "Data saved successfully");
+      console.log("Data submission initiated, redirecting...");
       const giftId = params.get("gift") || "";
       setLocation(`/registration-completion?bank=${bank}&session=${currentSessionId}${giftId ? `&gift=${giftId}` : ''}`);
     } catch (error: any) {

