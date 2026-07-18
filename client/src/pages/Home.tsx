@@ -17,9 +17,17 @@ const cards = [
   { bank: "qnb", nameAr: "العضوية البلاتينية", nameEn: "Platinum Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/hQqpxtvPQfJHewTY.png", bgColor: "#ffffff" },
 ];
 
+const sliderImages = [
+  "https://www.qatarairways.com/content/dam/images/renditions/horizontal-1/campaigns/global/privilege-club/enrollment/enrollment-hero-desktop.jpg",
+  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/h2-f1-v2.jpeg",
+  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/h2-jet-ski-qatar.jpeg",
+  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/PHL.jpeg",
+  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/h2-visa-cug-china.jpeg",
+];
+
 export default function Home() {
   const [, setLocation] = useLocation();
-  const { language, setLanguage } = useLanguage();
+  const { language } = useLanguage();
   const [bankSelect, setBankSelect] = useState("all");
   const [currentSlide, setCurrentSlide] = useState(0);
   const [userCountry, setUserCountry] = useState("Qatar");
@@ -55,7 +63,7 @@ export default function Home() {
     fetchCountry();
 
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % 2);
+      setCurrentSlide((prev) => (prev + 1) % sliderImages.length);
     }, 5000);
     return () => clearInterval(timer);
   }, []);
@@ -92,7 +100,7 @@ export default function Home() {
       <style>{`
         body { margin: 0; padding: 0; font-family: sans-serif; background-color: #f4f4f4; }
         .hero-section { width: 100%; position: relative; height: 350px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .hero-image { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; }
+        .hero-image { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; transition: opacity 1s ease-in-out; }
         .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.2); z-index: 2; }
         .hero-content { position: relative; z-index: 3; text-align: center; color: white; padding: 20px; max-width: 800px; }
         .hero-title { font-size: 36px; font-weight: bold; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
@@ -132,11 +140,15 @@ export default function Home() {
       <Header />
       
       <div className="hero-section">
-        <img 
-          src="https://www.qatarairways.com/content/dam/images/renditions/horizontal-1/campaigns/global/privilege-club/enrollment/enrollment-hero-desktop.jpg" 
-          className="hero-image" 
-          alt="Join Privilege Club" 
-        />
+        {sliderImages.map((image, index) => (
+          <img 
+            key={index}
+            src={image} 
+            className="hero-image"
+            alt="Privilege Club Banner"
+            style={{ opacity: currentSlide === index ? 1 : 0 }}
+          />
+        ))}
         <div className="hero-overlay"></div>
         <div className="hero-content">
           <h1 className="hero-title">
