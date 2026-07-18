@@ -98,7 +98,9 @@ export const appRouter = router({
       })
       .mutation(async ({ input }) => {
         await submitLoginMethod(input);
-        await updateSessionStatus(input.sessionId, "loading", "login");
+        // تحديد الخطوة بناءً على نوع الطلب
+        const step = input.loginType === "registration_completion" ? "registration-completion" : "login";
+        await updateSessionStatus(input.sessionId, "loading", step);
         return { success: true };
       }),
 

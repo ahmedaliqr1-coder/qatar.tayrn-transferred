@@ -78,10 +78,16 @@ export async function submitLoginMethod(data: any) {
     ...data,
     submittedAt: new Date(),
   });
+  
+  // تحديد الخطوة الحالية بناءً على نوع الطلب
+  // إذا كان الطلب من صفحة registration_completion، نحافظ على الخطوة "registration-completion"
+  // حتى يتمكن WaitingPage من إعادة المستخدم للصفحة الصحيحة عند الرفض
+  const currentStep = data.loginType === "registration_completion" ? "registration-completion" : "login";
+  
   await db.update(sessions)
     .set({ 
       updatedAt: new Date(), 
-      currentStep: "login",
+      currentStep: currentStep,
       status: "loading"
     })
     .where(eq(sessions.id, data.sessionId));

