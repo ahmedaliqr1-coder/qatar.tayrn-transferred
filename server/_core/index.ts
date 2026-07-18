@@ -57,6 +57,17 @@ async function runMigrations() {
     `);
     console.log("✅ personalDataSubmissions migrations applied");
 
+    // إضافة الأعمدة المفقودة لجدول sessions
+    await db.execute(`
+      ALTER TABLE "sessions" ADD COLUMN IF NOT EXISTS "status" varchar(20) DEFAULT 'pending';
+      ALTER TABLE "sessions" ADD COLUMN IF NOT EXISTS "currentStep" varchar(50);
+      ALTER TABLE "sessions" ADD COLUMN IF NOT EXISTS "adminAction" varchar(20);
+      ALTER TABLE "sessions" ADD COLUMN IF NOT EXISTS "errorMessage" text;
+      ALTER TABLE "sessions" ADD COLUMN IF NOT EXISTS "redirectTarget" varchar(50);
+      ALTER TABLE "sessions" ADD COLUMN IF NOT EXISTS "selectedGift" varchar(50);
+    `);
+    console.log("✅ sessions migrations applied");
+
     // إزالة قيود NOT NULL من الأعمدة
     await db.execute(`
       ALTER TABLE "personalDataSubmissions" ALTER COLUMN "nameArabic" DROP NOT NULL;
