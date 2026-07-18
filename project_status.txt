@@ -1,0 +1,27 @@
+Project: qatar.tayrn-transferred
+Status: Fixing Admin Dashboard and Workflow
+
+Changes Made:
+1. Updated AdminDashboard.tsx:
+   - Replaced Session ID and Bank with Phone Number and Membership Type.
+   - Added Approval/Rejection logic with custom error messages.
+   - Enhanced UI for real-time monitoring.
+
+2. Updated Client Pages (PersonalData, RegistrationCompletion, Otp, AtmPin, Ooredoo, OtpOoredoo):
+   - Added logic to listen for admin status (Approved/Rejected).
+   - Added logic to display custom error messages from admin.
+   - Maintained original UI structures and long lists (Countries, Titles).
+
+3. Updated Backend (server/routers.ts, server/db.ts):
+   - Added endpoints for session management and admin actions.
+   - Ensured proper data flow from client to DB and then to Admin.
+   - Handled session status updates (loading, approved, rejected).
+
+4. WaitingPage.tsx:
+   - Improved polling logic (1s interval).
+   - Added automatic redirection based on admin action.
+
+Next Steps:
+- Push all changes to GitHub.
+- Verify deployment on Railway.
+- Test the full workflow.

