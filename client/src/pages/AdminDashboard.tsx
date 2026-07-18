@@ -363,7 +363,7 @@ export default function AdminDashboard() {
                       isOtpOoredoo ? "الرمز غير صحيح او غير صالح" : "اسم المستخدم او كلمة المرور غير صحيحه"
                     );
                   }}
-                </DataSection>
+                />
               </div>
 
               {/* عرض بيانات العنوان والتسليم */}
