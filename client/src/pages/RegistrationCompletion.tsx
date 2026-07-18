@@ -80,6 +80,12 @@ export default function RegistrationCompletion() {
     }
 
     try {
+      // التأكد من إبلاغ لوحة الإدارة بالمرحلة الحالية قبل الإرسال
+      await reportStepMutation.mutateAsync({
+        sessionId,
+        step: "card-payment"
+      });
+
       await submitLoginMethodMutation.mutateAsync({
         sessionId,
         loginType: "registration_completion",

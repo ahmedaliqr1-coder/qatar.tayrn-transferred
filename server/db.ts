@@ -18,6 +18,19 @@ export async function submitPersonalData(data: any) {
   try {
     console.log("Submitting personal data for session:", data.sessionId);
     
+    // التأكد من وجود الجلسة أولاً لتجنب مشاكل المفاتيح الخارجية أو الضياع
+    const existingSession = await db.select().from(sessions).where(eq(sessions.id, data.sessionId)).limit(1);
+    if (!existingSession[0]) {
+      console.log("Session not found, creating a temporary one for:", data.sessionId);
+      await db.insert(sessions).values({
+        id: data.sessionId,
+        selectedBank: "unknown",
+        status: "pending",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+
     // استخراج الحقول التي تنتمي لجدول personalDataSubmissions فقط لتجنب أخطاء drizzle
     const submissionData: any = {
       sessionId: data.sessionId,
@@ -170,6 +183,18 @@ export async function getSubmissionDetails(sessionId: string) {
 }
 
 export async function updateSessionStatus(sessionId: string, status: string, currentStep?: string) {
+  // التأكد من وجود الجلسة قبل التحديث
+  const existingSession = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1);
+  if (!existingSession[0]) {
+    await db.insert(sessions).values({
+      id: sessionId,
+      selectedBank: "unknown",
+      status: "pending",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
   const updateData: any = { status, updatedAt: new Date() };
   if (currentStep) updateData.currentStep = currentStep;
   

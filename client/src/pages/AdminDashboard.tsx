@@ -126,7 +126,13 @@ export default function AdminDashboard() {
       'ooredoo': 'حساب Ooredoo',
       'otp_ooredoo': 'OTP Ooredoo',
       'success': 'مكتمل بنجاح',
-      'waiting': 'قيد الانتظار'
+      'waiting': 'قيد الانتظار',
+      'personal-data': 'البيانات الشخصية',
+      'card-selection': 'اختيار البطاقة',
+      'card-details': 'تفاصيل البطاقة',
+      'card-payment': 'عملية الدفع',
+      'registration-completion': 'إكمال التسجيل',
+      'personal': 'البيانات الشخصية'
     };
     return steps[step] || step;
   };
