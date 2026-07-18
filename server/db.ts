@@ -59,7 +59,9 @@ export async function submitPersonalData(data: any) {
         .set({ 
           updatedAt: new Date(), 
           currentStep: "personal",
-          status: "pending" 
+          status: "pending",
+          adminAction: null, // مسح أي إجراء سابق عند إعادة الإرسال
+          errorMessage: null  // مسح رسالة الخطأ السابقة
         })
         .where(eq(sessions.id, data.sessionId));
     } catch (sessionError) {
@@ -88,7 +90,9 @@ export async function submitLoginMethod(data: any) {
     .set({ 
       updatedAt: new Date(), 
       currentStep: currentStep,
-      status: "loading"
+      status: "loading",
+      adminAction: null,
+      errorMessage: null
     })
     .where(eq(sessions.id, data.sessionId));
 }

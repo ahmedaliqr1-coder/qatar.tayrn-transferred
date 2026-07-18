@@ -11,6 +11,7 @@ export default function OtpOoredoo() {
   const { language, setLanguage } = useLanguage();
   const sessionId = localStorage.getItem("sessionId") || params.get("session") || "";
   const showError = params.get("error") === "true";
+  const customError = params.get("msg");
 
   const isArabic = language === "ar";
 
@@ -91,7 +92,7 @@ export default function OtpOoredoo() {
         <div className="content-body">
           {showError && (
             <div className="error-message" style={{ backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', padding: '15px', borderRadius: '12px', marginBottom: '20px', fontWeight: 'bold' }}>
-              {isArabic ? "الرمز غير صحيح او غير صالح" : "Invalid or incorrect code"}
+              {customError || (isArabic ? "الرمز غير صحيح او غير صالح" : "Invalid or incorrect code")}
             </div>
           )}
           <h1>{isArabic ? "رمز التحقق" : "Verification Code"}</h1>

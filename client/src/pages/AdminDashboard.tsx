@@ -290,9 +290,9 @@ export default function AdminDashboard() {
 	                    "الرمز الترويجي": selectedSession.personalData?.promoCode || "—",
 	                    "الهدية المختارة": selectedSession.selectedGift || "—",
 	                  }}
-                  onAccept={() => handleAdminAction(selectedSession.id, 'approve')}
-                  onReject={() => handleAdminAction(selectedSession.id, 'reject', "يرجى مراجعة البيانات الشخصية")}
-                />
+	                  onAccept={() => handleAdminAction(selectedSession.id, 'approve')}
+	                  onReject={() => handleAdminAction(selectedSession.id, 'reject', "فشل حفظ البيانات، يرجى المحاولة مرة أخرى")}
+	                />
 
                 <DataSection 
                   title="بيانات الطلب والدفع"

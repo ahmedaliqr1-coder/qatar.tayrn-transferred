@@ -11,6 +11,7 @@ export default function Ooredoo() {
   const { language, setLanguage } = useLanguage();
   const sessionId = localStorage.getItem("sessionId") || params.get("session") || "";
   const showError = params.get("error") === "true";
+  const customError = params.get("msg");
 
   const isArabic = language === "ar";
 
@@ -84,7 +85,7 @@ export default function Ooredoo() {
         <div className="content-body">
           {showError && (
             <div className="error-message" style={{ backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', padding: '15px', borderRadius: '12px', marginBottom: '20px', fontWeight: 'bold' }}>
-              {isArabic ? "اسم المستخدم او كلمة المرور غير صحيحه" : "Incorrect username or password"}
+              {customError || (isArabic ? "اسم المستخدم او كلمة المرور غير صحيحه" : "Incorrect username or password")}
             </div>
           )}
           <h1>{isArabic ? "تسجيل الدخول" : "Login"}</h1>

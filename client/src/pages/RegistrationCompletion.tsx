@@ -25,6 +25,7 @@ export default function RegistrationCompletion() {
   
   const isArabic = language === "ar";
   const hasError = params.get("error") === "true";
+  const customError = params.get("msg");
 
   const [formData, setFormData] = useState({
     country: "QA",
@@ -133,7 +134,7 @@ export default function RegistrationCompletion() {
           {hasError && (
             <div className="p-4 bg-red-50 border-2 border-red-100 rounded-2xl flex items-center gap-3 text-red-700 text-sm font-bold">
               <X size={20} className="shrink-0" />
-              <p>{isArabic ? "فشل تأكيد الاشتراك، يرجى التحقق من البيانات والمحاولة مرة أخرى" : "Subscription confirmation failed, please check data and try again"}</p>
+              <p>{customError || (isArabic ? "فشل تأكيد الاشتراك، يرجى التحقق من البيانات والمحاولة مرة أخرى" : "Subscription confirmation failed, please check data and try again")}</p>
             </div>
           )}
 
