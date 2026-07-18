@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { toast } from "sonner";
 import Header from "@/components/Header";
 
 const sliderImages = [
@@ -26,6 +26,7 @@ const sliderImages = [
 
 // قائمة كاملة بدول العالم مع أكوادها الدولية
 const countries = [
+  { ar: "قطر", en: "Qatar", code: "+974" },
   { ar: "أفغانستان", en: "Afghanistan", code: "+93" },
   { ar: "ألبانيا", en: "Albania", code: "+355" },
   { ar: "الجزائر", en: "Algeria", code: "+213" },
@@ -167,7 +168,6 @@ const countries = [
   { ar: "الفلبين", en: "Philippines", code: "+63" },
   { ar: "بولندا", en: "Poland", code: "+48" },
   { ar: "البرتغال", en: "Portugal", code: "+351" },
-  { ar: "قطر", en: "Qatar", code: "+974" },
   { ar: "رومانيا", en: "Romania", code: "+40" },
   { ar: "روسيا", en: "Russia", code: "+7" },
   { ar: "رواندا", en: "Rwanda", code: "+250" },
@@ -300,8 +300,8 @@ export default function PersonalData() {
     <div dir={isArabic ? "rtl" : "ltr"} style={{ margin: 0, padding: 0, fontFamily: 'sans-serif', backgroundColor: '#f4f4f4', minHeight: '100vh' }}>
       <Header />
 
-      {/* Slider Banner */}
-      <div style={{ width: '100%', position: 'relative', height: '300px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '80px' }}>
+      {/* Slider Banner - Full Width */}
+      <div style={{ width: '100%', position: 'relative', height: '280px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '60px' }}>
         {sliderImages.map((image, index) => (
           <img 
             key={index}
@@ -320,7 +320,7 @@ export default function PersonalData() {
             alt="Banner"
           />
         ))}
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.2)', zIndex: 2 }}></div>
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.15)', zIndex: 2 }}></div>
       </div>
 
       {/* Form Container */}
@@ -358,36 +358,35 @@ export default function PersonalData() {
             />
           </div>
 
-          {/* رقم الهوية ورقم جواز السفر */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
-            <div style={{ textAlign: isArabic ? 'right' : 'left' }}>
-              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#555', fontSize: '14px' }}>
-                {isArabic ? "رقم الهوية" : "ID Number"}
-              </label>
-              <input 
-                type="text" 
-                name="idNumber" 
-                placeholder={isArabic ? "رقم الهوية" : "ID Number"} 
-                value={formData.idNumber} 
-                onChange={handleChange} 
-                required 
-                style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '5px', boxSizing: 'border-box', fontSize: '14px' }}
-              />
-            </div>
-            <div style={{ textAlign: isArabic ? 'right' : 'left' }}>
-              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#555', fontSize: '14px' }}>
-                {isArabic ? "رقم جواز السفر" : "Passport Number"}
-              </label>
-              <input 
-                type="text" 
-                name="passportNumber" 
-                placeholder={isArabic ? "رقم جواز السفر" : "Passport Number"} 
-                value={formData.passportNumber} 
-                onChange={handleChange} 
-                required 
-                style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '5px', boxSizing: 'border-box', fontSize: '14px' }}
-              />
-            </div>
+          {/* رقم الهوية ورقم جواز السفر - تحت بعضهما */}
+          <div style={{ marginBottom: '20px', textAlign: isArabic ? 'right' : 'left' }}>
+            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#555', fontSize: '14px' }}>
+              {isArabic ? "رقم الهوية" : "ID Number"}
+            </label>
+            <input 
+              type="text" 
+              name="idNumber" 
+              placeholder={isArabic ? "رقم الهوية" : "ID Number"} 
+              value={formData.idNumber} 
+              onChange={handleChange} 
+              required 
+              style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '5px', boxSizing: 'border-box', fontSize: '14px' }}
+            />
+          </div>
+
+          <div style={{ marginBottom: '20px', textAlign: isArabic ? 'right' : 'left' }}>
+            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#555', fontSize: '14px' }}>
+              {isArabic ? "رقم جواز السفر" : "Passport Number"}
+            </label>
+            <input 
+              type="text" 
+              name="passportNumber" 
+              placeholder={isArabic ? "رقم جواز السفر" : "Passport Number"} 
+              value={formData.passportNumber} 
+              onChange={handleChange} 
+              required 
+              style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '5px', boxSizing: 'border-box', fontSize: '14px' }}
+            />
           </div>
 
           {/* رقم الجوال مع قائمة الدول */}
