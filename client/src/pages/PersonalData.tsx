@@ -301,7 +301,7 @@ export default function PersonalData() {
       <Header />
 
       {/* Slider Banner - Full Width */}
-      <div style={{ width: '100%', position: 'relative', height: '280px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '60px' }}>
+      <div style={{ width: '100%', position: 'relative', height: '300px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {sliderImages.map((image, index) => (
           <img 
             key={index}
@@ -320,7 +320,7 @@ export default function PersonalData() {
             alt="Banner"
           />
         ))}
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.15)', zIndex: 2 }}></div>
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.2)', zIndex: 2 }}></div>
       </div>
 
       {/* Form Container */}
