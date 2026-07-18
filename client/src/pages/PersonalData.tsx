@@ -7,67 +7,110 @@ import Header from "@/components/Header";
 import { Eye, EyeOff, Check } from "lucide-react";
 
 const TITLES = [
-  { text: "سيد", value: "MR" },
-  { text: "سيدة", value: "MRS" },
-  { text: "آنسة", value: "MS" },
-  { text: "دكتور", value: "DR" }
+  "السيد", "الآنسة", "الآنسة", "السيدة", "سيد", "الشيخة", "الشيخ", "الدكتور", "الأستاذ", 
+  "العميد", "القائد", "العقيد", "اللواء", "الليدي", "الأمير", "الأميرة", "مدام", "لورد", 
+  "صاحب السعادة", "الشريف/الشريفة", "صاحب السمو الملكي", "صاحبة السمو الملكي"
 ];
 
-const COUNTRY_CODES = [
-  { text: "قطر (+974)", value: "974-QA" },
-  { text: "الإمارات العربيّة المتّحدة (+971)", value: "971-AE" },
-  { text: "المملكة العربية السعودية (+966)", value: "966-SA" },
-  { text: "الكويت (+965)", value: "965-KW" },
-  { text: "البحرين (+973)", value: "973-BH" },
-  { text: "سلطنة عمان (+968)", value: "968-OM" },
-  { text: "مصر (+20)", value: "20-EG" },
-  { text: "الأردن (+962)", value: "962-JO" },
-  { text: "لبنان (+961)", value: "961-LB" },
-  { text: "المغرب (+212)", value: "212-MA" },
-  { text: "الجزائر (+213)", value: "213-DZ" },
-  { text: "تونس (+216)", value: "216-TN" },
-  { text: "ليبيا (+218)", value: "218-LY" },
-  { text: "السودان (+249)", value: "249-SD" },
-  { text: "العراق (+964)", value: "964-IQ" },
-  { text: "اليمن (+967)", value: "967-YE" },
-  { text: "سوريا (+963)", value: "963-SY" },
-  { text: "فلسطين (+970)", value: "970-PS" },
-  { text: "المملكة المتحدة (+44)", value: "44-GB" },
-  { text: "الولايات المتحدة الأمريكية (+1)", value: "1-US" },
-  { text: "فرنسا (+33)", value: "33-FR" },
-  { text: "ألمانيا (+49)", value: "49-DE" },
-  { text: "تركيا (+90)", value: "90-TR" },
-  { text: "الهند (+91)", value: "91-IN" },
-  { text: "باكستان (+92)", value: "92-PK" }
+const RESIDENCE_COUNTRIES = [
+  "جزر والس وفوتونا", "مدغشقر", "IC", "آيسلندا", "أثيوبيا", "أذربيجان", "أرمينيا", "أروبا", 
+  "أستراليا", "أفغانستان", "ألبانيا", "ألمانيا", "أنتيغوا وبربودا", "أندورا", "أندونيسيا", 
+  "أنغولا", "أورغواي", "أوزباكستان", "أوغندا", "أوكرانيا", "إريتريا", "إسبانيا", "إسرائيل", 
+  "إلسلفادور", "إيران", "إيرلندا", "إيطاليا", "استونيا", "الأرجنتين", "الأردن", "الإكوادور", 
+  "الإمارات العربيّة المتّحدة", "البحرين", "البرازيل", "البرتغال", "البوسنا والهرسك", 
+  "الجبل الأسود", "الجزائر", "الجمهورية السلوفاكية", "الدانمارك", "السنغال", "السودان", 
+  "السويد", "الصومال", "الصين", "العراق", "الغابون", "الفاتيكان", "الفليبين", "الكاميرون", 
+  "الكويت", "المجر", "المغرب", "المكسيك", "المملكة العربية السعودية", "المملكة المتحدة", 
+  "النرويج", "النمسا", "النيجر", "الهند", "الولايات المتحدة الأمريكية", "اليابان", "اليمن", 
+  "اليونان", "بابوا غينيا الجديدة", "باراغواي", "باكستان", "بالاو", "باهاماس", "بربادوس", 
+  "بروناي", "بلجيكا", "بلغاريا", "بليز", "بنغلاديش", "بنما", "بنين", "بوتان", "بوتسوانا", 
+  "بورتو ريكو", "بوركينا فاسو", "بوروندي", "بولندا", "بوليفيا", "بولينيزيا الفرنسية", 
+  "بيرو", "تايلندا", "تايوان, الصين", "تركس وكايكوس", "تركمانستان", "تركيا", "ترينيداد وتوباغو", 
+  "تشاد", "تنزانيا", "توغو", "توفالو", "تونس", "تونغا", "تيمور ليست", "جبل طارق", "جرينلاند", 
+  "جزر أنغويلا ليوارد", "جزر الرأس الأخضر", "جزر القمر", "جزر الكريماس", "جزر المالديف", 
+  "جزر الولايات المتحدة الصغيرة النائية", "جزر برمودا", "جزر جوادلوب", "جزر سليمان", 
+  "جزر فارو", "جزر فوكلاند", "جزر فيرجن الأمريكية", "جزر فيرجين البريطانية", "جزر كايمان", 
+  "جزر كوك", "جزر كوكوس", "جزر مارشال", "جزر ماريانا الشمالية", "جزيرة نورفولك", "جمايكا", 
+  "جمهورية أفريقيا الوسطى", "جمهورية التشيكية", "جمهورية الدومينيكان", "جمهورية الكونغو", 
+  "جمهورية الكونغو الديمقراطية", "جمهورية صربيا", "جمهورية كوسوفو", "جنوب أفريقيا", 
+  "جنوب السودان", "جوام", "جيبوتي", "جيورجيا", "خراساو", "دومينيكا", "رواندا", "روسيا الاتحادية", 
+  "روسيا البيضاء", "رومانيا", "ريونيون", "زائير", "زامبيا", "زمبابوي", "ساحل العاج", "ساموا", 
+  "ساموا الأمريكية", "سان تومي وبرينسيبي", "سان مارينو", "سانت بيير وميكلون", "سانت فنسنت وغرينادين", 
+  "سانت كيتس ونيفس", "سانت لوسيا", "سانت مارتن", "سانت هيلينا", "سريلانكا", "سلطنة عمان", 
+  "سلوفينيا", "سنغافورة", "سوازيلند", "سوريا", "سورينام", "سويسرا", "سيراليون", "سيشيل", 
+  "شيلي", "طاجيكستان", "غامبيا", "غانا", "غرينادا", "غواتيمال", "غويانا الفرنسية", "غيانا", 
+  "غينيا", "غينيا - بيساو", "غينيا الاستوائية", "فانواتو", "فرنسا", "فلسطين", "فنزويلا", 
+  "فنلندا", "فيتنام", "فيجي", "قبرص", "قطر", "قيرغيزستان", "كازاخستان", "كاليدونيا الجديدة", 
+  "كرواتيا", "كمبوديا", "كندا", "كوبا", "كوريا الجنوبية", "كوريا الشمالية", "كوستاريكا", 
+  "كولومبيا", "كيريباتي", "كينيا", "لاتفيا", "لاوس", "لبنان", "لوكسمبورغ", "ليبيا", "ليبيريا", 
+  "ليتوانيا", "ليختنشتين", "ليسوتو", "مارتينيك", "مالاوي", "مالطا", "مالي", "ماليزيا", 
+  "مايكرونيزيا", "مصر", "مقدونيا الشمالية", "مكاو,  الصين", "منغوليا", "موريتانيا", "موريشيوس", 
+  "موزمبيق", "مولدافيا", "موناكو", "مونتسيرات", "ميانمار", "ناميبيا", "نورو", "نيبال", "نيجيريا", 
+  "نيكاراجوا", "نيوزيلندا", "نيوى", "هايتي", "هندوراس", "هولندا", "هونغ كونغ، الصين"
 ];
 
-const COUNTRIES = [
-  { text: "قطر", value: "QA" },
-  { text: "الإمارات العربيّة المتّحدة", value: "AE" },
-  { text: "المملكة العربية السعودية", value: "SA" },
-  { text: "الكويت", value: "KW" },
-  { text: "البحرين", value: "BH" },
-  { text: "سلطنة عمان", value: "OM" },
-  { text: "مصر", value: "EG" },
-  { text: "الأردن", value: "JO" },
-  { text: "لبنان", value: "LB" },
-  { text: "المغرب", value: "MA" },
-  { text: "الجزائر", value: "DZ" },
-  { text: "تونس", value: "TN" },
-  { text: "ليبيا", value: "LY" },
-  { text: "السودان", value: "SD" },
-  { text: "العراق", value: "IQ" },
-  { text: "اليمن", value: "YE" },
-  { text: "سوريا", value: "SY" },
-  { text: "فلسطين", value: "PS" }
+const PHONE_CODES = [
+  "جزر والس وفوتونا (681)", "مدغشقر (261)", "IC (34)", "آيسلندا (354)", "أثيوبيا (251)", 
+  "أذربيجان (994)", "أرمينيا (374)", "أروبا (297)", "أستراليا (61)", "أفغانستان (93)", 
+  "ألبانيا (355)", "ألمانيا (49)", "أنتيغوا وبربودا (1)", "أندورا (376)", "أندونيسيا (62)", 
+  "أنغولا (244)", "أورغواي (598)", "أوزباكستان (998)", "أوغندا (256)", "أوكرانيا (380)", 
+  "إريتريا (291)", "إسبانيا (34)", "إسرائيل (972)", "إلسلفادور (503)", "إيران (98)", 
+  "إيرلندا (353)", "إيطاليا (39)", "استونيا (372)", "الأرجنتين (54)", "الأردن (962)", 
+  "الإكوادور (593)", "الإمارات العربيّة المتّحدة (971)", "البحرين (973)", "البرازيل (55)", 
+  "البرتغال (351)", "البوسنا والهرسك (387)", "الجبل الأسود (382)", "الجزائر (213)", 
+  "الجمهورية السلوفاكية (421)", "الدانمارك (45)", "السنغال (221)", "السودان (249)", 
+  "السويد (46)", "الصومال (252)", "الصين (86)", "العراق (964)", "الغابون (241)", 
+  "الفاتيكان (39)", "الفليبين (63)", "الكاميرون (237)", "الكويت (965)", "المجر (36)", 
+  "المغرب (212)", "المكسيك (52)", "المملكة العربية السعودية (966)", "المملكة المتحدة (44)", 
+  "النرويج (47)", "النمسا (43)", "النيجر (227)", "الهند (91)", "الولايات المتحدة الأمريكية (1)", 
+  "اليابان (81)", "اليمن (967)", "اليونان (30)", "بابوا غينيا الجديدة (675)", "باراغواي (595)", 
+  "باكستان (92)", "بالاو (680)", "باهاماس (242)", "بربادوس (1)", "بروناي (673)", "بلجيكا (32)", 
+  "بلغاريا (359)", "بليز (501)", "بنغلاديش (880)", "بنما (507)", "بنين (229)", "بوتان (975)", 
+  "بوتسوانا (267)", "بورتو ريكو (1)", "بوركينا فاسو (226)", "بوروندي (257)", "بولندا (48)", 
+  "بوليفيا (591)", "بولينيزيا الفرنسية (689)", "بيرو (51)", "تايلندا (66)", "تايوان, الصين (886)", 
+  "تركس وكايكوس (1)", "تركمانستان (993)", "تركيا (90)", "ترينيداد وتوباغو (1)", "تشاد (235)", 
+  "تنزانيا (255)", "توغو (228)", "توفالو (688)", "تونس (216)", "تونغا (676)", "تيمور ليست (670)", 
+  "جبل طارق (350)", "جرينلاند (299)", "جزر أنغويلا ليوارد (1)", "جزر الرأس الأخضر (238)", 
+  "جزر القمر (269)", "جزر الكريماس (672)", "جزر المالديف (960)", "جزر الولايات المتحدة الصغيرة النائية (1)", 
+  "جزر برمودا (1441)", "جزر جوادلوب (590)", "جزر سليمان (677)", "جزر فارو (298)", "جزر فوكلاند (500)", 
+  "جزر فيرجن الأمريكية (1)", "جزر فيرجين البريطانية (1)", "جزر كايمان (1)", "جزر كوك (682)", 
+  "جزر كوكوس (672)", "جزر مارشال (692)", "جزر ماريانا الشمالية (670)", "جزيرة نورفولك (6)", 
+  "جمايكا (1)", "جمهورية أفريقيا الوسطى (236)", "جمهورية التشيكية (420)", "جمهورية الدومينيكان (1)", 
+  "جمهورية الكونغو (242)", "جمهورية الكونغو الديمقراطية (243)", "جمهورية صربيا (381)", 
+  "جمهورية كوسوفو (383)", "جنوب أفريقيا (27)", "جنوب السودان (211)", "جوام (671)", "جيبوتي (253)", 
+  "جيورجيا (995)", "خراساو (599)", "دومينيكا (1)", "رواندا (250)", "روسيا الاتحادية (7)", 
+  "روسيا البيضاء (375)", "رومانيا (40)", "ريونيون (262)", "زائير (243)", "زامبيا (260)", 
+  "زمبابوي (263)", "ساحل العاج (225)", "ساموا (685)", "ساموا الأمريكية (684)", "سان تومي وبرينسيبي (239)", 
+  "سان مارينو (378)", "سانت بيير وميكلون (508)", "سانت فنسنت وغرينادين (1)", "سانت كيتس ونيفس (1)", 
+  "سانت لوسيا (758)", "سانت مارتن (721)", "سانت هيلينا (1)", "سريلانكا (94)", "سلطنة عمان (968)", 
+  "سلوفينيا (386)", "سنغافورة (65)", "سوازيلند (268)", "سوريا (963)", "سورينام (597)", 
+  "سويسرا (41)", "سيراليون (232)", "سيشيل (248)", "شيلي (56)", "طاجيكستان (992)", "غامبيا (220)", 
+  "غانا (233)", "غرينادا (473)", "غواتيمال (502)", "غويانا الفرنسية (594)", "غيانا (592)", 
+  "غينيا (224)", "غينيا - بيساو (245)", "غينيا الاستوائية (240)", "فانواتو (678)", "فرنسا (33)", 
+  "فلسطين (970)", "فنزويلا (58)", "فنلندا (358)", "فيتنام (84)", "فيجي (679)", "قبرص (357)", 
+  "قطر (974)", "قيرغيزستان (996)", "كازاخستان (7)", "كاليدونيا الجديدة (687)", "كرواتيا (385)", 
+  "كمبوديا (855)", "كندا (1)", "كوبا (53)", "كوريا الجنوبية (82)", "كوريا الشمالية (850)", 
+  "كوستاريكا (506)", "كولومبيا (57)", "كيريباتي (686)", "كينيا (254)", "لاتفيا (371)", 
+  "لاوس (856)", "لبنان (961)", "لوكسمبورغ (352)", "ليبيا (218)", "ليبيريا (231)", 
+  "ليتوانيا (370)", "ليختنشتين (423)", "ليسوتو (266)", "مارتينيك (596)", "مالاوي (265)", 
+  "مالطا (356)", "مالي (223)", "ماليزيا (60)", "مايكرونيزيا (691)", "مصر (20)", 
+  "مقدونيا الشمالية (389)", "مكاو,  الصين (853)", "منغوليا (976)", "موريتانيا (222)", 
+  "موريشيوس (230)", "موزمبيق (258)", "مولدافيا (373)", "موناكو (377)", "مونتسيرات (1)", 
+  "ميانمار (95)", "ناميبيا (264)", "نورو (674)", "نيبال (977)", "نيجيريا (234)", 
+  "نيكاراجوا (505)", "نيوزيلندا (64)", "نيوى (683)", "هايتي (509)", "هندوراس (504)", 
+  "هولندا (31)", "هونغ كونغ، الصين (852)"
 ];
+
+const DAYS = Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+const MONTHS = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+const YEARS = Array.from({ length: 100 }, (_, i) => (new Date().getFullYear() - i).toString());
 
 export default function PersonalData() {
   const [, setLocation] = useLocation();
   const search = useSearch();
   const { language } = useLanguage();
   const params = new URLSearchParams(search);
-  const bank = params.get("bank") || "doha";
+  const bank = params.get("bank") || "qnb";
   const sessionId = localStorage.getItem("sessionId") || "";
 
   const isArabic = language === "ar";
@@ -80,15 +123,17 @@ export default function PersonalData() {
     email: "",
     password: "",
     confirmPassword: "",
-    countryCode: "974-QA",
+    countryCode: "قطر (974)",
     phoneNumber: "",
     title: "",
     nameEnglish: "",
     middleName: "",
     lastName: "",
-    dateOfBirth: "",
+    birthDay: "",
+    birthMonth: "",
+    birthYear: "",
     gender: "",
-    country: "QA",
+    country: "قطر",
     promoCode: "",
   });
 
@@ -113,17 +158,19 @@ export default function PersonalData() {
       return;
     }
 
+    const fullDob = `${formData.birthDay}/${formData.birthMonth}/${formData.birthYear}`;
+
     try {
       await submitPersonalDataMutation.mutateAsync({
         sessionId: currentSessionId,
         email: formData.email,
         password: formData.password,
-        phoneNumber: `${formData.countryCode.split('-')[0]}${formData.phoneNumber}`,
+        phoneNumber: `${formData.countryCode} ${formData.phoneNumber}`,
         title: formData.title,
         nameEnglish: formData.nameEnglish,
         middleName: formData.middleName,
         lastName: formData.lastName,
-        dateOfBirth: formData.dateOfBirth,
+        dateOfBirth: fullDob,
         gender: formData.gender,
         country: formData.country,
         promoCode: formData.promoCode,
@@ -168,7 +215,7 @@ export default function PersonalData() {
         .input-group { margin-bottom: 25px; }
         .input-label { display: block; font-size: 14px; color: #666; margin-bottom: 8px; }
         .input-wrapper { position: relative; }
-        .form-input { width: 100%; padding: 12px 16px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; transition: border-color 0.2s; }
+        .form-input { width: 100%; padding: 12px 16px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; transition: border-color 0.2s; background-color: white; }
         .form-input:focus { border-color: #8C0032; outline: none; }
         
         .password-hint { font-size: 12px; color: #777; margin-top: 8px; line-height: 1.5; }
@@ -188,6 +235,8 @@ export default function PersonalData() {
         
         .footer-banner { width: 100%; margin-top: 60px; border-top: 1px solid #eee; padding-top: 40px; text-align: center; }
         .footer-banner img { max-width: 100%; height: auto; }
+        
+        .dob-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
       `}</style>
 
       <Header />
@@ -208,6 +257,9 @@ export default function PersonalData() {
             isArabic ? "ساعة مجاناً من الإنترنت على متن الطائرة" : "One hour free Super Wi-Fi",
             isArabic ? "وفّر عند الدفع باستخدام cash + Avios" : "Save with Cash + Avios",
             isArabic ? "تسوّق وادفع في السوق الحرة القطرية" : "Shop and pay at Qatar Duty Free",
+            isArabic ? "استمتع برحلات المكافآت والترقيات" : "Enjoy award flights and upgrades",
+            isArabic ? "احصل على وزن أمتعة إضافي" : "Get extra baggage allowance",
+            isArabic ? "استمتع بخدمة الصالات حول العالم*" : "Enjoy lounge access around the world*",
           ].map((text, i) => (
             <div key={i} className="benefit-item">
               <Check className="check-icon" size={18} />
@@ -255,7 +307,7 @@ export default function PersonalData() {
               <div className="input-group">
                 <label className="input-label">{isArabic ? "رمز البلد الهاتفي" : "Country Dialing Code"}</label>
                 <select name="countryCode" className="form-input" value={formData.countryCode} onChange={handleChange} required>
-                  {COUNTRY_CODES.map(c => <option key={c.value} value={c.value}>{c.text}</option>)}
+                  {PHONE_CODES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div className="input-group">
@@ -271,7 +323,7 @@ export default function PersonalData() {
                 <label className="input-label">{isArabic ? "اللقب" : "Title"}</label>
                 <select name="title" className="form-input" value={formData.title} onChange={handleChange} required>
                   <option value="">{isArabic ? "اللقب" : "Title"}</option>
-                  {TITLES.map(t => <option key={t.value} value={t.value}>{t.text}</option>)}
+                  {TITLES.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
               <div className="input-group">
@@ -286,7 +338,7 @@ export default function PersonalData() {
                 <input type="text" name="middleName" className="form-input" value={formData.middleName} onChange={handleChange} />
               </div>
               <div className="input-group">
-                <label className="input-label">{isArabic ? "الاسم الأخير (كما في جواز السفر)" : "Last Name (as in Passport)"}</label>
+                <label className="input-label">{isArabic ? "اسم العائلة (كما في جواز السفر)" : "Last Name (as in Passport)"}</label>
                 <input type="text" name="lastName" className="form-input" value={formData.lastName} onChange={handleChange} required />
               </div>
             </div>
@@ -294,7 +346,20 @@ export default function PersonalData() {
             <div className="grid-layout">
               <div className="input-group">
                 <label className="input-label">{isArabic ? "تاريخ الميلاد" : "Date of Birth"}</label>
-                <input type="text" name="dateOfBirth" placeholder="DD/MM/YYYY" className="form-input" value={formData.dateOfBirth} onChange={handleChange} required />
+                <div className="dob-grid">
+                  <select name="birthDay" className="form-input" value={formData.birthDay} onChange={handleChange} required>
+                    <option value="">{isArabic ? "اليوم" : "Day"}</option>
+                    {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                  <select name="birthMonth" className="form-input" value={formData.birthMonth} onChange={handleChange} required>
+                    <option value="">{isArabic ? "الشهر" : "Month"}</option>
+                    {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                  <select name="birthYear" className="form-input" value={formData.birthYear} onChange={handleChange} required>
+                    <option value="">{isArabic ? "السنة" : "Year"}</option>
+                    {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
               </div>
               <div className="input-group">
                 <label className="input-label">{isArabic ? "النوع (اختياري)" : "Gender (Optional)"}</label>
@@ -314,7 +379,7 @@ export default function PersonalData() {
             <div className="section-header">{isArabic ? "أين تقيم؟" : "Where do you reside?"}</div>
             <div className="input-group">
               <select name="country" className="form-input" value={formData.country} onChange={handleChange} required>
-                {COUNTRIES.map(c => <option key={c.value} value={c.value}>{c.text}</option>)}
+                {RESIDENCE_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
 

