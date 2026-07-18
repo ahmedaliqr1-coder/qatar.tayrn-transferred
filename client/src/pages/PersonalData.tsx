@@ -71,6 +71,9 @@ export default function PersonalData() {
   const sessionId = localStorage.getItem("sessionId") || "";
 
   const isArabic = language === "ar";
+  const footerImage = isArabic 
+    ? "https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg"
+    : "https://i.ibb.co/609jMvhx/IMG-20260714-WA0016.jpg";
   
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
