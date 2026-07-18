@@ -98,11 +98,7 @@ export default function Home() {
           />
         ))}
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.3)', zIndex: 2 }}></div>
-        <div style={{ position: 'relative', zIndex: 3, textAlign: 'center', color: 'white', padding: '20px', maxWidth: '800px' }}>
-          <h1 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '10px', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
-            {isArabic ? "انضم إلى نادي الامتياز وابدأ بجمع نقاط أفيوس اليوم" : "Join Privilege Club to start earning Avios today"}
-          </h1>
-        </div>
+
       </div>
 
       {/* Reasons Section */}

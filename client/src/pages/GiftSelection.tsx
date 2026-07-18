@@ -1,8 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
+
+const sliderImages = [
+  "https://i.ibb.co/prbY7X4y/IMG-20260718-WA0011.jpg",
+  "https://i.ibb.co/hRZYJfHN/IMG-20260718-WA0010.jpg",
+  "https://i.ibb.co/LDBRJyyS/IMG-20260718-WA0009.jpg",
+  "https://i.ibb.co/SXj5mWQR/IMG-20260718-WA0008.jpg",
+  "https://i.ibb.co/PzVjfnr0/IMG-20260718-WA0007.jpg",
+  "https://i.ibb.co/NgqDV0LF/IMG-20260718-WA0006.jpg",
+  "https://i.ibb.co/rKNQp5t5/IMG-20260718-WA0005.jpg",
+  "https://i.ibb.co/mCNvcQ2s/IMG-20260718-WA0001.jpg",
+  "https://i.ibb.co/gMWpGhwT/IMG-20260718-WA0002.jpg",
+  "https://i.ibb.co/ycrZw6z1/IMG-20260718-WA0003.jpg",
+  "https://i.ibb.co/FPSMwx7/IMG-20260718-WA0004.jpg",
+  "https://i.ibb.co/BH4fNcs0/h2-uefa-2024.jpg",
+  "https://i.ibb.co/2707Nb2Z/h2-jet-ski-qatar.jpg",
+  "https://i.ibb.co/fzZ25gZW/h2-f1-v2.jpg",
+  "https://i.ibb.co/s9w4ZzdB/PHL.jpg",
+  "https://i.ibb.co/x8Kq5Nfr/h2-visa-cug-china.jpg",
+];
 
 const gifts = [
   { id: 1, img: "https://i.ibb.co/JW8Fdgwh/IMG-20260717-WA0013.jpg" },
@@ -26,6 +45,14 @@ export default function GiftSelection() {
   const { language } = useLanguage();
   const isArabic = language === "ar";
   const [selectedGift, setSelectedGift] = useState<number | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % sliderImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   const searchParams = new URLSearchParams(window.location.search);
   const bank = searchParams.get("bank") || "qnb";
@@ -72,6 +99,29 @@ export default function GiftSelection() {
       `}</style>
       
       <Header />
+      
+      {/* Slider Banner */}
+      <div style={{ width: '100%', position: 'relative', height: '300px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {sliderImages.map((image, index) => (
+          <img 
+            key={index}
+            src={image} 
+            style={{ 
+              width: '100%', 
+              height: '100%', 
+              objectFit: 'cover', 
+              position: 'absolute', 
+              top: 0, 
+              left: 0, 
+              zIndex: 1, 
+              transition: 'opacity 1.5s ease-in-out',
+              opacity: currentSlide === index ? 1 : 0
+            }}
+            alt="Banner"
+          />
+        ))}
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.2)', zIndex: 2 }}></div>
+      </div>
       
       <main className="flex-1 max-w-xl mx-auto w-full px-4 py-8">
         <div className="gift-container">
