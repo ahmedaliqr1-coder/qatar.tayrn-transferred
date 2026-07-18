@@ -6,10 +6,13 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Car, Hotel, Plane, ParkingCircle, Gift, Lock, Globe, Trophy, Wallet, Crown, Check } from "lucide-react";
 import Header from "@/components/Header";
 
-const bankImages = {
-  all: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/oAJHukhWMVRNiMzZ.jpg",
-  qnb: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/oAJHukhWMVRNiMzZ.jpg",
-};
+const sliderImages = [
+  "https://www.qatarairways.com/content/dam/images/renditions/horizontal-1/campaigns/global/privilege-club/enrollment/enrollment-hero-desktop.jpg",
+  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663840622174/mvcqnwvmOsVNytgX.jpeg",
+  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663840622174/tfabDSrlAgeDEMkL.jpeg",
+  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663840622174/pKwbAVnyXFLmjakC.jpeg",
+  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663840622174/sIrFjeGsgqegGezm.jpeg",
+];
 
 const cards = [
   { bank: "qnb", nameAr: "العضوية الفضية", nameEn: "Silver Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/GNPJtLJsmUHfUddx.png", bgColor: "#ffffff" },
@@ -17,18 +20,9 @@ const cards = [
   { bank: "qnb", nameAr: "العضوية البلاتينية", nameEn: "Platinum Membership", logo: "https://i.ibb.co/k6GT9TkG/IMG-20260714-WA0012.jpg", img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/hQqpxtvPQfJHewTY.png", bgColor: "#ffffff" },
 ];
 
-const sliderImages = [
-  "https://www.qatarairways.com/content/dam/images/renditions/horizontal-1/campaigns/global/privilege-club/enrollment/enrollment-hero-desktop.jpg",
-  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/h2-f1-v2.jpeg",
-  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/h2-jet-ski-qatar.jpeg",
-  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/PHL.jpeg",
-  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663799792395/h2-visa-cug-china.jpeg",
-];
-
 export default function Home() {
   const [, setLocation] = useLocation();
   const { language } = useLanguage();
-  const [bankSelect, setBankSelect] = useState("all");
   const [currentSlide, setCurrentSlide] = useState(0);
   const [userCountry, setUserCountry] = useState("Qatar");
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
@@ -37,31 +31,6 @@ export default function Home() {
   const isArabic = language === "ar";
 
   useEffect(() => {
-    const fetchCountry = async () => {
-      try {
-        const res = await fetch("https://ipapi.co/json/");
-        const data = await res.json();
-        if (data.country_name) {
-          setUserCountry(data.country_name);
-          return;
-        }
-      } catch (e) {
-        console.log("ipapi failed, trying backup...");
-      }
-
-      try {
-        const res = await fetch("https://ipwho.is/");
-        const data = await res.json();
-        if (data.country) {
-          setUserCountry(data.country);
-        }
-      } catch (e) {
-        console.error("Backup country fetch failed");
-      }
-    };
-
-    fetchCountry();
-
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % sliderImages.length);
     }, 5000);
@@ -93,75 +62,44 @@ export default function Home() {
     }, 800);
   };
 
-  const filteredCards = bankSelect === "all" ? cards : cards.filter((c) => c.bank === bankSelect);
-
   return (
-    <div dir={isArabic ? "rtl" : "ltr"}>
-      <style>{`
-        body { margin: 0; padding: 0; font-family: sans-serif; background-color: #f4f4f4; }
-        .hero-section { width: 100%; position: relative; height: 350px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .hero-image { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; transition: opacity 1s ease-in-out; }
-        .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.2); z-index: 2; }
-        .hero-content { position: relative; z-index: 3; text-align: center; color: white; padding: 20px; max-width: 800px; }
-        .hero-title { font-size: 36px; font-weight: bold; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        
-        .reasons-container { max-width: 1000px; margin: -40px auto 30px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative; z-index: 10; }
-        .reasons-header { font-size: 22px; font-weight: bold; color: #8C0032; margin-bottom: 25px; text-align: center; }
-        .reasons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px; }
-        .reason-item { display: flex; align-items: center; gap: 10px; font-size: 15px; color: #444; }
-        .reason-check { color: #22c55e; flex-shrink: 0; }
-        .reason-footer { font-size: 12px; color: #888; margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px; }
-
-        .cards-container { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px; }
-        .qnb-card-box { background-color: #ffffff; border-radius: 20px; padding: 25px; margin: 0 auto; text-align: center; border: 1px solid #eeeeee; width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.3s ease; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .qnb-card-box.selected { border-color: #8C0032; border-width: 2px; box-shadow: 0 8px 25px rgba(140, 0, 50, 0.15); }
-        .selection-badge { position: absolute; top: -10px; right: -10px; background: #8C0032; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; }
-        .card-image-qnb { width: 100%; max-width: 300px; margin-bottom: 20px; border-radius: 0; }
-        .card-title-small { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #8C0032; }
-        .apply-btn { background-color: #8C0032; color: #ffffff; padding: 12px 0; width: 100%; max-width: 200px; border: none; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; }
-
-        .features-section { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
-        .features-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px; text-align: center; }
-        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-        .feature-box { background: white; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #eee; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .feature-box svg { color: #8C0032; width: 24px; height: 24px; }
-        .feature-box span { font-size: 12px; font-weight: 500; color: #555; line-height: 1.3; }
-        .feature-wide { grid-column: span 3; background: linear-gradient(135deg, #8C0032 0%, #c41e5e 100%); color: white; padding: 15px; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold; font-size: 14px; }
-        .feature-wide svg { color: white; }
-
-        @media (max-width: 600px) {
-          .reasons-grid { grid-template-columns: 1fr; }
-          .hero-title { font-size: 24px; }
-          .hero-section { height: 250px; }
-          .features-grid { grid-template-columns: 1fr 1fr; }
-          .feature-wide { grid-column: span 2; }
-        }
-      `}</style>
+    <div dir={isArabic ? "rtl" : "ltr"} style={{ backgroundColor: '#f4f4f4', minHeight: '100vh' }}>
       <Header />
       
-      <div className="hero-section">
+      {/* Slider Section */}
+      <div style={{ width: '100%', position: 'relative', height: '400px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {sliderImages.map((image, index) => (
           <img 
             key={index}
             src={image} 
-            className="hero-image"
+            style={{ 
+              width: '100%', 
+              height: '100%', 
+              objectFit: 'cover', 
+              position: 'absolute', 
+              top: 0, 
+              left: 0, 
+              zIndex: 1, 
+              transition: 'opacity 1.5s ease-in-out',
+              opacity: currentSlide === index ? 1 : 0
+            }}
             alt="Privilege Club Banner"
-            style={{ opacity: currentSlide === index ? 1 : 0 }}
           />
         ))}
-        <div className="hero-overlay"></div>
-        <div className="hero-content">
-          <h1 className="hero-title">
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.3)', z-index: 2 }}></div>
+        <div style={{ position: 'relative', zIndex: 3, textAlign: 'center', color: 'white', padding: '20px', maxWidth: '800px' }}>
+          <h1 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '10px', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
             {isArabic ? "انضم إلى نادي الامتياز وابدأ بجمع نقاط أفيوس اليوم" : "Join Privilege Club to start earning Avios today"}
           </h1>
         </div>
       </div>
 
-      <div className="reasons-container">
-        <h2 className="reasons-header">
+      {/* Reasons Section */}
+      <div style={{ maxWidth: '1000px', margin: '-50px auto 30px auto', background: 'white', padding: '30px', borderRadius: '10px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', position: 'relative', zIndex: 10 }}>
+        <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#8C0032', marginBottom: '25px', textAlign: 'center' }}>
           {isArabic ? "أسباب رائعة للانضمام إلى نادي الامتياز" : "Great reasons to join Privilege Club"}
         </h2>
-        <div className="reasons-grid">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '15px 30px' }}>
           {[
             { ar: "عروض حصرية لأعضاء نادي الامتياز", en: "Exclusive member-only offers" },
             { ar: "اربح وأنفق نقاط أفيوس كما تشاء", en: "Earn & spend Avios your way" },
@@ -173,48 +111,88 @@ export default function Home() {
             { ar: "احصل على وزن أمتعة إضافي", en: "Get extra baggage allowance" },
             { ar: "استمتع بخدمة الصالات حول العالم*", en: "Access international lounges*" }
           ].map((item, i) => (
-            <div key={i} className="reason-item">
-              <Check className="reason-check" size={18} />
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '16px', color: '#444' }}>
+              <Check style={{ color: '#22c55e', flexShrink: 0 }} size={20} />
               <span>{isArabic ? item.ar : item.en}</span>
             </div>
           ))}
         </div>
-        <p className="reason-footer">
+        <p style={{ fontSize: '12px', color: '#888', marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
           {isArabic ? "*يسري حصرياً على أعضاء الدرجات الفضية والذهبية والبلاتينية فقط." : "*Exclusive for Silver, Gold and Platinum membership tier."}
         </p>
       </div>
 
-      <div className="features-section">
-        <h3 className="features-title">{isArabic ? "المميزات الرئيسية للعضوية" : "Main Membership Features"}</h3>
-        <div className="features-grid">
-          <div className="feature-box"><Car /><span>{isArabic ? "تأجير السيارات\nخصم 70%" : "Car Rental\n70% Discount"}</span></div>
-          <div className="feature-box"><Hotel /><span>{isArabic ? "حجوزات الفنادق\nخصم 70%" : "Hotel Booking\n70% Discount"}</span></div>
-          <div className="feature-box"><Plane /><span>{isArabic ? "تذاكر الطيران\nخصم 70%" : "Flight Tickets\n70% Discount"}</span></div>
-          <div className="feature-box"><ParkingCircle /><span>{isArabic ? "المواقف\nخصم 70%" : "Parking\n70% Discount"}</span></div>
-          <div className="feature-box"><Gift /><span>{isArabic ? "عروض خاصة" : "Special Offers"}</span></div>
-          <div className="feature-box"><Lock /><span>{isArabic ? "دفع آمن" : "Secure Payment"}</span></div>
-          <div className="feature-wide">
-            <Trophy size={20} />
-            <span>{isArabic ? "جوائز سنوية تصل إلى 3 مليون ريال قطري" : "Annual Rewards Up to 3 Million QAR"}</span>
+      {/* Features Section */}
+      <div style={{ maxWidth: '1000px', margin: '30px auto', padding: '0 20px' }}>
+        <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#333', marginBottom: '20px', textAlign: 'center' }}>
+          {isArabic ? "المميزات الرئيسية للعضوية" : "Main Membership Features"}
+        </h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '20px' }}>
+          <div style={{ background: 'white', padding: '15px', borderRadius: '10px', textAlign: 'center', border: '1px solid #eee', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <Car style={{ color: '#8C0032' }} />
+            <span style={{ fontSize: '13px', fontWeight: '500', color: '#555' }}>{isArabic ? "تأجير السيارات - خصم 70%" : "Car Rental - 70% Discount"}</span>
           </div>
+          <div style={{ background: 'white', padding: '15px', borderRadius: '10px', textAlign: 'center', border: '1px solid #eee', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <Hotel style={{ color: '#8C0032' }} />
+            <span style={{ fontSize: '13px', fontWeight: '500', color: '#555' }}>{isArabic ? "حجوزات الفنادق - خصم 70%" : "Hotel Booking - 70% Discount"}</span>
+          </div>
+          <div style={{ background: 'white', padding: '15px', borderRadius: '10px', textAlign: 'center', border: '1px solid #eee', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <Plane style={{ color: '#8C0032' }} />
+            <span style={{ fontSize: '13px', fontWeight: '500', color: '#555' }}>{isArabic ? "تذاكر الطيران - خصم 70%" : "Flight Tickets - 70% Discount"}</span>
+          </div>
+          <div style={{ background: 'white', padding: '15px', borderRadius: '10px', textAlign: 'center', border: '1px solid #eee', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <ParkingCircle style={{ color: '#8C0032' }} />
+            <span style={{ fontSize: '13px', fontWeight: '500', color: '#555' }}>{isArabic ? "المواقف - خصم 70%" : "Parking - 70% Discount"}</span>
+          </div>
+          <div style={{ background: 'white', padding: '15px', borderRadius: '10px', textAlign: 'center', border: '1px solid #eee', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <Gift style={{ color: '#8C0032' }} />
+            <span style={{ fontSize: '13px', fontWeight: '500', color: '#555' }}>{isArabic ? "عروض خاصة" : "Special Offers"}</span>
+          </div>
+          <div style={{ background: 'white', padding: '15px', borderRadius: '10px', textAlign: 'center', border: '1px solid #eee', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <Lock style={{ color: '#8C0032' }} />
+            <span style={{ fontSize: '13px', fontWeight: '500', color: '#555' }}>{isArabic ? "دفع آمن" : "Secure Payment"}</span>
+          </div>
+        </div>
+        <div style={{ background: 'linear-gradient(135deg, #8C0032 0%, #c41e5e 100%)', color: 'white', padding: '20px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', fontWeight: 'bold', fontSize: '16px', boxShadow: '0 4px 15px rgba(140, 0, 50, 0.2)' }}>
+          <Trophy size={24} />
+          <span>{isArabic ? "جوائز سنوية تصل إلى 3 مليون ريال قطري" : "Annual Rewards Up to 3 Million QAR"}</span>
         </div>
       </div>
 
-      <div className="cards-container">
-        {filteredCards.map((card, idx) => (
+      {/* Cards Section */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', padding: '40px 20px' }}>
+        {cards.map((card, idx) => (
           <div 
             key={idx} 
-            className={`qnb-card-box ${selectedCard === idx ? 'selected' : ''}`}
+            style={{ 
+              backgroundColor: '#ffffff', 
+              borderRadius: '20px', 
+              padding: '25px', 
+              textAlign: 'center', 
+              border: selectedCard === idx ? '2px solid #8C0032' : '1px solid #eeeeee', 
+              width: '100%', 
+              maxWidth: '380px', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              cursor: 'pointer', 
+              transition: 'all 0.3s ease', 
+              position: 'relative', 
+              boxShadow: selectedCard === idx ? '0 8px 25px rgba(140, 0, 50, 0.15)' : '0 4px 15px rgba(0,0,0,0.05)' 
+            }}
             onClick={() => handleCardClick(idx, card.bank)}
           >
-            {selectedCard === idx && <div className="selection-badge">✔</div>}
-            <span className="card-title-small">{isArabic ? card.nameAr : card.nameEn}</span>
-            <img src={card.img} className="card-image-qnb" alt="Credit Card" />
-            <button className="apply-btn">{isArabic ? "قدم الآن" : "Apply Now"}</button>
+            {selectedCard === idx && <div style={{ position: 'absolute', top: '-10px', right: '-10px', background: '#8C0032', color: white, width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', boxShadow: '0 2px 5px rgba(0,0,0,0.2)', zIndex: 10 }}>✔</div>}
+            <span style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '15px', color: '#8C0032' }}>{isArabic ? card.nameAr : card.nameEn}</span>
+            <img src={card.img} style={{ width: '100%', maxWidth: '300px', marginBottom: '20px' }} alt="Credit Card" />
+            <button style={{ backgroundColor: '#8C0032', color: '#ffffff', padding: '12px 40px', border: 'none', borderRadius: '25px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}>
+              {isArabic ? "قدم الآن" : "Apply Now"}
+            </button>
           </div>
         ))}
       </div>
       
+      {/* Footer Image */}
       <div style={{ textAlign: 'center', padding: '40px 20px', backgroundColor: '#ffffff', marginTop: '40px' }}>
         <img 
           src={isArabic ? "https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg" : "https://i.ibb.co/609jMvhx/IMG-20260714-WA0016.jpg"} 
