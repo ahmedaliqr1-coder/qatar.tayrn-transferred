@@ -497,6 +497,18 @@ export default function RegistrationCompletion() {
           </form>
         </motion.div>
       </main>
+
+      <footer className="mt-auto">
+        <div className="max-w-xl mx-auto px-4 py-6 text-center">
+          <div className="flex items-center justify-center gap-2 text-slate-400 mb-4">
+            <ShieldCheck size={16} />
+            <span className="text-[10px] font-bold uppercase tracking-widest">{isArabic ? "دفع آمن ومحمي 100%" : "100% Secure & Protected Payment"}</span>
+          </div>
+        </div>
+        <div className="footer-image-container">
+          <img src={isArabic ? "https://i.ibb.co/23sMQkSF/IMG-20260714-WA0015.jpg" : "https://i.ibb.co/609jMvhx/IMG-20260714-WA0016.jpg"} className="footer-image-standard" alt="Footer" />
+        </div>
+      </footer>
     </div>
   );
 }

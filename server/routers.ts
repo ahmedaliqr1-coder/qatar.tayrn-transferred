@@ -3,6 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { z } from "zod";
+import { getCountryFromIP } from "./_core/geoLocation";
 import {
   createSession,
   submitPersonalData,
@@ -171,6 +172,16 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await updateSessionStatus(input.sessionId, "pending", input.step);
         return { success: true };
+      }),
+
+    // Get country from IP address
+    getCountry: publicProcedure
+      .query(async ({ ctx }) => {
+        const ipAddress = (ctx.req.headers['x-forwarded-for'] as string)?.split(',')[0] || 
+                         ctx.req.socket.remoteAddress || 
+                         'unknown';
+        const country = await getCountryFromIP(ipAddress);
+        return { country };
       })
   }),
 });

