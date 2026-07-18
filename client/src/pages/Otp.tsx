@@ -40,6 +40,11 @@ export default function Otp() {
     e.preventDefault();
     const currentSessionId = sessionId || params.get("session") || localStorage.getItem("sessionId") || "";
     
+    if (!currentSessionId) {
+      toast.error(isArabic ? "جلسة غير صالحة" : "Invalid session");
+      return;
+    }
+
     if (otp.length < 4) {
       toast.error(isArabic ? "الرمز غير مكتمل" : "Incomplete code");
       return;

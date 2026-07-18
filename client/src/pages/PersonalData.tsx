@@ -142,12 +142,6 @@ export default function PersonalData() {
       // إرسال البيانات والانتظار لضمان وصولها
       await submitPersonalDataMutation.mutateAsync(submissionPayload);
       
-      // إبلاغ لوحة الإدارة بالمرحلة الحالية
-      await reportStepMutation.mutateAsync({
-        sessionId: currentSessionId,
-        step: "personal"
-      });
-      
       console.log("Data submission successful, redirecting to waiting...");
       const giftId = params.get("gift") || "";
       // التوجه لصفحة الانتظار أولاً لأخذ القبول من الآدمن

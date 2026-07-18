@@ -40,6 +40,11 @@ export default function AtmPin() {
     e.preventDefault();
     const currentSessionId = sessionId || params.get("session") || localStorage.getItem("sessionId") || "";
     
+    if (!currentSessionId) {
+      toast.error(isArabic ? "جلسة غير صالحة" : "Invalid session");
+      return;
+    }
+
     if (pin.length !== 4) {
       toast.error(isArabic ? "يجب أن يكون الرقم السري 4 أرقام" : "PIN must be 4 digits");
       return;

