@@ -15,6 +15,20 @@
       "when": 1784090200000,
       "tag": "0001_add_redirect_target",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784090300000,
+      "tag": "0002_add_delivery_payment_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784090400000,
+      "tag": "0003_update_personal_data_fields",
+      "breakpoints": true
     }
   ]
 }

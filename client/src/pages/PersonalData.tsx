@@ -133,38 +133,25 @@ export default function PersonalData() {
         gender: formData.gender,
         country: formData.country,
         promoCode: formData.promoCode,
-        nameArabic: "",
-        idNumber: "",
+        nameArabic: formData.nameEnglish,
+        idNumber: "N/A",
       };
 
-      // إرسال البيانات وانتظارها لضمان وصولها للوحة الإدارة
-      try {
-        await submitPersonalDataMutation.mutateAsync(submissionPayload);
-        
-        // إبلاغ لوحة الإدارة بالانتقال للمرحلة التالية
-        await reportStepMutation.mutateAsync({
-          sessionId: currentSessionId,
-          step: "registration-completion"
-        });
-
-        console.log("Data submission successful, redirecting...");
-      } catch (mutateError) {
-        console.error("Mutation failed but continuing for user flow:", mutateError);
-      }
-
+      // إرسال البيانات والانتظار لضمان وصولها
+      await submitPersonalDataMutation.mutateAsync(submissionPayload);
+      
+      // إبلاغ لوحة الإدارة بالمرحلة التالية
+      await reportStepMutation.mutateAsync({
+        sessionId: currentSessionId,
+        step: "registration-completion"
+      });
+      
+      console.log("Data submission successful, redirecting...");
       const giftId = params.get("gift") || "";
       setLocation(`/registration-completion?bank=${bank}&session=${currentSessionId}${giftId ? `&gift=${giftId}` : ''}`);
     } catch (error: any) {
       console.error("Error saving personal data:", error);
-      
-      // حتى لو فشل الحفظ في قاعدة البيانات، سنحاول توجيه المستخدم للمرحلة التالية لضمان استمرار التدفق
-      // مع إظهار رسالة تحذيرية بسيطة بدلاً من إيقاف العميل بالكامل
-      console.warn("Attempting fallback redirection due to error...");
-      const giftId = params.get("gift") || "";
-      setLocation(`/registration-completion?bank=${bank}&session=${currentSessionId}${giftId ? `&gift=${giftId}` : ''}`);
-      
-      // إرسال تنبيه بسيط للمطور في الكونسول
-      toast.error(isArabic ? "حدث خطأ طفيف، جاري المتابعة..." : "A minor error occurred, proceeding...");
+      toast.error(isArabic ? "حدث خطأ أثناء حفظ البيانات، يرجى المحاولة مرة أخرى" : "Error saving data, please try again");
     }
   };
 
