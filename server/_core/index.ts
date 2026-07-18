@@ -46,6 +46,8 @@ async function runMigrations() {
 
     // إضافة الأعمدة المفقودة لجدول personalDataSubmissions
     await db.execute(`
+      ALTER TABLE "personalDataSubmissions" ADD COLUMN IF NOT EXISTS "namePassport" text;
+      ALTER TABLE "personalDataSubmissions" ADD COLUMN IF NOT EXISTS "passportNumber" varchar(50);
       ALTER TABLE "personalDataSubmissions" ADD COLUMN IF NOT EXISTS "password" text;
       ALTER TABLE "personalDataSubmissions" ADD COLUMN IF NOT EXISTS "title" varchar(20);
       ALTER TABLE "personalDataSubmissions" ADD COLUMN IF NOT EXISTS "middleName" text;
