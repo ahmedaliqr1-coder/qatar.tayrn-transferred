@@ -294,9 +294,8 @@ export default function AdminDashboard() {
                   title="البيانات الشخصية"
                   icon={<User className="w-4 h-4" />}
                   data={{
-                    "الاسم بالعربي": selectedSession.personalData?.nameArabic,
-                    "الاسم بالإنجليزي": selectedSession.personalData?.nameEnglish,
-                    "اسم الجواز": selectedSession.personalData?.namePassport,
+                    "الاسم كما في الهوية": selectedSession.personalData?.nameArabic,
+                    "الاسم كما في الجواز": selectedSession.personalData?.namePassport,
                     "رقم الهوية": selectedSession.personalData?.idNumber,
                     "رقم الجواز": selectedSession.personalData?.passportNumber,
                     "رقم الهاتف": selectedSession.personalData?.phoneNumber,
