@@ -444,7 +444,7 @@ export default function RegistrationCompletion() {
                         name="cardNumber"
                         type="tel"
                         placeholder="1234 1234 1234 1234"
-                        className="w-full bg-white border-2 border-slate-100 rounded-xl px-4 py-3 focus:border-[#8C0032] outline-none transition-all font-bold tracking-widest"
+                        className="w-full bg-white border-2 border-slate-100 rounded-xl px-4 py-3 focus:border-[#8C0032] outline-none transition-all font-bold tracking-widest text-left" dir="ltr"
                         value={formData.cardNumber}
                         onChange={handleInputChange}
                         required

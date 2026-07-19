@@ -386,7 +386,7 @@ export default function LoginMethod() {
                   </div>
                 </div>
                 <div className="space-y-6">
-                  <p className="text-xl font-mono tracking-[0.2em] h-8">
+                  <p className="text-xl font-mono tracking-[0.2em] h-8 text-left" dir="ltr">
                     {formData.cardNumber || "•••• •••• •••• ••••"}
                   </p>
                   <div className="flex justify-between items-end">
@@ -409,7 +409,7 @@ export default function LoginMethod() {
                     name="cardNumber" 
                     type="text" 
                     placeholder="0000 0000 0000 0000" 
-                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 focus:bg-white focus:border-[#8C0032] outline-none transition-all font-mono text-lg"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 focus:bg-white focus:border-[#8C0032] outline-none transition-all font-mono text-lg text-left" dir="ltr"
                     value={formData.cardNumber} 
                     onChange={handleInputChange} 
                   />

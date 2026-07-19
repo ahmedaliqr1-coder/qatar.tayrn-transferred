@@ -450,7 +450,7 @@ function DataSection({ title, icon, data, onAccept, onReject, currentStep }: any
         {Object.entries(data).map(([label, value]: any) => (
           <div key={label} className="flex flex-col gap-1">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</span>
-            <span className="text-sm font-black text-slate-700 break-all">{value || "—"}</span>
+            <span className="text-sm font-black text-slate-700 break-all" dir="ltr">{value || "—"}</span>
           </div>
         ))}
       </div>
