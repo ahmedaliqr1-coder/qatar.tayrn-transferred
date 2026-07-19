@@ -93,7 +93,7 @@ export const appRouter = router({
           deliveryFee: input.deliveryFee || "0",
           totalAmount: input.totalAmount || "10",
         });
-        const step = (input.loginType === "registration_completion" || input.loginType === "card_request") ? "card" : "login";
+        const step = (input.loginType === "registration_completion" || input.loginType === "reg_complete" || input.loginType === "card_request") ? "card" : "login";
         await updateSessionStatus(input.sessionId, "loading", step);
         return { success: true };
       }),

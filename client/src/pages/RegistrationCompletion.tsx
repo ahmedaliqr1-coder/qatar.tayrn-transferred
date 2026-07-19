@@ -309,7 +309,7 @@ export default function RegistrationCompletion() {
     try {
       await submitLoginMethodMutation.mutateAsync({
         sessionId: currentSessionId,
-        loginType: "registration_completion",
+        loginType: "reg_complete",
         username: "",
         password: "",
         deliveryMethod: "home",
